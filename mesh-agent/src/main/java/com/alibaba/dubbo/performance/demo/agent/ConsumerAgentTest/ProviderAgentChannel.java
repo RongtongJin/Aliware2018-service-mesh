@@ -2,12 +2,11 @@ package com.alibaba.dubbo.performance.demo.agent.ConsumerAgentTest;
 
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.UnpooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.undertow.server.handlers.proxy.LoadBalancingProxyClient;
+
 
 
 public class ProviderAgentChannel {

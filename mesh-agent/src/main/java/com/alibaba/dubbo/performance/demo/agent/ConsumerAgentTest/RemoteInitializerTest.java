@@ -2,7 +2,6 @@ package com.alibaba.dubbo.performance.demo.agent.ConsumerAgentTest;
 
 
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
