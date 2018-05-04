@@ -1,7 +1,5 @@
 package com.alibaba.dubbo.performance.demo.agent.testcomponet;
 
-import com.alibaba.dubbo.performance.demo.agent.dubbo.model.Bytes;
-import com.alibaba.fastjson.JSON;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -31,19 +29,22 @@ public class UDPServerTest {
                         public void channelRead0(ChannelHandlerContext ctx,
                                                  DatagramPacket msg) throws Exception {
 
-                            ByteBuf buf=msg.content();
-                            ByteBuf sendBuf=Unpooled.copiedBuffer(buf);
-                            long id=buf.readLong();
-                            byte[] bytes=new byte[buf.readableBytes()];
+                            ByteBuf buf = msg.content();
+                            ByteBuf sendBuf = Unpooled.copiedBuffer(buf);
+                            long id = buf.readLong();
+                            byte[] bytes = new byte[buf.readableBytes()];
                             buf.readBytes(bytes);
-                            String str=new String(bytes);
-                            System.out.println("id="+id);
-                            System.out.println("str="+str);
-                            DatagramPacket dp=new DatagramPacket(sendBuf,msg.sender());
+                            String str = new String(bytes);
+                            System.out.println("id=" + id);
+                            System.out.println("str=" + str);
+                            DatagramPacket dp = new DatagramPacket(sendBuf, msg.sender());
                             ctx.channel().writeAndFlush(dp)
-                                    .addListener(cf->{
-                                System.err.println("error in udpserver write msg.");
-                                cf.cause().printStackTrace();
+                                    .addListener(cf -> {
+                                        if(!cf.isSuccess()){
+                                            System.err.println("error in udpserver write msg.");
+                                            cf.cause().printStackTrace();
+                                        }
+
                             });
 
                         }

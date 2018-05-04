@@ -1,15 +1,18 @@
-package com.alibaba.dubbo.performance.demo.agent.dubbo.model;
+package com.alibaba.dubbo.performance.demo.agent.provideragent.rpcmodel;
+
+import java.util.List;
 
 public class RpcResponse {
 
-    private String requestId;
+
+    private long requestId;
     private byte[] bytes;
 
-    public String getRequestId() {
+    public long getRequestId() {
         return requestId;
     }
 
-    public void setRequestId(String requestId) {
+    public void setRequestId(long requestId) {
         this.requestId = requestId;
     }
 

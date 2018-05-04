@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alibaba.dubbo.performance.demo.agent.dubbo.model;
+package com.alibaba.dubbo.performance.demo.agent.provideragent.rpcmodel;
 
 
 import java.io.Serializable;
@@ -30,13 +30,18 @@ public class RpcInvocation implements Serializable {
 
     private static final long serialVersionUID = -4355285085441097045L;
 
-    private String methodName;
+    private String methodName="hash";
 
-    private String parameterTypes;
+    private String parameterTypes="Ljava/lang/String;";
 
     private byte[] arguments;
 
-    private Map<String, String> attachments;
+    private Map<String, String> attachments=null;
+
+    {
+        attachments=new HashMap<>();
+        attachments.put("path","com.alibaba.dubbo.performance.demo.provider.IHelloService");
+    }
 
     public RpcInvocation() {
     }

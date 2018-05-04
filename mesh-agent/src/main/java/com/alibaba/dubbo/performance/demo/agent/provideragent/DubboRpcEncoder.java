@@ -1,9 +1,9 @@
-package com.alibaba.dubbo.performance.demo.agent.dubbo;
+package com.alibaba.dubbo.performance.demo.agent.provideragent;
 
-import com.alibaba.dubbo.performance.demo.agent.dubbo.model.Bytes;
-import com.alibaba.dubbo.performance.demo.agent.dubbo.model.JsonUtils;
-import com.alibaba.dubbo.performance.demo.agent.dubbo.model.Request;
-import com.alibaba.dubbo.performance.demo.agent.dubbo.model.RpcInvocation;
+import com.alibaba.dubbo.performance.demo.agent.utils.Bytes;
+import com.alibaba.dubbo.performance.demo.agent.utils.JsonUtils;
+import com.alibaba.dubbo.performance.demo.agent.provideragent.rpcmodel.Request;
+import com.alibaba.dubbo.performance.demo.agent.provideragent.rpcmodel.RpcInvocation;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -40,6 +40,7 @@ public class DubboRpcEncoder extends MessageToByteEncoder{
         if (req.isEvent()) header[2] |= FLAG_EVENT;
 
         // set request id.
+        System.out.println("long2bytes set id"+req.getId());
         Bytes.long2bytes(req.getId(), header, 4);
 
         // encode request data.

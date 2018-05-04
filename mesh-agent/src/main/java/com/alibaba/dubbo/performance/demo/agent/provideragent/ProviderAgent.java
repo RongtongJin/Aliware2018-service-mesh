@@ -1,8 +1,11 @@
 package com.alibaba.dubbo.performance.demo.agent.provideragent;
 
+import com.alibaba.dubbo.performance.demo.agent.registry.EtcdRegistry;
+import com.alibaba.dubbo.performance.demo.agent.registry.IRegistry;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -14,6 +17,12 @@ import java.net.InetSocketAddress;
 
 public class ProviderAgent {
 
+    //fix me:需要加volatie关键字吗？
+    private static volatile Channel channel=null;
+
+    //private IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
+
+
     public void start(int port) throws Exception{
         EventLoopGroup eventLoopGroup=new NioEventLoopGroup();
         try {
@@ -23,41 +32,17 @@ public class ProviderAgent {
                     //.option(ChannelOption.SO_BACKLOG, 128)    //设置缓存队列
                     //.option(ChannelOption.SO_RCVBUF, 1024 * 1024)// 设置UDP读缓冲区为1M
                     //.option(ChannelOption.SO_SNDBUF, 1024 * 1024)// 设置UDP写缓冲区为1M
-                    .handler(new SimpleChannelInboundHandler<DatagramPacket>() {
-                        @Override
-                        public void channelRead0(ChannelHandlerContext ctx,
-                                                 DatagramPacket msg) throws Exception {
-
-                            ByteBuf buf=msg.content();
-                            ByteBuf sendBuf= Unpooled.copiedBuffer(buf);
-                            long id=buf.readLong();
-                            byte[] bytes=new byte[buf.readableBytes()];
-                            buf.readBytes(bytes);
-                            String str=new String(bytes);
-                            System.out.println("id="+id);
-                            System.out.println("str="+str);
-                            DatagramPacket dp=new DatagramPacket(sendBuf,msg.sender());
-                            ctx.channel().writeAndFlush(dp)
-                                    .addListener(cf->{
-                                        System.err.println("error in udpserver write msg.");
-                                        cf.cause().printStackTrace();
-                                    });
-
-                        }
-                    });
-            bootstrap.bind(new InetSocketAddress(port)).sync().channel().closeFuture().await();
-
-//                    .addListener(cf->{
-//                if (!cf.isSuccess()){
-//                    System.err.println("error in udpserver channel bound.");
-//                    cf.cause().printStackTrace();
-//                }else{
-//                    System.out.println("success!");
-//                }
-//            });
+                    .handler(new ConsumerAgentMsgHandler());
+            channel=bootstrap.bind(new InetSocketAddress(port)).sync().channel();
+           // ProviderChannelManager.setUDPChannel(channel);
+            channel.closeFuture().await();
         }finally {
             eventLoopGroup.shutdownGracefully();
         }
+    }
+
+    public static Channel getUDPChannel(){
+        return channel;
     }
 
     public static void main(String[] args) throws Exception{
