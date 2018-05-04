@@ -29,7 +29,7 @@ public class ConsumerAgent {
 
         //UDP服务器测试端口
         endpoints=new ArrayList<>();
-        endpoints.add(new Endpoint("127.0.0.1",8844));
+        endpoints.add(new Endpoint("127.0.0.1",30000));
 
         //new Thread(new UDPChannelManager()).start();
 

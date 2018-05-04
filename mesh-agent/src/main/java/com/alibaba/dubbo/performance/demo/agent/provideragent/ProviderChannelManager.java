@@ -32,7 +32,7 @@ public class ProviderChannelManager{
             synchronized (lock){
                 if (null == channel){
                     //int port = Integer.valueOf(System.getProperty("dubbo.protocol.port"));
-                    int port=22222;
+                    int port=20889;
                     channel = new Bootstrap()
                             .group(new NioEventLoopGroup())
                             .option(ChannelOption.SO_KEEPALIVE, true)
