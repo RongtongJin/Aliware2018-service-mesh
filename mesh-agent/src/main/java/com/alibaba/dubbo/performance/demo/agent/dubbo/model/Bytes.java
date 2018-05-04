@@ -61,6 +61,21 @@ public class Bytes {
         b[off + 0] = (byte) (v >>> 24);
     }
 
+    /*
+     * add by jrt
+     */
+    public static int bytes2int(byte[] bytes){
+        int result = 0;
+        if(bytes.length == 4){
+            int a = (bytes[0] & 0xff) << 24;
+            int b = (bytes[1] & 0xff) << 16;
+            int c = (bytes[2] & 0xff) << 8;
+            int d = (bytes[3] & 0xff);
+            result = a | b | c | d;
+        }
+        return result;
+    }
+
     /**
      * to byte array.
      *

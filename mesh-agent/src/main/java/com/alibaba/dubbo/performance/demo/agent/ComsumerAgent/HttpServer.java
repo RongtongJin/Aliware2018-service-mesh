@@ -2,7 +2,6 @@ package com.alibaba.dubbo.performance.demo.agent.ComsumerAgent;
 
 
 
-import com.alibaba.dubbo.performance.demo.agent.ConsumerAgentTest.HttpServerInboundHandlerTest;
 import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
 import com.alibaba.dubbo.performance.demo.agent.registry.EtcdRegistry;
 import com.alibaba.dubbo.performance.demo.agent.registry.IRegistry;

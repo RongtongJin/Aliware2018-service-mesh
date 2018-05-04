@@ -24,26 +24,30 @@ public class ProviderAgentMsgHandler extends SimpleChannelInboundHandler<Datagra
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, DatagramPacket datagramPacket) throws Exception {
         ByteBuf buf=datagramPacket.content();
         int id=buf.readInt();
-        ByteBuf content=buf.slice(4,buf.capacity());
-        byte[] bytes=content.array();
-        Integer res=JSON.parseObject(bytes, Integer.class);
         Channel sendChannel=ChannelHolder.get(id);
         //fix me：获取后是否需要删除，删除可能会影响性能，不删除可能会影响GC
-        ChannelHolder.remove(id);
-        byte[] ans=new byte[4];
-        Bytes.int2bytes(res,ans,0);
+        //ChannelHolder.remove(id);
+        //是否要加这个连接判断
+        if(sendChannel.isActive()){
+            byte[] bytes=new byte[buf.readableBytes()];
+            buf.readBytes(bytes);
+           // Integer res=JSON.parseObject(bytes, Integer.class);
 
-        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1,
-                OK, Unpooled.wrappedBuffer(ans));
-        //需要加这个吗？
-        response.headers().set(CONTENT_TYPE, "text/plain");
-        response.headers().set(CONTENT_LENGTH,
-                response.content().readableBytes());
-        sendChannel.writeAndFlush(response).addListener(cf->{
-            if(!cf.isSuccess()){
-                log.error("send msg to Consumer failed.");
-                cf.cause().printStackTrace();
-            }
-        });
+           // byte[] ans=new byte[4];
+           // Bytes.int2bytes(res,ans,0);
+
+            FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1,
+                    OK, Unpooled.wrappedBuffer(bytes));
+            //需要加这个吗？
+            response.headers().set(CONTENT_TYPE, "text/plain");
+            response.headers().set(CONTENT_LENGTH,
+                    response.content().readableBytes());
+            sendChannel.writeAndFlush(response).addListener(cf->{
+                if(!cf.isSuccess()){
+                    log.error("send msg to Consumer failed.");
+                    cf.cause().printStackTrace();
+                }
+            });
+        }
     }
 }

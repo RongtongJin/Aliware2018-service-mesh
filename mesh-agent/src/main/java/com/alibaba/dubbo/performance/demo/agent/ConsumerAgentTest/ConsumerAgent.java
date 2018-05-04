@@ -18,6 +18,7 @@ import io.netty.handler.codec.http.HttpResponseEncoder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ConsumerAgent {
@@ -30,8 +31,12 @@ public class ConsumerAgent {
 
         //endpoints = registry.find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
 
+
         //UDP服务器测试端口
+        endpoints=new ArrayList<>();
         endpoints.add(new Endpoint("127.0.0.1",8844));
+
+        new Thread(new UDPChannelManager()).start();
 
         EventLoopGroup bossGroup = new NioEventLoopGroup();
 
@@ -53,13 +58,18 @@ public class ConsumerAgent {
                     })
                     .childOption(ChannelOption.SO_KEEPALIVE, true)
                     .childOption(ChannelOption.TCP_NODELAY,true);
-
+            System.out.println("ConsumerAgent1");
             ChannelFuture f = b.bind(port).sync();
+            System.out.println("ConsumerAgent2");
             f.channel().closeFuture().sync();
         } finally {
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();
         }
+    }
+
+    public static void main(String[] args) throws Exception{
+        new ConsumerAgent().start(8087);
     }
 
 }
