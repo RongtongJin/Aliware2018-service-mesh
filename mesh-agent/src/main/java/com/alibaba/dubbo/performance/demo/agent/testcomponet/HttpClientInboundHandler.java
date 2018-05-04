@@ -1,4 +1,4 @@
-package com.alibaba.dubbo.performance.demo.agent.ComsumerAgent;
+package com.alibaba.dubbo.performance.demo.agent.testcomponet;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;

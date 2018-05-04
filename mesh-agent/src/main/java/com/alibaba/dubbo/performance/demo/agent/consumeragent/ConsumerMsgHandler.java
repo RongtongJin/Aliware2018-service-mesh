@@ -1,8 +1,7 @@
-package com.alibaba.dubbo.performance.demo.agent.ConsumerAgentTest;
+package com.alibaba.dubbo.performance.demo.agent.consumeragent;
 
 import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.CompositeByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -63,7 +62,7 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
 //        else
 //            endpoint=endpoints.get(2);
 
-        DatagramPacket dp=new DatagramPacket(byteBuf,new java.net.InetSocketAddress(InetAddress.getLocalHost(),8844));
+        DatagramPacket dp=new DatagramPacket(byteBuf,new java.net.InetSocketAddress(endpoint.getHost(),endpoint.getPort()));
         if (udpChannel.isActive()) {
             udpChannel.writeAndFlush(dp).addListener(cf -> {
                 if (!cf.isSuccess()) {

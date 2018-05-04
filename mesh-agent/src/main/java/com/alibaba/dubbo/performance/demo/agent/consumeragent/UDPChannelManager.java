@@ -1,4 +1,4 @@
-package com.alibaba.dubbo.performance.demo.agent.ConsumerAgentTest;
+package com.alibaba.dubbo.performance.demo.agent.consumeragent;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -30,7 +30,7 @@ public class UDPChannelManager {
                             //.option(ChannelOption.SO_RCVBUF, 1024 * 1024)// 设置UDP读缓冲区为1M
                             //.option(ChannelOption.SO_SNDBUF, 1024 * 1024)// 设置UDP写缓冲区为1M ;
                             .handler(new UDPChannelInitialzer())
-                            .bind(new InetSocketAddress(8087)).sync().channel();
+                            .bind(new InetSocketAddress(20000)).sync().channel();
                 }
             }
         }

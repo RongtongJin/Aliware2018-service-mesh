@@ -1,4 +1,4 @@
-package com.alibaba.dubbo.performance.demo.agent.ConsumerAgentTest;
+package com.alibaba.dubbo.performance.demo.agent.consumeragent;
 
 import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
 import io.netty.bootstrap.ServerBootstrap;
@@ -47,7 +47,7 @@ public class ConsumerAgent {
                             // server端接收到的是httpRequest，所以要使用HttpRequestDecoder进行解码
                             ch.pipeline().addLast(new HttpRequestDecoder());
                             //fix me:设置的最大长度会不会影响性能
-                            ch.pipeline().addLast(new HttpObjectAggregator(1024));
+                            ch.pipeline().addLast(new HttpObjectAggregator(2048));
                             ch.pipeline().addLast(new ConsumerMsgHandler(endpoints));
                         }
                     })
@@ -64,7 +64,7 @@ public class ConsumerAgent {
     }
 
     public static void main(String[] args) throws Exception{
-        new ConsumerAgent().start(8087);
+        new ConsumerAgent().start(20000);
     }
 
 }

@@ -1,4 +1,4 @@
-package com.alibaba.dubbo.performance.demo.agent.ConsumerAgentTest;
+package com.alibaba.dubbo.performance.demo.agent.consumeragent;
 
 import com.alibaba.dubbo.performance.demo.agent.dubbo.model.Bytes;
 import com.alibaba.fastjson.JSON;
@@ -31,13 +31,12 @@ public class ProviderAgentMsgHandler extends SimpleChannelInboundHandler<Datagra
         if(sendChannel.isActive()){
             byte[] bytes=new byte[buf.readableBytes()];
             buf.readBytes(bytes);
-           // Integer res=JSON.parseObject(bytes, Integer.class);
-
-           // byte[] ans=new byte[4];
-           // Bytes.int2bytes(res,ans,0);
+            Integer res= JSON.parseObject(bytes, Integer.class);
+            byte[] ans=new byte[4];
+            Bytes.int2bytes(res,ans,0);
 
             FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1,
-                    OK, Unpooled.wrappedBuffer(bytes));
+                    OK, Unpooled.wrappedBuffer(ans));
             //需要加这个吗？
             response.headers().set(CONTENT_TYPE, "text/plain");
             response.headers().set(CONTENT_LENGTH,
