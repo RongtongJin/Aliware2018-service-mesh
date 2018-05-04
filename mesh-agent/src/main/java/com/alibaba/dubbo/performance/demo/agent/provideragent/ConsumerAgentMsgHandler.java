@@ -20,9 +20,9 @@ public class ConsumerAgentMsgHandler extends SimpleChannelInboundHandler<Datagra
         buf.readBytes(bytes);
         String str = new String(bytes);
         String parameter=str.substring(str.lastIndexOf("=")+1);
-        System.out.println(id);
-        System.out.println(str);
-        System.out.println(parameter);
+        //System.out.println(id);
+        //System.out.println(str);
+        //System.out.println(parameter);
         RpcClient.invoke(id,parameter);
     }
 }

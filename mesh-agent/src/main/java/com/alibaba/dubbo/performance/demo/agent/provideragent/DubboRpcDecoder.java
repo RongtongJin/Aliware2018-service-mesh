@@ -30,7 +30,7 @@ public class DubboRpcDecoder extends ByteToMessageDecoder {
         byte[] requestIdBytes = Arrays.copyOfRange(data,4,12);
         long requestId = Bytes.bytes2long(requestIdBytes,0);
 
-        System.out.println("get from dubbo requestId"+requestId);
+        //System.out.println("get from dubbo requestId"+requestId);
 
         RpcResponse response = new RpcResponse();
         response.setRequestId(requestId);

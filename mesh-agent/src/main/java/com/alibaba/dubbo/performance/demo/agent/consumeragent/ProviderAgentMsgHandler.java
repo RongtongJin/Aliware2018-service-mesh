@@ -32,13 +32,9 @@ public class ProviderAgentMsgHandler extends SimpleChannelInboundHandler<Datagra
             byte[] bytes=new byte[buf.readableBytes()];
             buf.readBytes(bytes);
             Integer res= JSON.parseObject(bytes, Integer.class);
-            byte[] ans=new byte[4];
-            Bytes.int2bytes(res,ans,0);
-
             FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1,
-                    OK, Unpooled.wrappedBuffer(ans));
+                    OK, Unpooled.wrappedBuffer(res.toString().getBytes()));
 
-            System.out.print("------------2------------");
             //需要加这个吗？
             response.headers().set(CONTENT_TYPE, "text/plain");
             response.headers().set(CONTENT_LENGTH,

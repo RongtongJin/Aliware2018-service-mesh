@@ -53,9 +53,9 @@ public class ConsumerAgent {
                     })
                     .childOption(ChannelOption.SO_KEEPALIVE, true)
                     .childOption(ChannelOption.TCP_NODELAY,true);
-            System.out.println("ConsumerAgent1");
+           // System.out.println("ConsumerAgent1");
             ChannelFuture f = b.bind(port).sync();
-            System.out.println("ConsumerAgent2");
+           // System.out.println("ConsumerAgent2");
             f.channel().closeFuture().sync();
         } finally {
             workerGroup.shutdownGracefully();

@@ -40,7 +40,7 @@ public class DubboRpcEncoder extends MessageToByteEncoder{
         if (req.isEvent()) header[2] |= FLAG_EVENT;
 
         // set request id.
-        System.out.println("long2bytes set id"+req.getId());
+        //System.out.println("long2bytes set id"+req.getId());
         Bytes.long2bytes(req.getId(), header, 4);
 
         // encode request data.
