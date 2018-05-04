@@ -1,7 +1,5 @@
-package com.alibaba.dubbo.performance.demo.agent.testcomponet;
+package com.alibaba.dubbo.performance.demo.agent.provideragent;
 
-import com.alibaba.dubbo.performance.demo.agent.dubbo.model.Bytes;
-import com.alibaba.fastjson.JSON;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -14,8 +12,7 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 
 import java.net.InetSocketAddress;
 
-
-public class UDPServerTest {
+public class ProviderAgent {
 
     public void start(int port) throws Exception{
         EventLoopGroup eventLoopGroup=new NioEventLoopGroup();
@@ -32,7 +29,7 @@ public class UDPServerTest {
                                                  DatagramPacket msg) throws Exception {
 
                             ByteBuf buf=msg.content();
-                            ByteBuf sendBuf=Unpooled.copiedBuffer(buf);
+                            ByteBuf sendBuf= Unpooled.copiedBuffer(buf);
                             long id=buf.readLong();
                             byte[] bytes=new byte[buf.readableBytes()];
                             buf.readBytes(bytes);
@@ -42,9 +39,9 @@ public class UDPServerTest {
                             DatagramPacket dp=new DatagramPacket(sendBuf,msg.sender());
                             ctx.channel().writeAndFlush(dp)
                                     .addListener(cf->{
-                                System.err.println("error in udpserver write msg.");
-                                cf.cause().printStackTrace();
-                            });
+                                        System.err.println("error in udpserver write msg.");
+                                        cf.cause().printStackTrace();
+                                    });
 
                         }
                     });
@@ -64,6 +61,6 @@ public class UDPServerTest {
     }
 
     public static void main(String[] args) throws Exception{
-        new UDPServerTest().start(8844);
+        new ProviderAgent().start(8844);
     }
 }

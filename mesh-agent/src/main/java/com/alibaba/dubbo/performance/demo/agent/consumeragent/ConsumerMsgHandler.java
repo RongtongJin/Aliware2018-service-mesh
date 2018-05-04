@@ -15,6 +15,7 @@ import org.apache.commons.logging.LogFactory;
 import java.net.InetAddress;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 
 public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
@@ -23,7 +24,7 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
 
     private Channel udpChannel=null;
 
-    private static AtomicInteger genId=new AtomicInteger();
+    private static AtomicLong genId=new AtomicLong();
 
     private List<Endpoint> endpoints=null;
 
@@ -38,15 +39,15 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
         //buf.retain();
         udpChannel=UDPChannelManager.getChannel();
 
-        int id=genId.incrementAndGet();
+        Long id=genId.getAndIncrement();
 
         //fix me:存储如此多的id会不会成为性能瓶颈？？或者ConcurrentHashMap能不能进行优化
         ChannelHolder.put(id,ctx.channel());
         //fix me:为什么不能用CompositeByteBuf
         //CompositeByteBuf sendBuf=Unpooled.compositeBuffer();
         //fix me:用直接内存好还是heap内存好？
-        ByteBuf byteBuf=Unpooled.directBuffer(4+buf.readableBytes());
-        byteBuf.writeInt(id);
+        ByteBuf byteBuf=Unpooled.directBuffer(8+buf.readableBytes());
+        byteBuf.writeLong(id);
         byteBuf.writeBytes(buf);
         //sendBuf.addComponents(byteBuf,buf);
 
