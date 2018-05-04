@@ -1,6 +1,8 @@
 package com.alibaba.dubbo.performance.demo.agent.consumeragent;
 
 import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
+import com.alibaba.dubbo.performance.demo.agent.registry.EtcdRegistry;
+import com.alibaba.dubbo.performance.demo.agent.registry.IRegistry;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -12,14 +14,16 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ConsumerAgent {
-    //private static Log log = LogFactory.getLog(ConsumerAgent.class);
+    private static Log log = LogFactory.getLog(ConsumerAgent.class);
 
-    //private IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
+    //IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
 
     private List<Endpoint> endpoints = null;
     public void start(int port) throws Exception {
@@ -30,8 +34,6 @@ public class ConsumerAgent {
         //UDP服务器测试端口
         endpoints=new ArrayList<>();
         endpoints.add(new Endpoint("127.0.0.1",30000));
-
-        //new Thread(new UDPChannelManager()).start();
 
         EventLoopGroup bossGroup = new NioEventLoopGroup();
 
