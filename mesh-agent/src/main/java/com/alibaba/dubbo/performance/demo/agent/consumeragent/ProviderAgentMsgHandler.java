@@ -26,7 +26,7 @@ public class ProviderAgentMsgHandler extends SimpleChannelInboundHandler<Datagra
         Long id=buf.readLong();
         Channel sendChannel=ChannelHolder.get(id);
         //fix me：获取后是否需要删除，删除可能会影响性能，不删除可能会影响GC
-        //ChannelHolder.remove(id);
+        ChannelHolder.remove(id);
         //是否要加这个连接判断
         if(sendChannel.isActive()){
             byte[] bytes=new byte[buf.readableBytes()];
