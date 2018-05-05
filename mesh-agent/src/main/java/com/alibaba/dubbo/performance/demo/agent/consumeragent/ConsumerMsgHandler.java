@@ -14,7 +14,6 @@ import org.apache.commons.logging.LogFactory;
 
 import java.net.InetAddress;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 
@@ -52,16 +51,16 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
         //sendBuf.addComponents(byteBuf,buf);
 
         //测试代码
-        Endpoint endpoint=endpoints.get(0);
-        //负载均衡代码
-        //按照性能简单负载均衡
-//        int x=id%6;
-//        if(x==0)
-//            endpoint=endpoints.get(0);
-//        else if(1<=x&&x<=2)
-//            endpoint=endpoints.get(1);
-//        else
-//            endpoint=endpoints.get(2);
+        Endpoint endpoint=null;
+        //负载均衡代码long
+        //按照性能简单负载long均衡
+        long x=id%6;
+        if(x==0)
+            endpoint=endpoints.get(0);
+        else if(1<=x&&x<=2)
+            endpoint=endpoints.get(1);
+        else
+            endpoint=endpoints.get(2);
 
         DatagramPacket dp=new DatagramPacket(byteBuf,new java.net.InetSocketAddress(endpoint.getHost(),endpoint.getPort()));
         if (udpChannel.isActive()) {

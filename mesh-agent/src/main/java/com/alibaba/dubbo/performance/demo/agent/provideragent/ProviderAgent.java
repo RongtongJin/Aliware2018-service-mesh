@@ -5,6 +5,8 @@ import com.alibaba.dubbo.performance.demo.agent.registry.IRegistry;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.epoll.EpollDatagramChannel;
+import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 
@@ -15,15 +17,17 @@ public class ProviderAgent {
     //fix me:需要加volatie关键字吗？
     private static volatile Channel channel=null;
 
-   // private IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
+    private IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
 
 
     public void start(int port) throws Exception{
-        EventLoopGroup eventLoopGroup=new NioEventLoopGroup();
+        //EventLoopGroup eventLoopGroup=new NioEventLoopGroup();
+        EventLoopGroup eventLoopGroup=new EpollEventLoopGroup();
         try {
             Bootstrap bootstrap=new Bootstrap()
                     .group(eventLoopGroup)
-                    .channel(NioDatagramChannel.class)
+                    //.channel(NioDatagramChannel.class)
+                    .channel(EpollDatagramChannel.class)
                     //.option(ChannelOption.SO_BACKLOG, 128)    //设置缓存队列
                     //.option(ChannelOption.SO_RCVBUF, 1024 * 1024)// 设置UDP读缓冲区为1M
                     //.option(ChannelOption.SO_SNDBUF, 1024 * 1024)// 设置UDP写缓冲区为1M
@@ -40,7 +44,7 @@ public class ProviderAgent {
         return channel;
     }
 
-    public static void main(String[] args) throws Exception{
-        new ProviderAgent().start(30000);
-    }
+//    public static void main(String[] args) throws Exception{
+//        new ProviderAgent().start(30000);
+//    }
 }

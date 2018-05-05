@@ -8,6 +8,10 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.epoll.EpollChannelOption;
+import io.netty.channel.epoll.EpollDatagramChannelConfig;
+import io.netty.channel.epoll.EpollEventLoopGroup;
+import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -23,24 +27,26 @@ import java.util.List;
 public class ConsumerAgent {
     private static Log log = LogFactory.getLog(ConsumerAgent.class);
 
-    //IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
+    IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
 
     private List<Endpoint> endpoints = null;
     public void start(int port) throws Exception {
 
-        //endpoints = registry.find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
+        endpoints = registry.find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
 
+        //endpoints=new ArrayList<>();
+        //endpoints.add(new Endpoint("127.0.0.1",30000));
 
-        //UDP服务器测试端口
-        endpoints=new ArrayList<>();
-        endpoints.add(new Endpoint("127.0.0.1",30000));
+       // EventLoopGroup bossGroup = new NioEventLoopGroup();
+        EventLoopGroup bossGroup = new EpollEventLoopGroup();
 
-        EventLoopGroup bossGroup = new NioEventLoopGroup();
+        //EventLoopGroup workerGroup = new NioEventLoopGroup();
+        EventLoopGroup workerGroup = new EpollEventLoopGroup();
 
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
             ServerBootstrap b = new ServerBootstrap();
-            b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
+            //b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
+            b.group(bossGroup, workerGroup).channel(EpollServerSocketChannel.class)
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         public void initChannel(SocketChannel ch) throws Exception {
@@ -65,8 +71,8 @@ public class ConsumerAgent {
         }
     }
 
-    public static void main(String[] args) throws Exception{
-        new ConsumerAgent().start(20000);
-    }
+//    public static void main(String[] args) throws Exception{
+//        new ConsumerAgent().start(20000);
+//    }
 
 }

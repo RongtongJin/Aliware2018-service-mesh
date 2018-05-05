@@ -22,6 +22,7 @@ public class RpcMsgHandler extends SimpleChannelInboundHandler<RpcResponse> {
         ByteBuf byteBuf= Unpooled.directBuffer(response.getBytes().length+8);
         byteBuf.writeLong(requestId);
         byteBuf.writeBytes(response.getBytes());
+        //这边的ip地址可能有问题
         DatagramPacket dp = new DatagramPacket(byteBuf,new InetSocketAddress("127.0.0.1",20000));
         ProviderAgent.getUDPChannel().writeAndFlush(dp).addListener(cf->{
             if(!cf.isSuccess()){
