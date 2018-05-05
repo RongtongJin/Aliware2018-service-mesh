@@ -4,6 +4,7 @@ import com.alibaba.dubbo.performance.demo.agent.registry.EtcdRegistry;
 import com.alibaba.dubbo.performance.demo.agent.registry.IRegistry;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.epoll.EpollDatagramChannel;
 import io.netty.channel.epoll.EpollEventLoopGroup;
@@ -29,8 +30,8 @@ public class ProviderAgent {
                     //.channel(NioDatagramChannel.class)
                     .channel(EpollDatagramChannel.class)
                     //.option(ChannelOption.SO_BACKLOG, 128)    //设置缓存队列
-                    //.option(ChannelOption.SO_RCVBUF, 1024 * 1024)// 设置UDP读缓冲区为1M
-                    //.option(ChannelOption.SO_SNDBUF, 1024 * 1024)// 设置UDP写缓冲区为1M
+                    .option(ChannelOption.SO_RCVBUF, 6*1024 * 1024)// 设置UDP读缓冲区为1M
+                    .option(ChannelOption.SO_SNDBUF, 6*1024 * 1024)// 设置UDP写缓冲区为1M
                     .handler(new ConsumerAgentMsgHandler());
             channel=bootstrap.bind(new InetSocketAddress(port)).sync().channel();
            // ProviderChannelManager.setUDPChannel(channel);
