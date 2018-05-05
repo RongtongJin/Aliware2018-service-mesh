@@ -30,6 +30,7 @@ public class ConsumerAgent {
 
         //endpoints = registry.find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
 
+        
 
         //UDP服务器测试端口
         endpoints=new ArrayList<>();
