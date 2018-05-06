@@ -2,6 +2,7 @@ package com.alibaba.dubbo.performance.demo.agent.consumeragent;
 
 import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.CompositeByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -18,7 +19,7 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
 
-public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
+public class ConsumerMsgHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
     private static Log log = LogFactory.getLog(ConsumerMsgHandler.class);
 
@@ -35,23 +36,31 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
     }
 
     @Override
-    public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest msg) throws Exception{
-        ByteBuf buf = msg.content();
-        //System.out.println(buf.toString(io.netty.util.CharsetUtil.UTF_8));
+    public void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws Exception{
+        System.out.println(msg.toString(io.netty.util.CharsetUtil.UTF_8));
+        byte eq='=';
+        int index=msg.bytesBefore(319,4,eq);
+        //msg.retain();
+       // System.out.println(index);
+        ByteBuf need=msg.slice(320+index,msg.readableBytes()-index-320);
+        System.out.println(need.toString(io.netty.util.CharsetUtil.UTF_8));
+        System.out.println(need.readableBytes());
         //buf.retain();
-        udpChannel=UDPChannelManager.getChannel();
+//        udpChannel=UDPChannelManager.getChannel();
 
         Long id=genId.getAndIncrement();
-
-        //fix me:存储如此多的id会不会成为性能瓶颈？？或者ConcurrentHashMap能不能进行优化
+//
+//        //fix me:存储如此多的id会不会成为性能瓶颈？？或者ConcurrentHashMap能不能进行优化
         ChannelHolder.put(id,ctx.channel());
-        //fix me:为什么不能用CompositeByteBuf
-        //CompositeByteBuf sendBuf=Unpooled.compositeBuffer();
-        //fix me:用直接内存好还是heap内存好？
-        ByteBuf byteBuf=Unpooled.directBuffer(8+buf.readableBytes());
+//        //fix me:为什么不能用CompositeByteBuf
+//        CompositeByteBuf sendBuf=ctx.alloc().compositeBuffer();
+//        ByteBuf idBuf=ctx.alloc().ioBuffer();
+//        idBuf.writeLong(id);
+//        sendBuf.addComponents(idBuf,need);
+//        //fix me:用直接内存好还是heap内存好？
+        ByteBuf byteBuf=Unpooled.buffer(8+need.readableBytes());
         byteBuf.writeLong(id);
-        byteBuf.writeBytes(buf);
-        //sendBuf.addComponents(byteBuf,buf);
+        byteBuf.writeBytes(need);
 
         //测试代码
      //   Endpoint endpoint=null;
@@ -68,14 +77,18 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
         // 简单的负载均衡，随机取一个
         Endpoint endpoint = endpoints.get(random.nextInt(endpoints.size()));
 
+        System.out.println(endpoint.getHost()+":"+endpoint.getPort());
+
         DatagramPacket dp=new DatagramPacket(byteBuf,new java.net.InetSocketAddress(endpoint.getHost(),endpoint.getPort()));
-        if (udpChannel.isActive()) {
-            udpChannel.writeAndFlush(dp).addListener(cf -> {
-                if (!cf.isSuccess()) {
-                    log.error("error in udpChannel write.");
-                    cf.cause().printStackTrace();
-                }
-            });
-        }
+
+        System.out.println("123");
+        udpChannel.writeAndFlush(dp).addListener(cf -> {
+            if (!cf.isSuccess()) {
+                log.error("error in udpChannel write.");
+                cf.cause().printStackTrace();
+                System.out.println("456");
+            }
+        });
+        System.out.println("456");
     }
 }
