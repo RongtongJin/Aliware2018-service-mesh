@@ -32,6 +32,7 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
         this.endpoints=endpoints;
     }
 
+
     @Override
     public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest msg) throws Exception{
         ByteBuf buf = msg.content();
@@ -73,4 +74,5 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
             });
         }
     }
+
 }

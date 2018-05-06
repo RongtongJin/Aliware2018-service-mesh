@@ -29,16 +29,15 @@ public class ConsumerAgent {
     public void start(int port) throws Exception {
 
         //endpoints = registry.find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
-
-        
-
         //UDP服务器测试端口
         endpoints=new ArrayList<>();
         endpoints.add(new Endpoint("127.0.0.1",30000));
 
-        EventLoopGroup bossGroup = new NioEventLoopGroup();
+        EventLoopGroup bossGroup = new NioEventLoopGroup(1);
+        EventLoopGroup workerGroup = new NioEventLoopGroup(6);
 
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
+        UDPChannelManager.initChannel(workerGroup);
+
         try {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)

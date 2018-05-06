@@ -19,7 +19,9 @@ public class ProviderAgent {
 
 
     public void start(int port) throws Exception{
-        EventLoopGroup eventLoopGroup=new NioEventLoopGroup();
+        EventLoopGroup eventLoopGroup=new NioEventLoopGroup(6);
+        ProviderChannelManager.initChannel(eventLoopGroup);
+
         try {
             Bootstrap bootstrap=new Bootstrap()
                     .group(eventLoopGroup)
