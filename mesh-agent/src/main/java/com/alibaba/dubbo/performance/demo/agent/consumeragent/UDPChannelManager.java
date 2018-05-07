@@ -11,10 +11,8 @@ import java.net.InetSocketAddress;
 
 
 public class UDPChannelManager {
-    //是否要考虑利用父channel的eventLoopGroup
 
     private static Channel channel=null;
-    private static Object lock = new Object();
 
     public UDPChannelManager(){
 

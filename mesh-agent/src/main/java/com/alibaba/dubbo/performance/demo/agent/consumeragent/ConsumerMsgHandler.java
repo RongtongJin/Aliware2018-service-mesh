@@ -23,8 +23,6 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
     private static Log log = LogFactory.getLog(ConsumerMsgHandler.class);
 
-    private Channel udpChannel=null;
-
     private static AtomicLong genId=new AtomicLong();
 
     private List<Endpoint> endpoints=null;
@@ -34,6 +32,7 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<ByteBuf> {
     public ConsumerMsgHandler(List<Endpoint> endpoints){
         this.endpoints=endpoints;
     }
+
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws Exception{
@@ -57,15 +56,15 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<ByteBuf> {
 //        ByteBuf idBuf=ctx.alloc().ioBuffer();
 //        idBuf.writeLong(id);
 //        sendBuf.addComponents(idBuf,need);
-//        //fix me:用直接内存好还是heap内存好？
-        ByteBuf byteBuf=Unpooled.buffer(8+need.readableBytes());
+//        //fix me:用直接内存好还是heap内存好？HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE
+        ByteBuf byteBuf=ctx.alloc().ioBuffer(8+need.readableBytes());
         byteBuf.writeLong(id);
         byteBuf.writeBytes(need);
 
         //测试代码
      //   Endpoint endpoint=null;
         //负载均衡代码
-        //按照性能简单负载均衡
+        //按照性能简单负载均衡,这里有问题，并不清楚提供服务的机器性能
 //        long x=id%6;
 //        if(x==0)
 //            endpoint=endpoints.get(0);
@@ -82,13 +81,24 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<ByteBuf> {
         DatagramPacket dp=new DatagramPacket(byteBuf,new java.net.InetSocketAddress(endpoint.getHost(),endpoint.getPort()));
 
         System.out.println("123");
-        udpChannel.writeAndFlush(dp).addListener(cf -> {
+
+        UDPChannelManager.getChannel().write(dp).addListener(cf -> {
             if (!cf.isSuccess()) {
                 log.error("error in udpChannel write.");
                 cf.cause().printStackTrace();
-                System.out.println("456");
             }
         });
-        System.out.println("456");
     }
+
+    @Override
+    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+        UDPChannelManager.getChannel().flush();
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        cause.printStackTrace();
+        //ctx.close();
+    }
+
 }

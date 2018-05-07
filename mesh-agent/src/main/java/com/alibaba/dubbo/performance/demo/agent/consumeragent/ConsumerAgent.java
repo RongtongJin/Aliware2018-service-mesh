@@ -57,7 +57,7 @@ public class ConsumerAgent {
                         @Override
                         public void initChannel(SocketChannel ch) throws Exception {
                             // server端发送的是httpResponse，所以要使用HttpResponseEncoder进行编码
-                            //ch.pipeline().addLast(new HttpResponseEncoder());
+                            ch.pipeline().addLast(new HttpResponseEncoder());
                             // server端接收到的是httpRequest，所以要使用HttpRequestDecoder进行解码
                             //ch.pipeline().addLast(new HttpRequestDecoder());
                             //fix me:设置的最大长度会不会影响性能

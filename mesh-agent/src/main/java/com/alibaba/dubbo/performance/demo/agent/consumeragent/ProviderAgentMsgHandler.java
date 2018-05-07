@@ -10,6 +10,8 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpHeaderValues;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -39,12 +41,21 @@ public class ProviderAgentMsgHandler extends SimpleChannelInboundHandler<Datagra
             response.headers().set(CONTENT_TYPE, "text/plain");
             response.headers().set(CONTENT_LENGTH,
                     response.content().readableBytes());
-            sendChannel.writeAndFlush(response).addListener(cf->{
+            response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
+            sendChannel.write(response).addListener(cf->{
                 if(!cf.isSuccess()){
                     log.error("send msg to Consumer failed.");
                     cf.cause().printStackTrace();
                 }
             });
         }
+    }
+
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        //super.exceptionCaught(ctx, cause);
+        cause.printStackTrace();
+        //ctx.close();
     }
 }
