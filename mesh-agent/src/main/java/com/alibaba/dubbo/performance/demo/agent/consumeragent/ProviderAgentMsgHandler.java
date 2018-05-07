@@ -26,9 +26,13 @@ public class ProviderAgentMsgHandler extends SimpleChannelInboundHandler<Datagra
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, DatagramPacket datagramPacket) throws Exception {
         ByteBuf buf=datagramPacket.content();
         Long id=buf.readLong();
+        System.out.println(id);
         Channel sendChannel=ChannelHolder.get(id);
         //fix me：获取后是否需要删除，删除可能会影响性能，不删除可能会影响GC
-        ChannelHolder.remove(id);
+       // ChannelHolder.remove(id);
+        if(sendChannel==null){
+            System.out.println("error");
+        }
         //是否要加这个连接判断
         if(sendChannel.isActive()){
             byte[] bytes=new byte[buf.readableBytes()];
@@ -42,7 +46,7 @@ public class ProviderAgentMsgHandler extends SimpleChannelInboundHandler<Datagra
             response.headers().set(CONTENT_LENGTH,
                     response.content().readableBytes());
             response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
-            sendChannel.write(response).addListener(cf->{
+            sendChannel.writeAndFlush(response).addListener(cf->{
                 if(!cf.isSuccess()){
                     log.error("send msg to Consumer failed.");
                     cf.cause().printStackTrace();

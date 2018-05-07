@@ -19,7 +19,7 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
 
-public class ConsumerMsgHandler extends SimpleChannelInboundHandler<ByteBuf> {
+public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     private static Log log = LogFactory.getLog(ConsumerMsgHandler.class);
 
@@ -35,15 +35,10 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
 
     @Override
-    public void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws Exception{
-        System.out.println(msg.toString(io.netty.util.CharsetUtil.UTF_8));
-        byte eq='=';
-        int index=msg.bytesBefore(319,4,eq);
-        //msg.retain();
-       // System.out.println(index);
-        ByteBuf need=msg.slice(320+index,msg.readableBytes()-index-320);
-        System.out.println(need.toString(io.netty.util.CharsetUtil.UTF_8));
-        System.out.println(need.readableBytes());
+    public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest msg) throws Exception{
+
+        ByteBuf buf = msg.content();
+        System.out.println(buf.toString(io.netty.util.CharsetUtil.UTF_8));
         //buf.retain();
 //        udpChannel=UDPChannelManager.getChannel();
 
@@ -57,10 +52,10 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<ByteBuf> {
 //        idBuf.writeLong(id);
 //        sendBuf.addComponents(idBuf,need);
 //        //fix me:用直接内存好还是heap内存好？HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE
-        ByteBuf byteBuf=ctx.alloc().ioBuffer(8+need.readableBytes());
+        ByteBuf byteBuf=ctx.alloc().ioBuffer(8+buf.readableBytes()-136);
         byteBuf.writeLong(id);
-        byteBuf.writeBytes(need);
-
+        byteBuf.writeBytes(buf,136,buf.readableBytes()-136);
+        System.out.println(byteBuf.toString(io.netty.util.CharsetUtil.UTF_8));
         //测试代码
      //   Endpoint endpoint=null;
         //负载均衡代码
@@ -80,7 +75,6 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
         DatagramPacket dp=new DatagramPacket(byteBuf,new java.net.InetSocketAddress(endpoint.getHost(),endpoint.getPort()));
 
-        System.out.println("123");
 
         UDPChannelManager.getChannel().write(dp).addListener(cf -> {
             if (!cf.isSuccess()) {

@@ -59,9 +59,9 @@ public class ConsumerAgent {
                             // server端发送的是httpResponse，所以要使用HttpResponseEncoder进行编码
                             ch.pipeline().addLast(new HttpResponseEncoder());
                             // server端接收到的是httpRequest，所以要使用HttpRequestDecoder进行解码
-                            //ch.pipeline().addLast(new HttpRequestDecoder());
+                            ch.pipeline().addLast(new HttpRequestDecoder());
                             //fix me:设置的最大长度会不会影响性能
-                            //ch.pipeline().addLast(new HttpObjectAggregator(2048));
+                            ch.pipeline().addLast(new HttpObjectAggregator(2048));
                             ch.pipeline().addLast(new ConsumerMsgHandler(endpoints));
                         }
                     })
