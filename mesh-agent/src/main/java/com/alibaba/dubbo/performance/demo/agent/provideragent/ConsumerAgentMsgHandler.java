@@ -13,16 +13,14 @@ public class ConsumerAgentMsgHandler extends SimpleChannelInboundHandler<Datagra
 
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, DatagramPacket msg) throws Exception {
+        System.out.println("-------------------");
         ByteBuf buf = msg.content();
-        ByteBuf sendBuf = Unpooled.copiedBuffer(buf);
         long id = buf.readLong();
         byte[] bytes = new byte[buf.readableBytes()];
         buf.readBytes(bytes);
-        String str = new String(bytes);
-        String parameter=str.substring(str.lastIndexOf("=")+1);
-        //System.out.println(id);
-        //System.out.println(str);
-        //System.out.println(parameter);
+        String parameter=new String(bytes);
+        System.out.println(id);
+        System.out.println(parameter);
         RpcClient.invoke(id,parameter);
     }
 }

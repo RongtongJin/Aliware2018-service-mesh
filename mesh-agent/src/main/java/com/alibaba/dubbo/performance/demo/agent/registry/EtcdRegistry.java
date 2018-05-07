@@ -27,6 +27,7 @@ public class EtcdRegistry implements IRegistry{
     private long leaseId;
 
     public EtcdRegistry(String registryAddress) {
+        System.out.println(registryAddress);
         Client client = Client.builder().endpoints(registryAddress).build();
         this.lease   = client.getLeaseClient();
         this.kv      = client.getKVClient();

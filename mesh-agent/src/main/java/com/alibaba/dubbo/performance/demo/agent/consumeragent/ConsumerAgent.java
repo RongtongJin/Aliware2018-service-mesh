@@ -32,30 +32,36 @@ public class ConsumerAgent {
     private List<Endpoint> endpoints = null;
     public void start(int port) throws Exception {
 
+        System.out.println("ConsumerAgent start1");
         endpoints = registry.find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
+        System.out.println("ConsumerAgent start2");
+
+        System.out.println(endpoints.get(0).getHost()+":"+endpoints.get(0).getPort());
 
         //endpoints=new ArrayList<>();
         //endpoints.add(new Endpoint("127.0.0.1",30000));
 
-       // EventLoopGroup bossGroup = new NioEventLoopGroup();
-        EventLoopGroup bossGroup = new EpollEventLoopGroup();
+        EventLoopGroup bossGroup = new NioEventLoopGroup(1);
+        //EventLoopGroup bossGroup = new EpollEventLoopGroup();
 
-        //EventLoopGroup workerGroup = new NioEventLoopGroup();
-        EventLoopGroup workerGroup = new EpollEventLoopGroup();
+        EventLoopGroup workerGroup = new NioEventLoopGroup(6);
+        //EventLoopGroup workerGroup = new EpollEventLoopGroup();
+
+        UDPChannelManager.initChannel(workerGroup);
 
         try {
             ServerBootstrap b = new ServerBootstrap();
-            //b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
-            b.group(bossGroup, workerGroup).channel(EpollServerSocketChannel.class)
+            b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
+            //b.group(bossGroup, workerGroup).channel(EpollServerSocketChannel.class)
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         public void initChannel(SocketChannel ch) throws Exception {
                             // server端发送的是httpResponse，所以要使用HttpResponseEncoder进行编码
-                            ch.pipeline().addLast(new HttpResponseEncoder());
+                            //ch.pipeline().addLast(new HttpResponseEncoder());
                             // server端接收到的是httpRequest，所以要使用HttpRequestDecoder进行解码
-                            ch.pipeline().addLast(new HttpRequestDecoder());
+                            //ch.pipeline().addLast(new HttpRequestDecoder());
                             //fix me:设置的最大长度会不会影响性能
-                            ch.pipeline().addLast(new HttpObjectAggregator(2048));
+                            //ch.pipeline().addLast(new HttpObjectAggregator(2048));
                             ch.pipeline().addLast(new ConsumerMsgHandler(endpoints));
                         }
                     })
@@ -71,8 +77,8 @@ public class ConsumerAgent {
         }
     }
 
-//    public static void main(String[] args) throws Exception{
-//        new ConsumerAgent().start(20000);
-//    }
+    public static void main(String[] args) throws Exception{
+        new ConsumerAgent().start(20000);
+    }
 
 }
