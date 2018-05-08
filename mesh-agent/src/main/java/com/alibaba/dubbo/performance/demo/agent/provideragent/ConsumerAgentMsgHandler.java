@@ -1,5 +1,6 @@
 package com.alibaba.dubbo.performance.demo.agent.provideragent;
 
+import com.alibaba.dubbo.performance.demo.agent.provideragent.rpcmodel.RpcRequest;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
@@ -15,13 +16,12 @@ public class ConsumerAgentMsgHandler extends SimpleChannelInboundHandler<Datagra
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, DatagramPacket msg) throws Exception {
         System.out.println("-------------------");
         ByteBuf buf = msg.content();
-        long id = buf.readLong();
+        long id=buf.readLong();
         byte[] bytes = new byte[buf.readableBytes()];
         buf.readBytes(bytes);
-        String parameter=new String(bytes);
-        System.out.println(id);
-        System.out.println(parameter);
-        RpcClient.invoke(id,parameter);
+        RpcRequest request=new RpcRequest(id,bytes);
+        ProviderChannelManager.getChannel().write(request);
     }
+
 }
 

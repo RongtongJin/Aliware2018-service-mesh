@@ -34,25 +34,24 @@ public class ProviderAgentMsgHandler extends SimpleChannelInboundHandler<Datagra
             System.out.println("error");
         }
         //是否要加这个连接判断
-        if(sendChannel.isActive()){
-            byte[] bytes=new byte[buf.readableBytes()];
-            buf.readBytes(bytes);
-            Integer res= JSON.parseObject(bytes, Integer.class);
-            FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1,
-                    OK, Unpooled.wrappedBuffer(res.toString().getBytes()));
+        byte[] bytes=new byte[buf.readableBytes()];
+        buf.readBytes(bytes);
+        Integer res= JSON.parseObject(bytes, Integer.class);
+        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1,
+                OK, Unpooled.wrappedBuffer(res.toString().getBytes()));
 
-            //需要加这个吗？
-            response.headers().set(CONTENT_TYPE, "text/plain");
-            response.headers().set(CONTENT_LENGTH,
-                    response.content().readableBytes());
-            response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
-            sendChannel.writeAndFlush(response).addListener(cf->{
-                if(!cf.isSuccess()){
-                    log.error("send msg to Consumer failed.");
-                    cf.cause().printStackTrace();
-                }
-            });
-        }
+        //需要加这个吗？
+        response.headers().set(CONTENT_TYPE, "text/plain");
+        response.headers().set(CONTENT_LENGTH,
+                response.content().readableBytes());
+        response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
+        sendChannel.writeAndFlush(response).addListener(cf->{
+            if(!cf.isSuccess()){
+                log.error("send msg to Consumer failed.");
+                cf.cause().printStackTrace();
+            }
+        });
+
     }
 
 

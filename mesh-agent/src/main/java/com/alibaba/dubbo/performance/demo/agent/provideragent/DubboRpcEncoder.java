@@ -1,5 +1,6 @@
 package com.alibaba.dubbo.performance.demo.agent.provideragent;
 
+import com.alibaba.dubbo.performance.demo.agent.provideragent.rpcmodel.RpcRequest;
 import com.alibaba.dubbo.performance.demo.agent.utils.Bytes;
 import com.alibaba.dubbo.performance.demo.agent.utils.JsonUtils;
 import com.alibaba.dubbo.performance.demo.agent.provideragent.rpcmodel.Request;
@@ -24,20 +25,21 @@ public class DubboRpcEncoder extends MessageToByteEncoder{
     protected static final byte FLAG_TWOWAY = (byte) 0x40;
     protected static final byte FLAG_EVENT = (byte) 0x20;
 
+    private static  byte[] header = new byte[HEADER_LENGTH];
+
+    //private static
+
+//    static {
+//        Bytes.short2bytes(MAGIC, header);
+//        // set request and serialization flag.
+//        header[2] = (byte) (FLAG_REQUEST | 6);
+//        header[2] |= FLAG_TWOWAY;
+//
+//    }
+
     @Override
     protected void encode(ChannelHandlerContext ctx, Object msg, ByteBuf buffer) throws Exception {
-        Request req = (Request)msg;
-
-        // header.
-        byte[] header = new byte[HEADER_LENGTH];
-        // set magic number.
-        Bytes.short2bytes(MAGIC, header);
-
-        // set request and serialization flag.
-        header[2] = (byte) (FLAG_REQUEST | 6);
-
-        if (req.isTwoWay()) header[2] |= FLAG_TWOWAY;
-        if (req.isEvent()) header[2] |= FLAG_EVENT;
+        RpcRequest req = (RpcRequest)msg;
 
         // set request id.
         //System.out.println("long2bytes set id"+req.getId());

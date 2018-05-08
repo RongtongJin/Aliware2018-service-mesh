@@ -41,10 +41,10 @@ public class ConsumerAgent {
         //endpoints=new ArrayList<>();
         //endpoints.add(new Endpoint("127.0.0.1",30000));
 
-        EventLoopGroup bossGroup = new NioEventLoopGroup(1);
+        EventLoopGroup bossGroup = new NioEventLoopGroup();
         //EventLoopGroup bossGroup = new EpollEventLoopGroup();
 
-        EventLoopGroup workerGroup = new NioEventLoopGroup(6);
+        EventLoopGroup workerGroup = new NioEventLoopGroup();
         //EventLoopGroup workerGroup = new EpollEventLoopGroup();
 
         UDPChannelManager.initChannel(workerGroup);

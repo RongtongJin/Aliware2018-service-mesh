@@ -14,6 +14,8 @@ import java.net.InetSocketAddress;
  */
 public class RpcMsgHandler extends SimpleChannelInboundHandler<RpcResponse> {
 
+    public static InetSocketAddress addr=new InetSocketAddress("127.0.0.1",20000);
+
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, RpcResponse response) throws Exception {
         long requestId = response.getRequestId();
@@ -23,7 +25,7 @@ public class RpcMsgHandler extends SimpleChannelInboundHandler<RpcResponse> {
         byteBuf.writeLong(requestId);
         byteBuf.writeBytes(response.getBytes());
         //这边的ip地址可能有问题
-        DatagramPacket dp = new DatagramPacket(byteBuf,new InetSocketAddress("127.0.0.1",20000));
+        DatagramPacket dp = new DatagramPacket(byteBuf,addr);
         ProviderAgent.getUDPChannel().writeAndFlush(dp).addListener(cf->{
             if(!cf.isSuccess()){
                 System.err.println("err in back to consumer agent");

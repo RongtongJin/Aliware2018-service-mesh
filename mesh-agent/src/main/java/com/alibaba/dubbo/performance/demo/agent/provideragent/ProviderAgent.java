@@ -20,8 +20,9 @@ public class ProviderAgent {
     private IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
 
     public void start(int port) throws Exception{
-        EventLoopGroup eventLoopGroup=new NioEventLoopGroup(4);
+        EventLoopGroup eventLoopGroup=new NioEventLoopGroup();
         //EventLoopGroup eventLoopGroup=new EpollEventLoopGroup(4);
+        Thread.sleep(1000);
         ProviderChannelManager.initChannel(eventLoopGroup);
 
         try {
