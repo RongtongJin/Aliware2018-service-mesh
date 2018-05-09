@@ -61,19 +61,19 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
  //       byteBuf.writeLong(id);
         //byteBuf.writeBytes(buf,136,buf.readableBytes()-136);
 
-        buf.readerIndex(136);
-        byte[] content=new byte[buf.readableBytes()];
-        buf.readBytes(content);
-        String str=new String(content);
+//        buf.readerIndex(136);
+//        byte[] content=new byte[buf.readableBytes()];
+//        buf.readBytes(content);
+//        String str=new String(content);
 
         FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1,
-                OK, Unpooled.wrappedBuffer(Integer.toString(str.hashCode()).getBytes()));
+                OK, Unpooled.wrappedBuffer(Integer.toString("lsx".hashCode()).getBytes()));
 
         //需要加这个吗？
         response.headers().set(CONTENT_TYPE, "text/plain");
         response.headers().set(CONTENT_LENGTH,
                 response.content().readableBytes());
-        response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
+//        response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
         ctx.writeAndFlush(response);
 
         //测试代码

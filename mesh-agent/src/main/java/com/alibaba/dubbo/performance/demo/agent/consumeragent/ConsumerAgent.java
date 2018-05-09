@@ -41,18 +41,18 @@ public class ConsumerAgent {
         //endpoints=new ArrayList<>();
         //endpoints.add(new Endpoint("127.0.0.1",30000));
 
-        EventLoopGroup bossGroup = new NioEventLoopGroup();
-        //EventLoopGroup bossGroup = new EpollEventLoopGroup();
+       // EventLoopGroup bossGroup = new NioEventLoopGroup(2);
+        EventLoopGroup bossGroup = new EpollEventLoopGroup();
 
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
-        //EventLoopGroup workerGroup = new EpollEventLoopGroup();
+        //EventLoopGroup workerGroup = new NioEventLoopGroup(16);
+        EventLoopGroup workerGroup = new EpollEventLoopGroup();
 
-        UDPChannelManager.initChannel(workerGroup);
+        //UDPChannelManager.initChannel(workerGroup);
 
         try {
             ServerBootstrap b = new ServerBootstrap();
-            b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
-            //b.group(bossGroup, workerGroup).channel(EpollServerSocketChannel.class)
+            //b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
+            b.group(bossGroup, workerGroup).channel(EpollServerSocketChannel.class)
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         public void initChannel(SocketChannel ch) throws Exception {
@@ -65,7 +65,7 @@ public class ConsumerAgent {
                             ch.pipeline().addLast(new ConsumerMsgHandler(endpoints));
                         }
                     })
-                    .childOption(ChannelOption.SO_KEEPALIVE, true)
+                    //.childOption(ChannelOption.SO_KEEPALIVE, true)
                     .childOption(ChannelOption.TCP_NODELAY,true);
            // System.out.println("ConsumerAgent1");
             ChannelFuture f = b.bind(port).sync();
