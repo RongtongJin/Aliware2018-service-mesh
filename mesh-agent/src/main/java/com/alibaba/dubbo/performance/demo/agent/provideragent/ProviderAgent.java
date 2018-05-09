@@ -22,7 +22,7 @@ public class ProviderAgent {
     public void start(int port) throws Exception{
         EventLoopGroup eventLoopGroup=new NioEventLoopGroup();
         //EventLoopGroup eventLoopGroup=new EpollEventLoopGroup(4);
-        Thread.sleep(1000);
+        Thread.sleep(2000);
         ProviderChannelManager.initChannel(eventLoopGroup);
 
         try {

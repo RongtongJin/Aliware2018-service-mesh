@@ -27,16 +27,16 @@ import java.util.List;
 public class ConsumerAgent {
     private static Log log = LogFactory.getLog(ConsumerAgent.class);
 
-    IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
+    //IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
 
     private List<Endpoint> endpoints = null;
     public void start(int port) throws Exception {
 
-        System.out.println("ConsumerAgent start1");
-        endpoints = registry.find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
-        System.out.println("ConsumerAgent start2");
+        //System.out.println("ConsumerAgent start1");
+        //endpoints = registry.find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
+        //System.out.println("ConsumerAgent start2");
 
-        System.out.println(endpoints.get(0).getHost()+":"+endpoints.get(0).getPort());
+        //System.out.println(endpoints.get(0).getHost()+":"+endpoints.get(0).getPort());
 
         //endpoints=new ArrayList<>();
         //endpoints.add(new Endpoint("127.0.0.1",30000));
