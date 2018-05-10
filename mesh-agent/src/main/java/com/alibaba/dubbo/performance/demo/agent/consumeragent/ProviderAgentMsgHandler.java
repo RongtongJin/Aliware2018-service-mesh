@@ -26,25 +26,25 @@ public class ProviderAgentMsgHandler extends SimpleChannelInboundHandler<Datagra
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, DatagramPacket datagramPacket) throws Exception {
         ByteBuf buf=datagramPacket.content();
         Long id=buf.readLong();
-        System.out.println(id);
+        buf.retain();
         Channel sendChannel=ChannelHolder.get(id);
         //fix me：获取后是否需要删除，删除可能会影响性能，不删除可能会影响GC
-       // ChannelHolder.remove(id);
-        if(sendChannel==null){
-            System.out.println("error");
-        }
+        ChannelHolder.remove(id);
         //是否要加这个连接判断
-        byte[] bytes=new byte[buf.readableBytes()];
-        buf.readBytes(bytes);
-        Integer res= JSON.parseObject(bytes, Integer.class);
+//        byte[] bytes=new byte[buf.readableBytes()];
+//        buf.readBytes(bytes);
+//        Integer res= JSON.parseObject(bytes, Integer.class);
+       // System.out.println(id);
+        ByteBuf hashCodeBuf = buf.slice(8,buf.readableBytes());
+       // System.out.println(hashCodeBuf.toString(io.netty.util.CharsetUtil.UTF_8));
         FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1,
-                OK, Unpooled.wrappedBuffer(res.toString().getBytes()));
+                OK, hashCodeBuf);
 
         //需要加这个吗？
         response.headers().set(CONTENT_TYPE, "text/plain");
         response.headers().set(CONTENT_LENGTH,
                 response.content().readableBytes());
-        response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
+        //response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
         sendChannel.writeAndFlush(response).addListener(cf->{
             if(!cf.isSuccess()){
                 log.error("send msg to Consumer failed.");

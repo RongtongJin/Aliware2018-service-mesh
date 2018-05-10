@@ -27,32 +27,28 @@ import java.util.List;
 public class ConsumerAgent {
     private static Log log = LogFactory.getLog(ConsumerAgent.class);
 
-    //IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
+    IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
 
     private List<Endpoint> endpoints = null;
     public void start(int port) throws Exception {
 
-        //System.out.println("ConsumerAgent start1");
-        //endpoints = registry.find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
-        //System.out.println("ConsumerAgent start2");
-
-        //System.out.println(endpoints.get(0).getHost()+":"+endpoints.get(0).getPort());
+        endpoints = registry.find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
 
         //endpoints=new ArrayList<>();
         //endpoints.add(new Endpoint("127.0.0.1",30000));
 
-       // EventLoopGroup bossGroup = new NioEventLoopGroup(2);
-        EventLoopGroup bossGroup = new EpollEventLoopGroup();
+        EventLoopGroup bossGroup = new NioEventLoopGroup(2);
+        //EventLoopGroup bossGroup = new EpollEventLoopGroup();
 
-        //EventLoopGroup workerGroup = new NioEventLoopGroup(16);
-        EventLoopGroup workerGroup = new EpollEventLoopGroup();
+        EventLoopGroup workerGroup = new NioEventLoopGroup(16);
+        //EventLoopGroup workerGroup = new EpollEventLoopGroup();
 
-        //UDPChannelManager.initChannel(workerGroup);
+        UDPChannelManager.initChannel(workerGroup);
 
         try {
             ServerBootstrap b = new ServerBootstrap();
-            //b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
-            b.group(bossGroup, workerGroup).channel(EpollServerSocketChannel.class)
+            b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
+            //b.group(bossGroup, workerGroup).channel(EpollServerSocketChannel.class)
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         public void initChannel(SocketChannel ch) throws Exception {
@@ -67,9 +63,8 @@ public class ConsumerAgent {
                     })
                     //.childOption(ChannelOption.SO_KEEPALIVE, true)
                     .childOption(ChannelOption.TCP_NODELAY,true);
-           // System.out.println("ConsumerAgent1");
             ChannelFuture f = b.bind(port).sync();
-           // System.out.println("ConsumerAgent2");
+            System.out.println("ConsumerAgent start...");
             f.channel().closeFuture().sync();
         } finally {
             workerGroup.shutdownGracefully();

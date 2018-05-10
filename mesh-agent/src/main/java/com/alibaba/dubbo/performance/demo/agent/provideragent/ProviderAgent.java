@@ -35,6 +35,7 @@ public class ProviderAgent {
                     //.option(ChannelOption.SO_SNDBUF) // 设置UDP写缓冲区为1M
                     .handler(new ConsumerAgentMsgHandler());
             channel=bootstrap.bind(new InetSocketAddress(port)).sync().channel();
+            System.out.println("ProviderAgent start...");
             channel.closeFuture().await();
         }finally {
             eventLoopGroup.shutdownGracefully();

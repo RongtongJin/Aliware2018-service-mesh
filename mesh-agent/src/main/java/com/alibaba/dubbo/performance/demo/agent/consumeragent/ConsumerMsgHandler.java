@@ -10,6 +10,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
 
 import io.netty.channel.socket.DatagramPacket;
+import io.netty.util.CharsetUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -32,7 +33,9 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
 
     private List<Endpoint> endpoints=null;
 
-    private Random random = new Random();
+    private static Random random = new Random();
+
+    //private static java.net.InetSocketAddress target=new java.net.InetSocketAddress("127.0.0.1",20000);
 
     public ConsumerMsgHandler(List<Endpoint> endpoints){
         this.endpoints=endpoints;
@@ -45,36 +48,39 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
         ByteBuf buf = msg.content();
         //System.out.println(buf.toString(io.netty.util.CharsetUtil.UTF_8));
         //buf.retain();
-//        udpChannel=UDPChannelManager.getChannel();
 
- //       Long id=genId.getAndIncrement();
+        Long id=genId.getAndIncrement();
 //
 //        //fix me:存储如此多的id会不会成为性能瓶颈？？或者ConcurrentHashMap能不能进行优化
-//        ChannelHolder.put(id,ctx.channel());
+        ChannelHolder.put(id,ctx.channel());
 //        //fix me:为什么不能用CompositeByteBuf
+
+//        //fix me:用直接内存好还是heap内存好？HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE
+        ByteBuf sendBuf=ctx.alloc().buffer(8+buf.readableBytes()-136);
+        sendBuf.writeLong(id);
+        sendBuf.writeBytes(buf,136,buf.readableBytes()-136);
+        //System.out.println(byteBuf.toString(CharsetUtil.UTF_8));
+
+
+
 //        CompositeByteBuf sendBuf=ctx.alloc().compositeBuffer();
 //        ByteBuf idBuf=ctx.alloc().ioBuffer();
 //        idBuf.writeLong(id);
-//        sendBuf.addComponents(idBuf,need);
-//        //fix me:用直接内存好还是heap内存好？HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE
-       // ByteBuf byteBuf=ctx.alloc().ioBuffer(8+buf.readableBytes()-136);
- //       byteBuf.writeLong(id);
-        //byteBuf.writeBytes(buf,136,buf.readableBytes()-136);
+//        sendBuf.addComponents(idBuf,buf.slice(136,buf.readableBytes()-136));
+//        System.out.println(idBuf.toString(CharsetUtil.UTF_8));
+//        System.out.println(buf.slice(136,buf.readableBytes()-136).toString(CharsetUtil.UTF_8));
+//        System.out.println(sendBuf.toString(CharsetUtil.UTF_8));
 
-//        buf.readerIndex(136);
-//        byte[] content=new byte[buf.readableBytes()];
-//        buf.readBytes(content);
-//        String str=new String(content);
 
-        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1,
-                OK, Unpooled.wrappedBuffer(Integer.toString("lsx".hashCode()).getBytes()));
-
-        //需要加这个吗？
-        response.headers().set(CONTENT_TYPE, "text/plain");
-        response.headers().set(CONTENT_LENGTH,
-                response.content().readableBytes());
-//        response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
-        ctx.writeAndFlush(response);
+//        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1,
+//                OK, Unpooled.wrappedBuffer(Integer.toString("lsx".hashCode()).getBytes()));
+//
+//        //需要加这个吗？
+//        response.headers().set(CONTENT_TYPE, "text/plain");
+//        response.headers().set(CONTENT_LENGTH,
+//                response.content().readableBytes());
+////        response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
+//        ctx.writeAndFlush(response);
 
         //测试代码
      //   Endpoint endpoint=null;
@@ -88,26 +94,29 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
 //        else
 //            endpoint=endpoints.get(2);
 
-        // 简单的负载均衡，随机取一个
-//        Endpoint endpoint = endpoints.get(random.nextInt(endpoints.size()));
+        //简单的负载均衡，随机取一个
+        Endpoint endpoint = endpoints.get(random.nextInt(endpoints.size()));
 //
-//        System.out.println(endpoint.getHost()+":"+endpoint.getPort());
-//
-//        DatagramPacket dp=new DatagramPacket(byteBuf,new java.net.InetSocketAddress(endpoint.getHost(),endpoint.getPort()));
-//
-//
-//        UDPChannelManager.getChannel().write(dp).addListener(cf -> {
-//            if (!cf.isSuccess()) {
-//                log.error("error in udpChannel write.");
-//                cf.cause().printStackTrace();
-//            }
-//        });
+        //System.out.println(endpoint.getHost()+":"+endpoint.getPort());
+
+
+        DatagramPacket dp=new DatagramPacket(sendBuf,new java.net.InetSocketAddress(endpoint.getHost(),endpoint.getPort()));
+
+
+        UDPChannelManager.getChannel().write(dp).addListener(cf -> {
+            if (!cf.isSuccess()) {
+                log.error("error in udpChannel write.");
+                cf.cause().printStackTrace();
+            }
+        });
+
+        //System.out.println("send finish..");
     }
 
-//    @Override
-//    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-//        UDPChannelManager.getChannel().flush();
-//    }
+    @Override
+    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+        UDPChannelManager.getChannel().flush();
+    }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
