@@ -33,7 +33,7 @@ public class ProviderAgent {
                     //.option(ChannelOption.SO_BACKLOG, 128)    //设置缓存队列
                     //.option(ChannelOption.SO_RCVBUF)// 设置UDP读缓冲区为1M
                     //.option(ChannelOption.SO_SNDBUF) // 设置UDP写缓冲区为1M
-                    .handler(new TCPConsumerAgentMsgHandler());
+                    .handler(new ConsumerAgentMsgHandler());
             channel=bootstrap.bind(new InetSocketAddress(port)).sync().channel();
             System.out.println("ProviderAgent start on "+port);
             channel.closeFuture().await();
