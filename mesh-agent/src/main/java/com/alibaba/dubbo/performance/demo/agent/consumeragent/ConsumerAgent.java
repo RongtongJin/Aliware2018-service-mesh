@@ -43,7 +43,9 @@ public class ConsumerAgent {
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         //EventLoopGroup workerGroup = new EpollEventLoopGroup();
 
-        UDPChannelManager.initChannel(workerGroup);
+        //UDPChannelManager.initChannel(workerGroup);
+
+        TCPChannelManager.initChannel(workerGroup,endpoints.get(0));
 
         try {
             ServerBootstrap b = new ServerBootstrap();
@@ -61,10 +63,10 @@ public class ConsumerAgent {
                             ch.pipeline().addLast(new ConsumerMsgHandler(endpoints));
                         }
                     })
-                    //.childOption(ChannelOption.SO_KEEPALIVE, true)
+                    .childOption(ChannelOption.SO_KEEPALIVE, true)
                     .childOption(ChannelOption.TCP_NODELAY,true);
             ChannelFuture f = b.bind(port).sync();
-            System.out.println("ConsumerAgent start...");
+            System.out.println("ConsumerAgent start on "+port);
             f.channel().closeFuture().sync();
         } finally {
             workerGroup.shutdownGracefully();

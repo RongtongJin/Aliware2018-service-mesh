@@ -47,7 +47,7 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
 
         ByteBuf buf = msg.content();
         //System.out.println(buf.toString(io.netty.util.CharsetUtil.UTF_8));
-        //buf.retain();
+        buf.retain();
 
         Long id=genId.getAndIncrement();
 //
@@ -56,36 +56,34 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
 //        //fix me:为什么不能用CompositeByteBuf
 
 //        //fix me:用直接内存好还是heap内存好？HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE
-        ByteBuf sendBuf=ctx.alloc().ioBuffer(8+buf.readableBytes()-136);
-        sendBuf.writeLong(id);
-        sendBuf.writeBytes(buf,136,buf.readableBytes()-136);
+        //ByteBuf sendBuf=ctx.alloc().ioBuffer(8+buf.readableBytes()-136);
+        //sendBuf.writeLong(id);
+        //sendBuf.writeBytes(buf,136,buf.readableBytes()-136);
         //System.out.println(byteBuf.toString(CharsetUtil.UTF_8));
 
+        CompositeByteBuf sendBuf=ctx.alloc().compositeBuffer();
+        ByteBuf idBuf=ctx.alloc().ioBuffer();
+        idBuf.writeLong(id);
+        sendBuf.addComponents(true,idBuf,buf.slice(136,buf.readableBytes()-136));
+        sendBuf.writeByte('$');
+        //System.out.println(sendBuf.toString(CharsetUtil.UTF_8));
 
-
-//        CompositeByteBuf sendBuf=ctx.alloc().compositeBuffer();
-//        ByteBuf idBuf=ctx.alloc().ioBuffer();
-//        idBuf.writeLong(id);
-//        sendBuf.addComponents(idBuf,buf.slice(136,buf.readableBytes()-136));
-//        System.out.println(idBuf.toString(CharsetUtil.UTF_8));
-//        System.out.println(buf.slice(136,buf.readableBytes()-136).toString(CharsetUtil.UTF_8));
-//        System.out.println(sendBuf.toString(CharsetUtil.UTF_8));
-
-
+        /*发给provider consumer做测试*/
+//        ByteBuf sendBuf=buf.slice(136,buf.readableBytes()-136);
+//
 //        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1,
-//                OK, Unpooled.wrappedBuffer(Integer.toString("lsx".hashCode()).getBytes()));
+//                OK, Unpooled.wrappedBuffer(Integer.toString(sendBuf.toString(CharsetUtil.UTF_8).hashCode()).getBytes()));
 //
 //        //需要加这个吗？
 //        response.headers().set(CONTENT_TYPE, "text/plain");
 //        response.headers().set(CONTENT_LENGTH,
 //                response.content().readableBytes());
-////        response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
 //        ctx.writeAndFlush(response);
 
-        //测试代码
-     //   Endpoint endpoint=null;
-        //负载均衡代码
+
+        /*负载均衡代码*/
         //按照性能简单负载均衡,这里有问题，并不清楚提供服务的机器性能
+//        Endpoint endpoint=null;
 //        long x=id%6;
 //        if(x==0)
 //            endpoint=endpoints.get(0);
@@ -94,28 +92,31 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
 //        else
 //            endpoint=endpoints.get(2);
 
+
+        /*udp发给provider agent*/
         //简单的负载均衡，随机取一个
-        Endpoint endpoint = endpoints.get(random.nextInt(endpoints.size()));
+//        Endpoint endpoint = endpoints.get(random.nextInt(endpoints.size()));
 //
-        //System.out.println(endpoint.getHost()+":"+endpoint.getPort());
+//        DatagramPacket dp=new DatagramPacket(sendBuf,new java.net.InetSocketAddress(endpoint.getHost(),endpoint.getPort()));
+//
+//        UDPChannelManager.getChannel().write(dp).addListener(cf -> {
+//            if (!cf.isSuccess()) {
+//                log.error("error in udpChannel write.");
+//                cf.cause().printStackTrace();
+//            }
+//        });
 
+        /*tcp发给provider agent*/
+        Endpoint endpoint = endpoints.get(random.nextInt(endpoints.size()));
 
-        DatagramPacket dp=new DatagramPacket(sendBuf,new java.net.InetSocketAddress(endpoint.getHost(),endpoint.getPort()));
-
-
-        UDPChannelManager.getChannel().write(dp).addListener(cf -> {
-            if (!cf.isSuccess()) {
-                log.error("error in udpChannel write.");
-                cf.cause().printStackTrace();
-            }
-        });
-
-        //System.out.println("send finish..");
+        TCPChannelManager.getChannel().write(sendBuf);
+//        System.out.println("send finish..");
     }
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-        UDPChannelManager.getChannel().flush();
+        //UDPChannelManager.getChannel().flush();
+        TCPChannelManager.getChannel().flush();
     }
 
     @Override

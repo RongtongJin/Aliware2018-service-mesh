@@ -25,13 +25,13 @@ public class ProviderChannelManager{
         int port = Integer.valueOf(System.getProperty("dubbo.protocol.port"));
         //int port=20889;
         channel = new Bootstrap()
-                .group(new NioEventLoopGroup())
+                .group(group)
                 .channel(NioSocketChannel.class)
                 //.group(new EpollEventLoopGroup())
                 //.channel(EpollSocketChannel.class)
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.TCP_NODELAY, true)
-                .option(ChannelOption.ALLOCATOR, UnpooledByteBufAllocator.DEFAULT)
+                //.option(ChannelOption.ALLOCATOR, UnpooledByteBufAllocator.DEFAULT)
                 .handler(new RpcHandlerInitializer())
                 .connect("127.0.0.1", port).sync().channel();
     }

@@ -2,6 +2,7 @@ package com.alibaba.dubbo.performance.demo.agent;
 
 import com.alibaba.dubbo.performance.demo.agent.consumeragent.ConsumerAgent;
 import com.alibaba.dubbo.performance.demo.agent.provideragent.ProviderAgent;
+import com.alibaba.dubbo.performance.demo.agent.provideragent.TCPProviderAgent;
 
 public class Main {
     public static void main(String[] args) throws Exception{
@@ -10,7 +11,7 @@ public class Main {
         if ("consumer".equals(type)){
             new ConsumerAgent().start(port);
         }else if("provider".equals(type)){
-            new ProviderAgent().start(port);
+            new TCPProviderAgent().start(port);
         }else {
             System.err.println("Environment variable type is needed to set to provider or consumer.");
         }

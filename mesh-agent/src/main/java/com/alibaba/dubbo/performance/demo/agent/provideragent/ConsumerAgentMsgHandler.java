@@ -20,6 +20,7 @@ public class ConsumerAgentMsgHandler extends SimpleChannelInboundHandler<Datagra
         ByteBuf buf = msg.content();
        // System.out.println(buf.toString(CharsetUtil.UTF_8));
         long id=buf.readLong();
+        //System.out.println(id);
 //        byte[] bytes = new byte[buf.readableBytes()];
 //        buf.readBytes(bytes);
         ByteBuf dataBuf=buf.slice(8,buf.readableBytes());
@@ -28,7 +29,7 @@ public class ConsumerAgentMsgHandler extends SimpleChannelInboundHandler<Datagra
         ByteBuf sendBuf=ctx.alloc().ioBuffer(8+data.length);
         sendBuf.writeLong(id);
         sendBuf.writeBytes(data);
-        DatagramPacket dp=new DatagramPacket(Unpooled.wrappedBuffer(sendBuf),msg.sender());
+        DatagramPacket dp=new DatagramPacket(sendBuf,msg.sender());
        // System.out.println(msg.sender().getHostString());
        // System.out.println(msg.sender().getPort());
         ctx.writeAndFlush(dp);
