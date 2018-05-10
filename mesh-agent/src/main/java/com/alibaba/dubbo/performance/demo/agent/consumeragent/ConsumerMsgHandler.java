@@ -56,7 +56,7 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
 //        //fix me:为什么不能用CompositeByteBuf
 
 //        //fix me:用直接内存好还是heap内存好？HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE
-        ByteBuf sendBuf=ctx.alloc().buffer(8+buf.readableBytes()-136);
+        ByteBuf sendBuf=ctx.alloc().ioBuffer(8+buf.readableBytes()-136);
         sendBuf.writeLong(id);
         sendBuf.writeBytes(buf,136,buf.readableBytes()-136);
         //System.out.println(byteBuf.toString(CharsetUtil.UTF_8));

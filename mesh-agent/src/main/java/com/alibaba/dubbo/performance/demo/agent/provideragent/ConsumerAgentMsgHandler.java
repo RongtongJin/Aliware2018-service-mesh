@@ -25,7 +25,7 @@ public class ConsumerAgentMsgHandler extends SimpleChannelInboundHandler<Datagra
         ByteBuf dataBuf=buf.slice(8,buf.readableBytes());
        // System.out.println(dataBuf.toString(io.netty.util.CharsetUtil.UTF_8));
         byte [] data=java.lang.String.valueOf(dataBuf.toString(io.netty.util.CharsetUtil.UTF_8).hashCode()).getBytes();
-        ByteBuf sendBuf=ctx.alloc().buffer(8+data.length);
+        ByteBuf sendBuf=ctx.alloc().ioBuffer(8+data.length);
         sendBuf.writeLong(id);
         sendBuf.writeBytes(data);
         DatagramPacket dp=new DatagramPacket(Unpooled.wrappedBuffer(sendBuf),msg.sender());
