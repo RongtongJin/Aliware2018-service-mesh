@@ -4,6 +4,7 @@ import com.alibaba.dubbo.performance.demo.agent.provideragent.RpcHandlerInitiali
 import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.epoll.EpollSocketChannel;
@@ -25,7 +26,8 @@ public class TCPChannelManager {
                 //.channel(EpollSocketChannel.class)
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.TCP_NODELAY, true)
-                //.option(ChannelOption.ALLOCATOR, UnpooledByteBufAllocator.DEFAULT)
+                //.option(ChannelOption.SO_SNDBUF,1024*1024)
+                //.option(ChannelOption.SO_RCVBUF,100*1024)
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel socketChannel) throws Exception {

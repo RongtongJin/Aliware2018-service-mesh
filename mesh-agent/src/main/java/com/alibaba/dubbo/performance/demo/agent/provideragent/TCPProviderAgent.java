@@ -6,6 +6,7 @@ import com.alibaba.dubbo.performance.demo.agent.registry.IRegistry;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.epoll.Epoll;
@@ -40,11 +41,14 @@ public class TCPProviderAgent {
                     .group(eventLoopGroup)
                     .channel(NioServerSocketChannel.class)
                     //.channel(EpollServerSocketChannel.class)
-                    //.option(ChannelOption.SO_KEEPALIVE, true)
-                    //.option(ChannelOption.TCP_NODELAY, true)
-                    .childOption(ChannelOption.SO_KEEPALIVE,true)
+                    .option(ChannelOption.SO_BACKLOG,2048)
+                    .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
+                    .childOption(ChannelOption.SO_KEEPALIVE, true)
                     .childOption(ChannelOption.TCP_NODELAY,true)
-                    //.option(ChannelOption.ALLOCATOR, UnpooledByteBufAllocator.DEFAULT)
+                    .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
+                    .childOption(ChannelOption.SO_REUSEADDR, Boolean.TRUE)
+                    .childOption(ChannelOption.AUTO_CLOSE, Boolean.TRUE)
+                    .childOption(ChannelOption.ALLOW_HALF_CLOSURE, Boolean.FALSE)
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel socketChannel) throws Exception {

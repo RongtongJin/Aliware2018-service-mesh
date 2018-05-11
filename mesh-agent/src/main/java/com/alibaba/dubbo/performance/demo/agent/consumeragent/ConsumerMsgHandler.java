@@ -65,7 +65,7 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
         ByteBuf idBuf=ctx.alloc().ioBuffer();
         idBuf.writeLong(id);
         sendBuf.addComponents(true,idBuf,buf.slice(136,buf.readableBytes()-136));
-        sendBuf.writeBytes(System.lineSeparator().getBytes());
+        //sendBuf.writeBytes(System.lineSeparator().getBytes());
 
         //System.out.println(sendBuf.toString(CharsetUtil.UTF_8));
 
@@ -96,28 +96,28 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
 
         /*udp发给provider agent*/
         //简单的负载均衡，随机取一个
-//        Endpoint endpoint = endpoints.get(random.nextInt(endpoints.size()));
-//
-//        DatagramPacket dp=new DatagramPacket(sendBuf,new java.net.InetSocketAddress(endpoint.getHost(),endpoint.getPort()));
-//
-//        UDPChannelManager.getChannel().write(dp).addListener(cf -> {
-//            if (!cf.isSuccess()) {
-//                log.error("error in udpChannel write.");
-//                cf.cause().printStackTrace();
-//            }
-//        });
-
-        /*tcp发给provider agent*/
         Endpoint endpoint = endpoints.get(random.nextInt(endpoints.size()));
 
-        TCPChannelManager.getChannel().write(sendBuf);
+        DatagramPacket dp=new DatagramPacket(sendBuf,new java.net.InetSocketAddress(endpoint.getHost(),endpoint.getPort()));
+
+        UDPChannelManager.getChannel().write(dp).addListener(cf -> {
+            if (!cf.isSuccess()) {
+                log.error("error in udpChannel write.");
+                cf.cause().printStackTrace();
+            }
+        });
+
+        /*tcp发给provider agent*/
+//        Endpoint endpoint = endpoints.get(random.nextInt(endpoints.size()));
+//
+//        TCPChannelManager.getChannel().write(sendBuf);
 //        System.out.println("send finish..");
     }
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-        //UDPChannelManager.getChannel().flush();
-        TCPChannelManager.getChannel().flush();
+        UDPChannelManager.getChannel().flush();
+        //TCPChannelManager.getChannel().flush();
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
 import com.alibaba.dubbo.performance.demo.agent.registry.EtcdRegistry;
 import com.alibaba.dubbo.performance.demo.agent.registry.IRegistry;
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
@@ -37,15 +38,15 @@ public class ConsumerAgent {
         //endpoints=new ArrayList<>();
         //endpoints.add(new Endpoint("127.0.0.1",30000));
 
-        EventLoopGroup bossGroup = new NioEventLoopGroup();
+        EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         //EventLoopGroup bossGroup = new EpollEventLoopGroup();
 
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         //EventLoopGroup workerGroup = new EpollEventLoopGroup();
 
-        //UDPChannelManager.initChannel(workerGroup);
+        UDPChannelManager.initChannel(workerGroup);
 
-        TCPChannelManager.initChannel(workerGroup,endpoints.get(0));
+        //TCPChannelManager.initChannel(workerGroup,endpoints.get(0));
 
         try {
             ServerBootstrap b = new ServerBootstrap();
@@ -63,8 +64,14 @@ public class ConsumerAgent {
                             ch.pipeline().addLast(new ConsumerMsgHandler(endpoints));
                         }
                     })
+                    .option(ChannelOption.SO_BACKLOG,2048)
+                    .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                     .childOption(ChannelOption.SO_KEEPALIVE, true)
-                    .childOption(ChannelOption.TCP_NODELAY,true);
+                    .childOption(ChannelOption.TCP_NODELAY,true)
+                    .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
+                    .childOption(ChannelOption.SO_REUSEADDR, Boolean.TRUE)
+                    .childOption(ChannelOption.AUTO_CLOSE, Boolean.TRUE)
+                    .childOption(ChannelOption.ALLOW_HALF_CLOSURE, Boolean.FALSE);
             ChannelFuture f = b.bind(port).sync();
             System.out.println("ConsumerAgent start on "+port);
             f.channel().closeFuture().sync();
