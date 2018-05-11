@@ -17,6 +17,7 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.DelimiterBasedFrameDecoder;
+import io.netty.handler.codec.LineBasedFrameDecoder;
 
 import java.net.InetSocketAddress;
 
@@ -27,18 +28,18 @@ public class TCPProviderAgent {
     private IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
 
     public void start(int port) throws Exception{
-        //EventLoopGroup eventLoopGroup=new NioEventLoopGroup();
+        EventLoopGroup eventLoopGroup=new NioEventLoopGroup();
 
-        EventLoopGroup eventLoopGroup=new EpollEventLoopGroup();
+        //EventLoopGroup eventLoopGroup=new EpollEventLoopGroup();
 
         Thread.sleep(1000);
         //ProviderChannelManager.initChannel(eventLoopGroup);
 
         try {
             channel = new ServerBootstrap()
-                    .group(eventLoopGroup,eventLoopGroup)
-                    //.channel(NioServerSocketChannel.class)
-                    .channel(EpollServerSocketChannel.class)
+                    .group(eventLoopGroup)
+                    .channel(NioServerSocketChannel.class)
+                    //.channel(EpollServerSocketChannel.class)
                     //.option(ChannelOption.SO_KEEPALIVE, true)
                     //.option(ChannelOption.TCP_NODELAY, true)
                     .childOption(ChannelOption.SO_KEEPALIVE,true)
@@ -48,8 +49,7 @@ public class TCPProviderAgent {
                         @Override
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
                             ChannelPipeline pipeline = socketChannel.pipeline();
-                            ByteBuf delimiter = Unpooled.wrappedBuffer("$".getBytes());
-                            pipeline.addLast(new DelimiterBasedFrameDecoder(1024,delimiter));
+                            pipeline.addLast(new LineBasedFrameDecoder(1034));
                             pipeline.addLast(new TCPConsumerAgentMsgHandler());
                         }
                     }).bind(port).sync().channel();

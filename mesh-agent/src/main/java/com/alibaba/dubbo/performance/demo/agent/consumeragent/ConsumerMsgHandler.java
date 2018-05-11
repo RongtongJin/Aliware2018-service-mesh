@@ -65,7 +65,8 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
         ByteBuf idBuf=ctx.alloc().ioBuffer();
         idBuf.writeLong(id);
         sendBuf.addComponents(true,idBuf,buf.slice(136,buf.readableBytes()-136));
-        sendBuf.writeByte('$');
+        sendBuf.writeBytes(System.lineSeparator().getBytes());
+
         //System.out.println(sendBuf.toString(CharsetUtil.UTF_8));
 
         /*发给provider consumer做测试*/
