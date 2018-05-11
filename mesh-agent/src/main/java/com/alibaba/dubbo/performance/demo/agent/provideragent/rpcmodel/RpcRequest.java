@@ -2,11 +2,11 @@ package com.alibaba.dubbo.performance.demo.agent.provideragent.rpcmodel;
 
 public class RpcRequest {
     private long id;
-    private byte[] data=null;
+    private String parameter=null;
 
-    public RpcRequest(long id, byte[] data){
+    public RpcRequest(long id, String parameter){
         this.id=id;
-        this.data=data;
+        this.parameter=parameter;
     }
 
 
@@ -14,7 +14,7 @@ public class RpcRequest {
         return id;
     }
 
-    public byte[] getData() {
-        return data;
+    public String getParameter() {
+        return parameter;
     }
 }

@@ -16,25 +16,22 @@ public class ConsumerAgentMsgHandler extends SimpleChannelInboundHandler<Datagra
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, DatagramPacket msg) throws Exception {
-        //System.out.println("----------------");
         ByteBuf buf = msg.content();
-       // System.out.println(buf.toString(CharsetUtil.UTF_8));
         long id=buf.readLong();
-        //System.out.println(id);
-//        byte[] bytes = new byte[buf.readableBytes()];
-//        buf.readBytes(bytes);
         ByteBuf dataBuf=buf.slice(8,buf.readableBytes());
-       // System.out.println(dataBuf.toString(io.netty.util.CharsetUtil.UTF_8));
-        byte [] data=java.lang.String.valueOf(dataBuf.toString(io.netty.util.CharsetUtil.UTF_8).hashCode()).getBytes();
-        ByteBuf sendBuf=ctx.alloc().ioBuffer(8+data.length);
-        sendBuf.writeLong(id);
-        sendBuf.writeBytes(data);
-        DatagramPacket dp=new DatagramPacket(sendBuf,msg.sender());
-       // System.out.println(msg.sender().getHostString());
-       // System.out.println(msg.sender().getPort());
-        ctx.writeAndFlush(dp);
-//        RpcRequest request=new RpcRequest(id,bytes);
-//        ProviderChannelManager.getChannel().write(request);
+        System.out.println(id);
+        System.out.println(dataBuf.toString(CharsetUtil.UTF_8));
+
+        RpcRequest request=new RpcRequest(id,dataBuf.toString(CharsetUtil.UTF_8));
+        ProviderChannelManager.getChannel().write(request);
+
+        /*用于验证不经过provider性能*/
+//        byte [] data=java.lang.String.valueOf(dataBuf.toString(io.netty.util.CharsetUtil.UTF_8).hashCode()).getBytes();
+//        ByteBuf sendBuf=ctx.alloc().ioBuffer(8+data.length);
+//        sendBuf.writeLong(id);
+//        sendBuf.writeBytes(data);
+//        DatagramPacket dp=new DatagramPacket(sendBuf,msg.sender());
+//        ctx.writeAndFlush(dp);
     }
 
 }

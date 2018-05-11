@@ -20,6 +20,7 @@ public class DubboRpcDecoder extends ByteToMessageDecoder {
     }
 
     private Object decode2(ByteBuf byteBuf){
+        System.out.println("decode");
         byte[] data = new byte[byteBuf.readableBytes()];
         byteBuf.readBytes(data);
 

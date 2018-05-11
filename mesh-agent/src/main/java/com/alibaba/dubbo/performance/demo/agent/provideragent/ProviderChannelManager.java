@@ -1,17 +1,17 @@
 package com.alibaba.dubbo.performance.demo.agent.provideragent;
 
 
-
 import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.UnpooledByteBufAllocator;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
+import io.netty.buffer.PooledByteBufAllocator;
+
+import io.netty.channel.*;
 import io.netty.channel.epoll.EpollDatagramChannel;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+
 
 
 /**
@@ -31,8 +31,16 @@ public class ProviderChannelManager{
                 //.channel(EpollSocketChannel.class)
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.TCP_NODELAY, true)
-                //.option(ChannelOption.ALLOCATOR, UnpooledByteBufAllocator.DEFAULT)
-                .handler(new RpcHandlerInitializer())
+                .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
+                .handler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    protected void initChannel(SocketChannel socketChannel) throws Exception {
+                        ChannelPipeline pipeline = socketChannel.pipeline();
+                        pipeline.addLast(new DubboRpcEncoder());
+                        pipeline.addLast(new DubboRpcDecoder());
+                        pipeline.addLast(new RpcMsgHandler());
+                    }
+                })
                 .connect("127.0.0.1", port).sync().channel();
     }
 

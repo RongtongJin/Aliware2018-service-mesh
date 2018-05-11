@@ -23,7 +23,7 @@ public class ProviderAgent {
         EventLoopGroup eventLoopGroup=new NioEventLoopGroup();
         //EventLoopGroup eventLoopGroup=new EpollEventLoopGroup();
         Thread.sleep(1000);
-        //ProviderChannelManager.initChannel(eventLoopGroup);
+        ProviderChannelManager.initChannel(eventLoopGroup);
 
         try {
             Bootstrap bootstrap=new Bootstrap()

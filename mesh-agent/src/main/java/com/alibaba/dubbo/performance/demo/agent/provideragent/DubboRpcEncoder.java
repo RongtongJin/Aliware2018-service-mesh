@@ -9,11 +9,11 @@ import com.alibaba.dubbo.performance.demo.agent.provideragent.rpcmodel.RpcInvoca
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
+import io.netty.util.CharsetUtil;
 
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DubboRpcEncoder extends MessageToByteEncoder{
     // header length.
@@ -23,57 +23,87 @@ public class DubboRpcEncoder extends MessageToByteEncoder{
     // message flag.
     protected static final byte FLAG_REQUEST = (byte) 0x80;
     protected static final byte FLAG_TWOWAY = (byte) 0x40;
-    protected static final byte FLAG_EVENT = (byte) 0x20;
 
-    private static  byte[] header = new byte[HEADER_LENGTH];
+    private static byte[] header = new byte[HEADER_LENGTH];
 
-    //private static
+    private static byte[] frontBody = null;
 
-//    static {
-//        Bytes.short2bytes(MAGIC, header);
-//        // set request and serialization flag.
-//        header[2] = (byte) (FLAG_REQUEST | 6);
-//        header[2] |= FLAG_TWOWAY;
-//
-//    }
+    private static byte[] tailBody = null;
+
+    static {
+        //header
+        Bytes.short2bytes(MAGIC, header);
+        // set request and serialization flag.
+        header[2] = (byte) (FLAG_REQUEST | 6);
+        header[2] |= FLAG_TWOWAY;
+
+        //front body
+        ByteArrayOutputStream frontOut = new ByteArrayOutputStream();
+        PrintWriter frontWriter = new PrintWriter(new OutputStreamWriter(frontOut));
+
+        try{
+            //Dubbo version
+            JsonUtils.writeObject("2.0.1",frontWriter);
+            //Service name
+            JsonUtils.writeObject("com.alibaba.dubbo.performance.demo.provider.IHelloService",frontWriter);
+            //Service version
+            JsonUtils.writeObject(null,frontWriter);
+            //Method name
+            JsonUtils.writeObject("hash",frontWriter);
+            //Method parameter types
+            JsonUtils.writeObject("Ljava/lang/String;",frontWriter);
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+        frontBody=frontOut.toByteArray();
+
+        //tailBody
+        ByteArrayOutputStream tailOut = new ByteArrayOutputStream();
+        PrintWriter tailWriter = new PrintWriter(new OutputStreamWriter(tailOut));
+
+        Map<String,String> map=new HashMap<>();
+        map.put("path","com.alibaba.dubbo.performance.demo.provider.IHelloService");
+
+        try{
+            JsonUtils.writeObject(map,tailWriter);
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+        tailBody=tailOut.toByteArray();
+    }
 
     @Override
     protected void encode(ChannelHandlerContext ctx, Object msg, ByteBuf buffer) throws Exception {
         RpcRequest req = (RpcRequest)msg;
-
-        // set request id.
-        //System.out.println("long2bytes set id"+req.getId());
-        Bytes.long2bytes(req.getId(), header, 4);
-
-        // encode request data.
         int savedWriteIndex = buffer.writerIndex();
-        buffer.writerIndex(savedWriteIndex + HEADER_LENGTH);
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        encodeRequestData(bos, req.getData());
-
-        int len = bos.size();
-        buffer.writeBytes(bos.toByteArray());
-        Bytes.int2bytes(len, header, 12);
-
-        // write
-        buffer.writerIndex(savedWriteIndex);
-        buffer.writeBytes(header); // write header.
+        buffer.writeBytes(header);
+        buffer.writeBytes(frontBody);
+        ByteArrayOutputStream dataOut = new ByteArrayOutputStream();
+        PrintWriter dataWriter = new PrintWriter(new OutputStreamWriter(dataOut));
+        JsonUtils.writeObject(req.getParameter(),dataWriter);
+        byte[] data=dataOut.toByteArray();
+        buffer.writeBytes(data);
+        buffer.writeBytes(tailBody);
+        buffer.writerIndex(savedWriteIndex+4);
+        //RPC Request ID
+        buffer.writeLong(req.getId());
+        int len=frontBody.length+data.length+tailBody.length;
+        //System.out.println(len);
+        //body length
+        buffer.writeInt(len);
         buffer.writerIndex(savedWriteIndex + HEADER_LENGTH + len);
-    }
-
-    public void encodeRequestData(OutputStream out, Object data) throws Exception {
-        RpcInvocation inv = (RpcInvocation)data;
-
-        PrintWriter writer = new PrintWriter(new OutputStreamWriter(out));
-
-        JsonUtils.writeObject(inv.getAttachment("dubbo", "2.0.1"), writer);
-        JsonUtils.writeObject(inv.getAttachment("path"), writer);
-        JsonUtils.writeObject(inv.getAttachment("version"), writer);
-        JsonUtils.writeObject(inv.getMethodName(), writer);
-        JsonUtils.writeObject(inv.getParameterTypes(), writer);
-
-        JsonUtils.writeBytes(inv.getArguments(), writer);
-        JsonUtils.writeObject(inv.getAttachments(), writer);
+//        buffer.readerIndex(savedWriteIndex + 4);
+//        System.out.println(buffer.readLong());
+//        int tlen=buffer.readInt();
+//        System.out.println(tlen);
+//        System.out.print(tlen==len);
+//        byte[] test=new byte[len];
+//        buffer.readBytes(test);;
+//        System.out.print(new String(test))
+//        System.out.println("req id="+req.getId());
+//        System.out.print(new String(frontBody));
+//        System.out.print(new String(data));
+//        System.out.print(new String(tailBody));
     }
 
 }

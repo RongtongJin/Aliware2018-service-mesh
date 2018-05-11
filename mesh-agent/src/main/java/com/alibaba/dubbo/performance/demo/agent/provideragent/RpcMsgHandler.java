@@ -18,9 +18,10 @@ public class RpcMsgHandler extends SimpleChannelInboundHandler<RpcResponse> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, RpcResponse response) throws Exception {
+        System.out.println("RpcMsgHandler");
         long requestId = response.getRequestId();
-        //System.out.println("requestId="+requestId);
-        //System.out.println(new String(response.getBytes()));
+        System.out.println("requestId="+requestId);
+        System.out.println(new String(response.getBytes()));
         ByteBuf byteBuf= Unpooled.directBuffer(response.getBytes().length+8);
         byteBuf.writeLong(requestId);
         byteBuf.writeBytes(response.getBytes());
