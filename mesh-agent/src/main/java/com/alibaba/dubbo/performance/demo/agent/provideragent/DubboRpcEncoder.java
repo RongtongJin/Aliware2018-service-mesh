@@ -1,15 +1,12 @@
 package com.alibaba.dubbo.performance.demo.agent.provideragent;
 
-import com.alibaba.dubbo.performance.demo.agent.provideragent.rpcmodel.RpcRequest;
+import com.alibaba.dubbo.performance.demo.agent.provideragent.model.RpcRequest;
 import com.alibaba.dubbo.performance.demo.agent.utils.Bytes;
 import com.alibaba.dubbo.performance.demo.agent.utils.JsonUtils;
-import com.alibaba.dubbo.performance.demo.agent.provideragent.rpcmodel.Request;
-import com.alibaba.dubbo.performance.demo.agent.provideragent.rpcmodel.RpcInvocation;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
-import io.netty.util.CharsetUtil;
 
 import java.io.*;
 import java.util.HashMap;
@@ -26,9 +23,9 @@ public class DubboRpcEncoder extends MessageToByteEncoder{
 
     private static byte[] header = new byte[HEADER_LENGTH];
 
-    private static byte[] frontBody = null;
+    private static byte[] frontBody ;
 
-    private static byte[] tailBody = null;
+    private static byte[] tailBody ;
 
     static {
         //header

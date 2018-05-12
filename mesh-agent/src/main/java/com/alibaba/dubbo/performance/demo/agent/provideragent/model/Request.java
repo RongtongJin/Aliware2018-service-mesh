@@ -1,7 +1,5 @@
-package com.alibaba.dubbo.performance.demo.agent.provideragent.rpcmodel;
+package com.alibaba.dubbo.performance.demo.agent.provideragent.model;
 
-
-import java.util.concurrent.atomic.AtomicLong;
 
 public class Request {
     private long id;

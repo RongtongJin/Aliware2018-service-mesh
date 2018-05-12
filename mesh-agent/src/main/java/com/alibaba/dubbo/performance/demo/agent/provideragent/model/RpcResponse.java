@@ -1,6 +1,4 @@
-package com.alibaba.dubbo.performance.demo.agent.provideragent.rpcmodel;
-
-import java.util.List;
+package com.alibaba.dubbo.performance.demo.agent.provideragent.model;
 
 public class RpcResponse {
 

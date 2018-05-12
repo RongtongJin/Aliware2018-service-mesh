@@ -17,6 +17,8 @@ public class ProviderAgent {
 
     private static Channel channel=null;
 
+    private static volatile InetSocketAddress msgReturner=null;
+
     private IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
 
     public void start(int port) throws Exception{
@@ -45,6 +47,13 @@ public class ProviderAgent {
     public static Channel getUDPChannel(){
         return channel;
     }
+
+    public static void setMsgReturner(InetSocketAddress addr){
+        if (msgReturner!=null) return;
+        msgReturner=addr;
+    }
+
+    public static InetSocketAddress getMsgReturner(){return msgReturner;}
 
     public static void main(String[] args) throws Exception{
         new ProviderAgent().start(30000);

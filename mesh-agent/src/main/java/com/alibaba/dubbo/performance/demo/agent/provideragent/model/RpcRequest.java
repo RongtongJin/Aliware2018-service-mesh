@@ -1,4 +1,4 @@
-package com.alibaba.dubbo.performance.demo.agent.provideragent.rpcmodel;
+package com.alibaba.dubbo.performance.demo.agent.provideragent.model;
 
 public class RpcRequest {
     private long id;
