@@ -20,7 +20,7 @@ public class RpcMsgHandler extends SimpleChannelInboundHandler<ByteBuf> {
     protected void channelRead0(ChannelHandlerContext ctx, ByteBuf byteBuf) throws Exception {
         byteBuf.retain();
         ByteBuf idBuf=byteBuf.slice(0,8);
-        byteBuf.readerIndex(12);
+        byteBuf.readerIndex(13);
         byte[] res=new byte[byteBuf.readableBytes()];
         byteBuf.readBytes(res);
         System.out.println("-------------------------");
