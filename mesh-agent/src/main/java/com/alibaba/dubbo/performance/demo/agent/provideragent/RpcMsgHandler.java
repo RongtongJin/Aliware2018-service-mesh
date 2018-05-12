@@ -23,9 +23,7 @@ public class RpcMsgHandler extends SimpleChannelInboundHandler<ByteBuf> {
         byteBuf.readerIndex(13);
         byte[] res=new byte[byteBuf.readableBytes()];
         byteBuf.readBytes(res);
-        System.out.println("-------------------------");
-        System.out.println(new String(res));
-        System.out.println("-------------------------");
+        //System.out.println(new String(res));
         CompositeByteBuf sendBuf= ctx.alloc().compositeBuffer();
         ByteBuf hashCodeBuf=ctx.alloc().ioBuffer();
         hashCodeBuf.writeBytes(JSON.parseObject(res,Integer.class).toString().getBytes());

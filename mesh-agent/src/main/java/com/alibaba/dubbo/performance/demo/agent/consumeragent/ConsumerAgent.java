@@ -35,11 +35,9 @@ public class ConsumerAgent {
 
         endpoints = registry.find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
 
-        //endpoints=new ArrayList<>();
-        //endpoints.add(new Endpoint("127.0.0.1",30000));
 
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
-        //EventLoopGroup bossGroup = new EpollEventLoopGroup();
+        //EventLoopGroup bossGroup = new EpollEventLoopGroup(1);
 
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         //EventLoopGroup workerGroup = new EpollEventLoopGroup();
