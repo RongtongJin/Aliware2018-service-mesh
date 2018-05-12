@@ -1,6 +1,7 @@
 package com.alibaba.dubbo.performance.demo.agent.provideragent;
 
 import com.alibaba.dubbo.performance.demo.agent.provideragent.rpcmodel.RpcResponse;
+import com.alibaba.fastjson.JSON;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
@@ -17,14 +18,11 @@ public class RpcMsgHandler extends SimpleChannelInboundHandler<RpcResponse> {
     public static InetSocketAddress addr=new InetSocketAddress("127.0.0.1",20000);
 
     @Override
-    protected void channelRead0(ChannelHandlerContext channelHandlerContext, RpcResponse response) throws Exception {
-        System.out.println("RpcMsgHandler");
+    protected void channelRead0(ChannelHandlerContext ctx, RpcResponse response) throws Exception {
         long requestId = response.getRequestId();
-        System.out.println("requestId="+requestId);
-        System.out.println(new String(response.getBytes()));
-        ByteBuf byteBuf= Unpooled.directBuffer(response.getBytes().length+8);
+        ByteBuf byteBuf= ctx.alloc().buffer();
         byteBuf.writeLong(requestId);
-        byteBuf.writeBytes(response.getBytes());
+        byteBuf.writeBytes(JSON.parseObject(response.getBytes(),Integer.class).toString().getBytes());
         //这边的ip地址可能有问题
         DatagramPacket dp = new DatagramPacket(byteBuf,addr);
         ProviderAgent.getUDPChannel().writeAndFlush(dp).addListener(cf->{

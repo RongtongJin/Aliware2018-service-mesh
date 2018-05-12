@@ -1,13 +1,15 @@
 package com.alibaba.dubbo.performance.demo.agent.provideragent;
 
+
 import com.alibaba.dubbo.performance.demo.agent.provideragent.rpcmodel.RpcRequest;
-import com.sun.org.apache.xpath.internal.operations.String;
+
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
+
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.util.CharsetUtil;
+
 
 /**
  * Created by 79422 on 2018/5/4.
@@ -19,8 +21,8 @@ public class ConsumerAgentMsgHandler extends SimpleChannelInboundHandler<Datagra
         ByteBuf buf = msg.content();
         long id=buf.readLong();
         ByteBuf dataBuf=buf.slice(8,buf.readableBytes());
-        System.out.println(id);
-        System.out.println(dataBuf.toString(CharsetUtil.UTF_8));
+//        System.out.println(id);
+//        System.out.println(dataBuf.toString(CharsetUtil.UTF_8));
 
         RpcRequest request=new RpcRequest(id,dataBuf.toString(CharsetUtil.UTF_8));
         ProviderChannelManager.getChannel().write(request);
@@ -34,5 +36,15 @@ public class ConsumerAgentMsgHandler extends SimpleChannelInboundHandler<Datagra
 //        ctx.writeAndFlush(dp);
     }
 
+    @Override
+    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+        ProviderChannelManager.getChannel().flush();
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+//        super.exceptionCaught(ctx, cause);
+        cause.printStackTrace();
+    }
 }
 

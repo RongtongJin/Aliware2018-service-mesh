@@ -88,22 +88,9 @@ public class DubboRpcEncoder extends MessageToByteEncoder{
         //RPC Request ID
         buffer.writeLong(req.getId());
         int len=frontBody.length+data.length+tailBody.length;
-        //System.out.println(len);
         //body length
         buffer.writeInt(len);
         buffer.writerIndex(savedWriteIndex + HEADER_LENGTH + len);
-//        buffer.readerIndex(savedWriteIndex + 4);
-//        System.out.println(buffer.readLong());
-//        int tlen=buffer.readInt();
-//        System.out.println(tlen);
-//        System.out.print(tlen==len);
-//        byte[] test=new byte[len];
-//        buffer.readBytes(test);;
-//        System.out.print(new String(test))
-//        System.out.println("req id="+req.getId());
-//        System.out.print(new String(frontBody));
-//        System.out.print(new String(data));
-//        System.out.print(new String(tailBody));
     }
 
 }
