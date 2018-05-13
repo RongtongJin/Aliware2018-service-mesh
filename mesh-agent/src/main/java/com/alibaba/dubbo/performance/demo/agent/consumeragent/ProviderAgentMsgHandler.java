@@ -30,11 +30,6 @@ public class ProviderAgentMsgHandler extends SimpleChannelInboundHandler<Datagra
         Channel sendChannel=ChannelHolder.get(id);
         //测试后发现每次remove id后性能更高
         ChannelHolder.remove(id);
-        //是否要加这个连接判断
-//        byte[] bytes=new byte[buf.readableBytes()];
-//        buf.readBytes(bytes);
-//        Integer res= JSON.parseObject(bytes, Integer.class);
-       // System.out.println(id);
         ByteBuf hashCodeBuf = buf.slice(8,buf.readableBytes());
        // System.out.println(hashCodeBuf.toString(io.netty.util.CharsetUtil.UTF_8));
         FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1,
@@ -51,13 +46,11 @@ public class ProviderAgentMsgHandler extends SimpleChannelInboundHandler<Datagra
                 cf.cause().printStackTrace();
             }
         });
-
     }
 
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        //super.exceptionCaught(ctx, cause);
         cause.printStackTrace();
         //ctx.close();
     }

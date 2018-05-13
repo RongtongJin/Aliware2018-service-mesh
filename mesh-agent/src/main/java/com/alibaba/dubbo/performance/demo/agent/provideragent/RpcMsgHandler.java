@@ -3,6 +3,7 @@ package com.alibaba.dubbo.performance.demo.agent.provideragent;
 import com.alibaba.dubbo.performance.demo.agent.provideragent.model.RpcResponse;
 import com.alibaba.fastjson.JSON;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.CompositeByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -19,16 +20,11 @@ public class RpcMsgHandler extends SimpleChannelInboundHandler<ByteBuf> {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, ByteBuf byteBuf) throws Exception {
         byteBuf.retain();
-        ByteBuf idBuf=byteBuf.slice(0,8);
-        byteBuf.readerIndex(13);
-        byte[] res=new byte[byteBuf.readableBytes()];
-        byteBuf.readBytes(res);
-        //System.out.println(new String(res));
-        CompositeByteBuf sendBuf= ctx.alloc().compositeBuffer();
-        ByteBuf hashCodeBuf=ctx.alloc().ioBuffer();
-        hashCodeBuf.writeBytes(JSON.parseObject(res,Integer.class).toString().getBytes());
+        ByteBuf idBuf=byteBuf.slice(4,8);
+        ByteBuf hashCodeBuf=byteBuf.slice(19,byteBuf.readableBytes()-21);
+        CompositeByteBuf sendBuf= ctx.alloc().compositeDirectBuffer();
         sendBuf.addComponents(true,idBuf,hashCodeBuf);
-        //这边的ip地址可能有问题
+        //fix me：感觉可以继续分解
         DatagramPacket dp = new DatagramPacket(sendBuf,ProviderAgent.getMsgReturner());
         //System.out.println(ProviderAgent.getMsgReturner().getHostString()+":"+ProviderAgent.getMsgReturner().getPort());
         ProviderAgent.getUDPChannel().write(dp).addListener(cf->{

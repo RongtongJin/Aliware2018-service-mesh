@@ -61,7 +61,7 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
         //sendBuf.writeBytes(buf,136,buf.readableBytes()-136);
         //System.out.println(byteBuf.toString(CharsetUtil.UTF_8));
 
-        CompositeByteBuf sendBuf=ctx.alloc().compositeBuffer();
+        CompositeByteBuf sendBuf=ctx.alloc().compositeDirectBuffer();
         ByteBuf idBuf=ctx.alloc().ioBuffer();
         idBuf.writeLong(id);
         sendBuf.addComponents(true,idBuf,buf.slice(136,buf.readableBytes()-136));

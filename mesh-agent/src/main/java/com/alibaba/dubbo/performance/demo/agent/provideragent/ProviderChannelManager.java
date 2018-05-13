@@ -37,7 +37,7 @@ public class ProviderChannelManager{
                     protected void initChannel(SocketChannel socketChannel) throws Exception {
                         ChannelPipeline pipeline = socketChannel.pipeline();
                         pipeline.addLast(new DubboRpcEncoder());
-                        pipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE,12,4,0,4));
+                        pipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE,12,4,0,0));
                         pipeline.addLast(new RpcMsgHandler());
                     }
                 })

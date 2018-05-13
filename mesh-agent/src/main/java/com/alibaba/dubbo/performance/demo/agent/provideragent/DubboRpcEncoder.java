@@ -5,8 +5,10 @@ import com.alibaba.dubbo.performance.demo.agent.utils.Bytes;
 import com.alibaba.dubbo.performance.demo.agent.utils.JsonUtils;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
+import io.netty.util.CharsetUtil;
 
 import java.io.*;
 import java.util.HashMap;
@@ -72,19 +74,19 @@ public class DubboRpcEncoder extends MessageToByteEncoder{
     @Override
     protected void encode(ChannelHandlerContext ctx, Object msg, ByteBuf buffer) throws Exception {
         RpcRequest req = (RpcRequest)msg;
+        int dataLen=req.getParameter().readableBytes()+4;
         int savedWriteIndex = buffer.writerIndex();
         buffer.writeBytes(header);
         buffer.writeBytes(frontBody);
-        ByteArrayOutputStream dataOut = new ByteArrayOutputStream();
-        PrintWriter dataWriter = new PrintWriter(new OutputStreamWriter(dataOut));
-        JsonUtils.writeObject(req.getParameter(),dataWriter);
-        byte[] data=dataOut.toByteArray();
-        buffer.writeBytes(data);
+        buffer.writeByte('"');
+        buffer.writeBytes(req.getParameter());
+        buffer.writeByte('"');
+        buffer.writeBytes(System.lineSeparator().getBytes());
         buffer.writeBytes(tailBody);
         buffer.writerIndex(savedWriteIndex+4);
         //RPC request ID
         buffer.writeLong(req.getId());
-        int len=frontBody.length+data.length+tailBody.length;
+        int len=frontBody.length+dataLen+tailBody.length;
         //body length
         buffer.writeInt(len);
         buffer.writerIndex(savedWriteIndex + HEADER_LENGTH + len);
