@@ -15,16 +15,33 @@ import java.net.InetSocketAddress;
 /**
  * Created by 79422 on 2018/5/4.
  */
-public class RpcMsgHandler extends SimpleChannelInboundHandler<ByteBuf> {
+public class RpcMsgHandler extends SimpleChannelInboundHandler<RpcResponse> {
+
+//    @Override
+//    protected void channelRead0(ChannelHandlerContext ctx, ByteBuf byteBuf) throws Exception {
+//        byteBuf.retain();
+//        ByteBuf idBuf=byteBuf.slice(4,8);
+//        ByteBuf hashCodeBuf=byteBuf.slice(19,byteBuf.readableBytes()-21);
+//        CompositeByteBuf sendBuf= ctx.alloc().compositeDirectBuffer();
+//        sendBuf.addComponents(true,idBuf,hashCodeBuf);
+//
+//        DatagramPacket dp = new DatagramPacket(sendBuf,ProviderAgent.getMsgReturner());
+//        //System.out.println(ProviderAgent.getMsgReturner().getHostString()+":"+ProviderAgent.getMsgReturner().getPort());
+//        ProviderAgent.getUDPChannel().write(dp).addListener(cf->{
+//            if(!cf.isSuccess()){
+//                System.err.println("err in back to consumer agent");
+//                cf.cause().printStackTrace();
+//            }
+//        });
+//    }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, ByteBuf byteBuf) throws Exception {
-        byteBuf.retain();
-        ByteBuf idBuf=byteBuf.slice(4,8);
-        ByteBuf hashCodeBuf=byteBuf.slice(19,byteBuf.readableBytes()-21);
-        CompositeByteBuf sendBuf= ctx.alloc().compositeDirectBuffer();
-        sendBuf.addComponents(true,idBuf,hashCodeBuf);
-        //fix me：感觉可以继续分解
+    protected void channelRead0(ChannelHandlerContext ctx, RpcResponse response) throws Exception {
+
+        ByteBuf sendBuf= ctx.alloc().ioBuffer();
+        sendBuf.writeLong(response.getRequestId());
+        sendBuf.writeBytes(response.getBytes());
+        //这边的ip地址可能有问题
         DatagramPacket dp = new DatagramPacket(sendBuf,ProviderAgent.getMsgReturner());
         //System.out.println(ProviderAgent.getMsgReturner().getHostString()+":"+ProviderAgent.getMsgReturner().getPort());
         ProviderAgent.getUDPChannel().write(dp).addListener(cf->{

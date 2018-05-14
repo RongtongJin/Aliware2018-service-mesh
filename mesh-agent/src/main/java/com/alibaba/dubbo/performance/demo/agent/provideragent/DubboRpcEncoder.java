@@ -74,7 +74,7 @@ public class DubboRpcEncoder extends MessageToByteEncoder{
     @Override
     protected void encode(ChannelHandlerContext ctx, Object msg, ByteBuf buffer) throws Exception {
         RpcRequest req = (RpcRequest)msg;
-        int dataLen=req.getParameter().readableBytes()+4;
+        int dataLen=req.getParameter().length+2+System.lineSeparator().length();
         int savedWriteIndex = buffer.writerIndex();
         buffer.writeBytes(header);
         buffer.writeBytes(frontBody);

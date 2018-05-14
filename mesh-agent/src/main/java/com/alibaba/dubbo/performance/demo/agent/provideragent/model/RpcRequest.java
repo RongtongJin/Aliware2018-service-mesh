@@ -4,9 +4,9 @@ import io.netty.buffer.ByteBuf;
 
 public class RpcRequest {
     private long id;
-    private ByteBuf parameter=null;
+    private byte[] parameter=null;
 
-    public RpcRequest(long id, ByteBuf parameter){
+    public RpcRequest(long id, byte[] parameter){
         this.id=id;
         this.parameter=parameter;
     }
@@ -16,7 +16,7 @@ public class RpcRequest {
         return id;
     }
 
-    public ByteBuf getParameter() {
+    public byte[] getParameter() {
         return parameter;
     }
 }
