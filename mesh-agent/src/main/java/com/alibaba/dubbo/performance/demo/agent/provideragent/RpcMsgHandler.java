@@ -26,8 +26,9 @@ public class RpcMsgHandler extends SimpleChannelInboundHandler<ByteBuf> {
         byte status=byteBuf.getByte(3);
         if((byte2&FLAG_EVENT)==0&&status==20){
             byteBuf.retain();
+            int len=System.lineSeparator().length();
             ByteBuf idBuf=byteBuf.slice(4,8);
-            ByteBuf hashCodeBuf=byteBuf.slice(19,byteBuf.readableBytes()-21);
+            ByteBuf hashCodeBuf=byteBuf.slice(17+len,byteBuf.readableBytes()-17-2*len);
 //            System.out.println("---------------------");
 //            byteBuf.readerIndex(17);
 //            byte[] res=new byte[byteBuf.readableBytes()];
