@@ -24,13 +24,14 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ConsumerAgent {
     private static Log log = LogFactory.getLog(ConsumerAgent.class);
 
     IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
 
-    private List<Endpoint> endpoints = null;
+    private Map<String,Endpoint> endpoints = null;
     public void start(int port) throws Exception {
 
         endpoints = registry.find("com.alibaba.dubbo.performance.demo.provider.IHelloService");

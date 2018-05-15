@@ -12,7 +12,9 @@ import org.slf4j.LoggerFactory;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 
 public class EtcdRegistry implements IRegistry{
@@ -21,7 +23,6 @@ public class EtcdRegistry implements IRegistry{
     // 添加watch，在本地内存缓存地址列表，可减少网络调用的次数
     // 使用的是简单的随机负载均衡，如果provider性能不一致，随机策略会影响性能
 
-    private final String rootPath = "dubbomesh";
     private Lease lease;
     private KV kv;
     private long leaseId;
@@ -53,10 +54,12 @@ public class EtcdRegistry implements IRegistry{
 
     // 向ETCD中注册服务
     public void register(String serviceName,int port) throws Exception {
-        // 服务注册的key为:    /dubbomesh/com.some.package.IHelloService/192.168.100.100:2000
-        String strKey = MessageFormat.format("/{0}/{1}/{2}:{3}",rootPath,serviceName,IpHelper.getHostIp(),String.valueOf(port));
+        // 服务注册的key为-->/serviceName/level    /com.some.package.IHelloService/small
+        String strKey = MessageFormat.format("/{0}/{1}",serviceName,System.getProperty("level"));
         ByteSequence key = ByteSequence.fromString(strKey);
-        ByteSequence val = ByteSequence.fromString("");     // 目前只需要创建这个key,对应的value暂不使用,先留空
+        // 服务注册的val为-->ip:port   /127.0.0.1:30000
+        String strVal= MessageFormat.format("{0}:{1}",IpHelper.getHostIp(),String.valueOf(port));
+        ByteSequence val = ByteSequence.fromString(strVal);
         kv.put(key,val, PutOption.newBuilder().withLeaseId(leaseId).build()).get();
         logger.info("Register a new service at:" + strKey);
     }
@@ -74,24 +77,27 @@ public class EtcdRegistry implements IRegistry{
         );
     }
 
-    public List<Endpoint> find(String serviceName) throws Exception {
+    public Map<String,Endpoint> find(String serviceName) throws Exception {
 
-        String strKey = MessageFormat.format("/{0}/{1}",rootPath,serviceName);
+        String strKey = MessageFormat.format("/{0}",serviceName);
         ByteSequence key  = ByteSequence.fromString(strKey);
         GetResponse response = kv.get(key, GetOption.newBuilder().withPrefix(key).build()).get();
 
-        List<Endpoint> endpoints = new ArrayList<>();
+        //List<Endpoint> endpoints = new ArrayList<>();
+
+        Map<String,Endpoint> level2EndPoint=new HashMap<>();
 
         for (com.coreos.jetcd.data.KeyValue kv : response.getKvs()){
-            String s = kv.getKey().toStringUtf8();
-            int index = s.lastIndexOf("/");
-            String endpointStr = s.substring(index + 1,s.length());
+            String k = kv.getKey().toStringUtf8();
+            int index = k.lastIndexOf("/");
+            String levelStr = k.substring(index + 1,k.length());
 
-            String host = endpointStr.split(":")[0];
-            int port = Integer.valueOf(endpointStr.split(":")[1]);
+            String v= kv.getValue().toStringUtf8();
+            String host = v.split(":")[0];
+            int port = Integer.valueOf(v.split(":")[1]);
 
-            endpoints.add(new Endpoint(host,port));
+            level2EndPoint.put(levelStr,new Endpoint(host,port));
         }
-        return endpoints;
+        return level2EndPoint;
     }
 }

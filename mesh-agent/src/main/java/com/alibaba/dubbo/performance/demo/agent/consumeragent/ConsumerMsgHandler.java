@@ -16,6 +16,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.net.InetAddress;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -31,13 +32,13 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
 
     private static AtomicLong genId=new AtomicLong();
 
-    private List<Endpoint> endpoints=null;
+    private Map<String,Endpoint> endpoints=null;
 
     private static Random random = new Random();
 
     //private static java.net.InetSocketAddress target=new java.net.InetSocketAddress("127.0.0.1",20000);
 
-    public ConsumerMsgHandler(List<Endpoint> endpoints){
+    public ConsumerMsgHandler(Map<String,Endpoint> endpoints){
         this.endpoints=endpoints;
     }
 
@@ -84,20 +85,20 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
 
 
         /*负载均衡代码*/
-        //按照性能简单负载均衡,这里有问题，并不清楚提供服务的机器性能
-//        Endpoint endpoint=null;
-//        long x=id%6;
-//        if(x==0)
-//            endpoint=endpoints.get(0);
-//        else if(1<=x&&x<=2)
-//            endpoint=endpoints.get(1);
-//        else
-//            endpoint=endpoints.get(2);
-
+        //按照性能简单负载均衡
+        int x=random.nextInt(6);
+        Endpoint endpoint=null;
+        if(x==0){
+            endpoint=endpoints.get("small");
+        }else if(x<=2){
+            endpoint=endpoints.get("medium");
+        }else{
+            endpoint=endpoints.get("large");
+        }
 
         /*udp发给provider agent*/
         //简单的负载均衡，随机取一个
-        Endpoint endpoint = endpoints.get(random.nextInt(endpoints.size()));
+//        Endpoint endpoint = endpoints.get(random.nextInt(endpoints.size()));
 
         DatagramPacket dp=new DatagramPacket(sendBuf,new java.net.InetSocketAddress(endpoint.getHost(),endpoint.getPort()));
 
