@@ -23,15 +23,15 @@ public class ConsumerAgentMsgHandler extends SimpleChannelInboundHandler<Datagra
         //fix me:每次做肯定有一定的性能损耗
         ProviderAgent.setMsgReturner(msg.sender());
         ByteBuf buf = msg.content();
-        //buf.retain();
+        buf.retain();
         long id=buf.readLong();
         ByteBuf dataBuf=buf.slice(8,buf.readableBytes());
        // dataBuf.retain();
 //        System.out.println(id);
 //        System.out.println(dataBuf.toString(CharsetUtil.UTF_8));
-        byte[] data=new byte[dataBuf.readableBytes()];
-        dataBuf.readBytes(data);
-        RpcRequest request=new RpcRequest(id,data);
+//        byte[] data=new byte[dataBuf.readableBytes()];
+//        dataBuf.readBytes(data);
+        RpcRequest request=new RpcRequest(id,dataBuf);
         ProviderChannelManager.getChannel().write(request);
 
         /*用于验证不经过provider性能*/

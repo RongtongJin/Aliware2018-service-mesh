@@ -28,14 +28,16 @@ public class RpcMsgHandler extends SimpleChannelInboundHandler<ByteBuf> {
             byteBuf.retain();
             ByteBuf idBuf=byteBuf.slice(4,8);
             ByteBuf hashCodeBuf=byteBuf.slice(19,byteBuf.readableBytes()-21);
-            System.out.println("---------------------");
+//            System.out.println("---------------------");
 //            byteBuf.readerIndex(17);
 //            byte[] res=new byte[byteBuf.readableBytes()];
 //            byteBuf.readBytes(res);
 //            ByteBuf hashCodeBuf=ctx.alloc().ioBuffer();
 //            hashCodeBuf.writeBytes(JSON.parseObject(res,Integer.class).toString().getBytes());
             CompositeByteBuf sendBuf= ctx.alloc().compositeDirectBuffer();
-            sendBuf.addComponents(true,idBuf,hashCodeBuf);
+            ByteBuf id=ctx.alloc().ioBuffer(8);
+            id.writeBytes(idBuf);
+            sendBuf.addComponents(true,id,hashCodeBuf);
 
             DatagramPacket dp = new DatagramPacket(sendBuf,ProviderAgent.getMsgReturner());
             //System.out.println(ProviderAgent.getMsgReturner().getHostString()+":"+ProviderAgent.getMsgReturner().getPort());

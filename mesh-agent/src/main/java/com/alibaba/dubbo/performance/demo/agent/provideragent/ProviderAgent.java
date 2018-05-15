@@ -3,6 +3,7 @@ package com.alibaba.dubbo.performance.demo.agent.provideragent;
 import com.alibaba.dubbo.performance.demo.agent.registry.EtcdRegistry;
 import com.alibaba.dubbo.performance.demo.agent.registry.IRegistry;
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
@@ -33,6 +34,7 @@ public class ProviderAgent {
                     .channel(NioDatagramChannel.class)
                     //.channel(EpollDatagramChannel.class)
                     .option(ChannelOption.SO_BACKLOG, 1024)    //设置缓存队列
+                    .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                     //.option(ChannelOption.SO_RCVBUF)// 设置UDP读缓冲区为1M
                     //.option(ChannelOption.SO_SNDBUF) // 设置UDP写缓冲区为1M
                     .handler(new ConsumerAgentMsgHandler());
