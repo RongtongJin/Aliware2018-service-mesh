@@ -6,6 +6,7 @@ import com.alibaba.dubbo.performance.demo.agent.provideragent.model.RpcRequest;
 import io.netty.buffer.ByteBuf;
 
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.util.CharsetUtil;
@@ -16,14 +17,16 @@ import java.security.Provider;
 /**
  * Created by 79422 on 2018/5/4.
  */
-public class ConsumerAgentMsgHandler extends SimpleChannelInboundHandler<DatagramPacket> {
+public class ConsumerAgentMsgHandler extends ChannelInboundHandlerAdapter {
+
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, DatagramPacket msg) throws Exception {
+    public void channelRead(ChannelHandlerContext ctx, Object msg2) throws Exception {
+        DatagramPacket msg=(DatagramPacket)msg2;
         //fix me:每次做肯定有一定的性能损耗
         ProviderAgent.setMsgReturner(msg.sender());
         ByteBuf buf = msg.content();
-        buf.retain();
+        //buf.retain();
         long id=buf.readLong();
         ByteBuf dataBuf=buf.slice(8,buf.readableBytes());
        // dataBuf.retain();

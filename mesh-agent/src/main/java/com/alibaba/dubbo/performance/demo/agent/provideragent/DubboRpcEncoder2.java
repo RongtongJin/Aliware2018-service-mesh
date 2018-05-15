@@ -98,8 +98,8 @@ public class DubboRpcEncoder2 extends ChannelOutboundHandlerAdapter {
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
         RpcRequest req = (RpcRequest)msg;
-        System.out.println(req.getId());
-        System.out.println(req.getParameter().toString(CharsetUtil.UTF_8));
+//        System.out.println(req.getId());
+//        System.out.println(req.getParameter().toString(CharsetUtil.UTF_8));
         int bodyLen=frontBody.readableBytes()+req.getParameter().readableBytes()+tailBody.readableBytes();
         ByteBuf headerDup=headerBuf.copy();
         int saveWriterIndex=headerDup.writerIndex();
