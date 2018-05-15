@@ -3,20 +3,21 @@ package com.alibaba.dubbo.performance.demo.agent.provideragent;
 import com.alibaba.dubbo.performance.demo.agent.provideragent.model.RpcRequest;
 import com.alibaba.dubbo.performance.demo.agent.utils.Bytes;
 import com.alibaba.dubbo.performance.demo.agent.utils.JsonUtils;
-
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.CompositeByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.MessageToByteEncoder;
+import io.netty.channel.ChannelOutboundHandlerAdapter;
+import io.netty.channel.ChannelPromise;
 import io.netty.util.CharsetUtil;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-
-//利用零拷贝技术仍然可以改进
-public class DubboRpcEncoder extends MessageToByteEncoder{
+public class DubboRpcEncoder2 extends ChannelOutboundHandlerAdapter {
     // header length.
     protected static final int HEADER_LENGTH = 16;
     // magic header.
@@ -25,18 +26,26 @@ public class DubboRpcEncoder extends MessageToByteEncoder{
     protected static final byte FLAG_REQUEST = (byte) 0x80;
     protected static final byte FLAG_TWOWAY = (byte) 0x40;
 
-    private static byte[] header = new byte[HEADER_LENGTH];
+    private ByteBuf headerBuf=null;
 
-    private static byte[] frontBody ;
+    private ByteBuf frontBody=null;
 
-    private static byte[] tailBody ;
+    private ByteBuf tailBody=null;
 
-    static {
+    @Override
+    public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+        headerBuf=ctx.alloc().buffer(HEADER_LENGTH);
+        frontBody=ctx.alloc().buffer();
+        tailBody=ctx.alloc().buffer();
+
+        byte[] header = new byte[HEADER_LENGTH];
         //header
         Bytes.short2bytes(MAGIC, header);
         // set request and serialization flag.
         header[2] = (byte) (FLAG_REQUEST | 6);
         header[2] |= FLAG_TWOWAY;
+
+        headerBuf.writeBytes(header);
 
         //front body
         ByteArrayOutputStream frontOut = new ByteArrayOutputStream();
@@ -56,7 +65,9 @@ public class DubboRpcEncoder extends MessageToByteEncoder{
         }catch (IOException e){
             e.printStackTrace();
         }
-        frontBody=frontOut.toByteArray();
+
+        frontBody.writeBytes(frontOut.toByteArray());
+        frontBody.writeByte('"');
 
         //tailBody
         ByteArrayOutputStream tailOut = new ByteArrayOutputStream();
@@ -70,29 +81,34 @@ public class DubboRpcEncoder extends MessageToByteEncoder{
         }catch (IOException e){
             e.printStackTrace();
         }
-        tailBody=tailOut.toByteArray();
+
+        tailBody.writeByte('"');
+        tailBody.writeBytes(System.lineSeparator().getBytes());
+        tailBody.writeBytes(tailOut.toByteArray());
+
     }
 
     @Override
-    protected void encode(ChannelHandlerContext ctx, Object msg, ByteBuf buffer) throws Exception {
-        RpcRequest req = (RpcRequest)msg;
-        int dataLen=req.getParameter().readableBytes()+2+System.lineSeparator().length();
-        int savedWriteIndex = buffer.writerIndex();
-        buffer.writeBytes(header);
-        buffer.writeBytes(frontBody);
-        buffer.writeByte('"');
-        buffer.writeBytes(req.getParameter());
-        buffer.writeByte('"');
-        buffer.writeBytes(System.lineSeparator().getBytes());
-        buffer.writeBytes(tailBody);
-        buffer.writerIndex(savedWriteIndex+4);
-        //RPC request ID
-        buffer.writeLong(req.getId());
-        int len=frontBody.length+dataLen+tailBody.length;
-        //body length
-        buffer.writeInt(len);
-        buffer.writerIndex(savedWriteIndex + HEADER_LENGTH + len);
-        req.getParameter().release();
+    public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
+        headerBuf.release();
+        frontBody.release();
+        tailBody.release();
     }
 
+    @Override
+    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+        RpcRequest req = (RpcRequest)msg;
+        System.out.println(req.getId());
+        System.out.println(req.getParameter().toString(CharsetUtil.UTF_8));
+        int bodyLen=frontBody.readableBytes()+req.getParameter().readableBytes()+tailBody.readableBytes();
+        ByteBuf headerDup=headerBuf.copy();
+        int saveWriterIndex=headerDup.writerIndex();
+        headerDup.writerIndex(4);
+        headerDup.writeLong(req.getId());
+        headerDup.writeInt(bodyLen);
+        headerDup.writerIndex(saveWriterIndex);
+        CompositeByteBuf sendBuf=ctx.alloc().compositeDirectBuffer();
+        sendBuf.addComponents(true,headerDup,frontBody.copy(),req.getParameter(),tailBody.copy());
+        ctx.writeAndFlush(sendBuf,promise);
+    }
 }

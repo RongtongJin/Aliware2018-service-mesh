@@ -1,6 +1,7 @@
 package com.alibaba.dubbo.performance.demo.agent.consumeragent;
 
 import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
+import com.alibaba.dubbo.performance.demo.agent.registry.IpHelper;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.CompositeByteBuf;
 import io.netty.buffer.Unpooled;
@@ -86,15 +87,18 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
 
         /*负载均衡代码*/
         //按照性能简单负载均衡
-        int x=random.nextInt(6);
-        Endpoint endpoint=null;
-        if(x==0){
-            endpoint=endpoints.get("small");
-        }else if(x<=2){
-            endpoint=endpoints.get("medium");
-        }else{
-            endpoint=endpoints.get("large");
-        }
+//        int x=random.nextInt(6);
+//        Endpoint endpoint=null;
+//        if(x==0){
+//            endpoint=endpoints.get("small");
+//        }else if(x<=2){
+//            endpoint=endpoints.get("medium");
+//        }else{
+//            endpoint=endpoints.get("large");
+//        }
+
+        //idea下测试使用
+        Endpoint endpoint=new Endpoint(IpHelper.getHostIp(),30000);
 
         /*udp发给provider agent*/
         //简单的负载均衡，随机取一个
