@@ -79,11 +79,6 @@ public class DubboRpcEncoder extends MessageToByteEncoder{
         buffer.writeBytes(header);
         buffer.writeBytes(frontBody);
         buffer.writeByte('"');
-//        ByteArrayOutputStream dataOut = new ByteArrayOutputStream();
-//        PrintWriter dataWriter = new PrintWriter(new OutputStreamWriter(dataOut));
-//        JsonUtils.writeObject(new String(req.getParameter()),dataWriter);
-//        byte[] data=dataOut.toByteArray();
-//        buffer.writeBytes(data);
         buffer.writeBytes(req.getParameter());
         buffer.writeByte('"');
         buffer.writeBytes(System.lineSeparator().getBytes());

@@ -12,6 +12,8 @@ import io.netty.util.ReferenceCountUtil;
 import java.util.Arrays;
 import java.util.List;
 
+
+//fix me:解决粘包问题可以利用提高性能
 public class DubboRpcDecoder extends ByteToMessageDecoder {
     // header length.
     protected static final int HEADER_LENGTH = 16;
