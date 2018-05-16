@@ -11,7 +11,7 @@ public class Main {
         if ("consumer".equals(type)){
             new ConsumerAgent().start(port);
         }else if("provider".equals(type)){
-            new ProviderAgent().start(port);
+            new TCPProviderAgent().start(port);
         }else {
             System.err.println("Environment variable type is needed to set to provider or consumer.");
         }

@@ -18,6 +18,8 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.DelimiterBasedFrameDecoder;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.codec.LineBasedFrameDecoder;
 
 import java.net.InetSocketAddress;
@@ -52,7 +54,8 @@ public class TCPProviderAgent {
                         @Override
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
                             ChannelPipeline pipeline = socketChannel.pipeline();
-                            pipeline.addLast(new LineBasedFrameDecoder(1034));
+                            pipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE,0,2,0,2));
+                            pipeline.addLast(new LengthFieldPrepender(2,false));
                             pipeline.addLast(new TCPConsumerAgentMsgHandler());
                         }
                     }).bind(port).sync().channel();

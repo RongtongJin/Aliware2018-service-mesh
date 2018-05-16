@@ -18,7 +18,6 @@ public class TCPConsumerAgentMsgHandler extends SimpleChannelInboundHandler<Byte
         ByteBuf sendBuf=ctx.alloc().ioBuffer();
         sendBuf.writeLong(id);
         sendBuf.writeBytes(data);
-        sendBuf.writeBytes(System.lineSeparator().getBytes());
        // System.out.println(sendBuf.toString(CharsetUtil.UTF_8));
         ctx.writeAndFlush(sendBuf);
     }

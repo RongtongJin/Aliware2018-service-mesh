@@ -4,6 +4,7 @@ import com.alibaba.dubbo.performance.demo.agent.provideragent.ProviderAgent;
 import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
 import com.alibaba.dubbo.performance.demo.agent.registry.EtcdRegistry;
 import com.alibaba.dubbo.performance.demo.agent.registry.IRegistry;
+import com.alibaba.dubbo.performance.demo.agent.registry.IpHelper;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelFuture;
@@ -33,6 +34,10 @@ public class ConsumerAgent {
     private IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
     private Map<String,Endpoint> endpoints = null;
 
+    private static TCPChannelGroup channelGroup=null;
+
+    public static TCPChannelGroup getTCPChannelGroup(){return channelGroup;}
+
     public void start(int port) throws Exception {
 
         endpoints = registry.find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
@@ -44,7 +49,9 @@ public class ConsumerAgent {
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         //EventLoopGroup workerGroup = new EpollEventLoopGroup();
 
-        UDPChannelManager.initChannel(workerGroup);
+        //UDPChannelManager.initChannel(workerGroup);
+
+        channelGroup=new TCPChannelGroup(12,workerGroup,new Endpoint(IpHelper.getHostIp(),30000));
 
         try {
             ServerBootstrap b = new ServerBootstrap();

@@ -99,24 +99,24 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
 
         //idea下测试使用ls
 
-        Endpoint endpoint=new Endpoint(IpHelper.getHostIp(),30000);
+//        Endpoint endpoint=new Endpoint(IpHelper.getHostIp(),30000);
 
         /*udp发给provider agent*/
         //简单的负载均衡，随机取一个
 //        Endpoint endpoint = endpoints.get(random.nextInt(endpoints.size()));
 
-        DatagramPacket dp=new DatagramPacket(sendBuf,new java.net.InetSocketAddress(endpoint.getHost(),endpoint.getPort()));
-
-        UDPChannelManager.getChannel().write(dp).addListener(cf -> {
-            if (!cf.isSuccess()) {
-                log.error("error in udpChannel write.");
-                cf.cause().printStackTrace();
-            }
-        });
+//        DatagramPacket dp=new DatagramPacket(sendBuf,new java.net.InetSocketAddress(endpoint.getHost(),endpoint.getPort()));
+//
+//        UDPChannelManager.getChannel().write(dp).addListener(cf -> {
+//            if (!cf.isSuccess()) {
+//                log.error("error in udpChannel write.");
+//                cf.cause().printStackTrace();
+//            }
+//        });
 
         /*tcp发给provider agent*/
 //        Endpoint endpoint = endpoints.get(random.nextInt(endpoints.size()));
-//
+          ConsumerAgent.getTCPChannelGroup().nextChannel().writeAndFlush(sendBuf);
 
 //        System.out.println("send finish..");
     }
