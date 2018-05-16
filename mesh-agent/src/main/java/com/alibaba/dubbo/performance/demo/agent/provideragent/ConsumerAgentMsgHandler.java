@@ -19,7 +19,6 @@ import java.security.Provider;
  */
 public class ConsumerAgentMsgHandler extends ChannelInboundHandlerAdapter {
 
-
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg2) throws Exception {
         DatagramPacket msg=(DatagramPacket)msg2;
@@ -35,6 +34,8 @@ public class ConsumerAgentMsgHandler extends ChannelInboundHandlerAdapter {
 //        byte[] data=new byte[dataBuf.readableBytes()];
 //        dataBuf.readBytes(data);
         RpcRequest request=new RpcRequest(id,dataBuf);
+
+
         ProviderChannelManager.getChannel().write(request);
 
         /*用于验证不经过provider性能*/
