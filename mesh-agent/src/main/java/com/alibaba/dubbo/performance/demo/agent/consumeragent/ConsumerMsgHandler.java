@@ -117,14 +117,13 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
         /*tcp发给provider agent*/
 //        Endpoint endpoint = endpoints.get(random.nextInt(endpoints.size()));
 //
-//        TCPChannelManager.getChannel().write(sendBuf);
+
 //        System.out.println("send finish..");
     }
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
         UDPChannelManager.getChannel().flush();
-        //TCPChannelManager.getChannel().flush();
     }
 
     @Override

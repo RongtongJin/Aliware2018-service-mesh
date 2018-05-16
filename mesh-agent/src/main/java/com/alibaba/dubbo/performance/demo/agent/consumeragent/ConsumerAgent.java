@@ -1,5 +1,6 @@
 package com.alibaba.dubbo.performance.demo.agent.consumeragent;
 
+import com.alibaba.dubbo.performance.demo.agent.provideragent.ProviderAgent;
 import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
 import com.alibaba.dubbo.performance.demo.agent.registry.EtcdRegistry;
 import com.alibaba.dubbo.performance.demo.agent.registry.IRegistry;
@@ -27,11 +28,11 @@ import java.util.List;
 import java.util.Map;
 
 public class ConsumerAgent {
+
     private static Log log = LogFactory.getLog(ConsumerAgent.class);
-
-    IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
-
+    private IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
     private Map<String,Endpoint> endpoints = null;
+
     public void start(int port) throws Exception {
 
         endpoints = registry.find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
@@ -43,9 +44,7 @@ public class ConsumerAgent {
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         //EventLoopGroup workerGroup = new EpollEventLoopGroup();
 
-        UDPChannelManager.initChannel(workerGroup);
-
-        //TCPChannelManager.initChannel(workerGroup,endpoints.get(0));
+        //UDPChannelManager.initChannel(workerGroup);
 
         try {
             ServerBootstrap b = new ServerBootstrap();

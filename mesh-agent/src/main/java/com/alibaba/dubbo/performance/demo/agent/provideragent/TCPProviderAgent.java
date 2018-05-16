@@ -29,16 +29,16 @@ public class TCPProviderAgent {
     private IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
 
     public void start(int port) throws Exception{
-        EventLoopGroup eventLoopGroup=new NioEventLoopGroup();
-
-        //EventLoopGroup eventLoopGroup=new EpollEventLoopGroup();
-
+        EventLoopGroup bossGroup=new NioEventLoopGroup(1);
+        EventLoopGroup workGroup=new NioEventLoopGroup();
+        //EventLoopGroup bossGroup=new EpollEventLoopGroup(1);
+        //EventLoopGroup workGroup=new EpollEventLoopGroup();
         Thread.sleep(1000);
         //ProviderChannelManager.initChannel(eventLoopGroup);
 
         try {
             channel = new ServerBootstrap()
-                    .group(eventLoopGroup)
+                    .group(bossGroup,workGroup)
                     .channel(NioServerSocketChannel.class)
                     //.channel(EpollServerSocketChannel.class)
                     .option(ChannelOption.SO_BACKLOG,2048)
@@ -47,7 +47,6 @@ public class TCPProviderAgent {
                     .childOption(ChannelOption.TCP_NODELAY,true)
                     .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                     .childOption(ChannelOption.SO_REUSEADDR, Boolean.TRUE)
-                    .childOption(ChannelOption.AUTO_CLOSE, Boolean.TRUE)
                     .childOption(ChannelOption.ALLOW_HALF_CLOSURE, Boolean.FALSE)
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
@@ -60,7 +59,8 @@ public class TCPProviderAgent {
             System.out.println("TCPProviderAgent start on "+port);
             channel.closeFuture().await();
         }finally {
-            eventLoopGroup.shutdownGracefully();
+            bossGroup.shutdownGracefully();
+            workGroup.shutdownGracefully();
         }
     }
 

@@ -38,7 +38,7 @@ public class ProviderAgent {
                     .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                     //.option(ChannelOption.SO_RCVBUF)// 设置UDP读缓冲区为1M
                     //.option(ChannelOption.SO_SNDBUF) // 设置UDP写缓冲区为1M
-                    .handler(new ConsumerAgentMsgHandler2());
+                    .handler(new ConsumerAgentMsgHandler());
             channel=bootstrap.bind(new InetSocketAddress(port)).sync().channel();
             System.out.println("ProviderAgent start on "+port);
             channel.closeFuture().await();

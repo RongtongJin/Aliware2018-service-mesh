@@ -8,12 +8,12 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LineBasedFrameDecoder;
 
 
-public class TCPChannelManager {
-    private static Channel channel=null;
+public class TCPChannel {
+    private Channel channel=null;
 
-    public TCPChannelManager(){}
+    public TCPChannel(){}
 
-    public static void initChannel(EventLoopGroup group, Endpoint endpoint) throws Exception{
+    public void initChannel(EventLoopGroup group, Endpoint endpoint) throws Exception{
         channel = new Bootstrap()
                 .group(group)
                 .channel(NioSocketChannel.class)
@@ -33,7 +33,7 @@ public class TCPChannelManager {
                 .connect(endpoint.getHost(), endpoint.getPort()).sync().channel();
     }
 
-    public static Channel getChannel() throws Exception {
+    public Channel getChannel() throws Exception {
         return channel;
     }
 }
