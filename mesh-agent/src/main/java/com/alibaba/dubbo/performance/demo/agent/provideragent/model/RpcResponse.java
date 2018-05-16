@@ -1,10 +1,17 @@
 package com.alibaba.dubbo.performance.demo.agent.provideragent.model;
 
+import io.netty.buffer.ByteBuf;
+
 public class RpcResponse {
 
 
     private long requestId;
-    private byte[] bytes;
+    private ByteBuf buf;
+
+    public RpcResponse(long requestId, ByteBuf buf) {
+        this.requestId = requestId;
+        this.buf = buf;
+    }
 
     public long getRequestId() {
         return requestId;
@@ -14,11 +21,11 @@ public class RpcResponse {
         this.requestId = requestId;
     }
 
-    public byte[] getBytes() {
-        return bytes;
+    public ByteBuf getBuf() {
+        return buf;
     }
 
-    public void setBytes(byte[] bytes) {
-        this.bytes = bytes;
+    public void setBuf(ByteBuf buf) {
+        this.buf = buf;
     }
 }

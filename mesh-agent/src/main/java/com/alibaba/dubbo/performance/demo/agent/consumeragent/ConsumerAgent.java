@@ -44,7 +44,7 @@ public class ConsumerAgent {
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         //EventLoopGroup workerGroup = new EpollEventLoopGroup();
 
-        //UDPChannelManager.initChannel(workerGroup);
+        UDPChannelManager.initChannel(workerGroup);
 
         try {
             ServerBootstrap b = new ServerBootstrap();
