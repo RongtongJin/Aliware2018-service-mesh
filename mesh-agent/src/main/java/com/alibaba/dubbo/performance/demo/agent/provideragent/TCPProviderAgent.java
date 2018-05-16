@@ -1,5 +1,6 @@
 package com.alibaba.dubbo.performance.demo.agent.provideragent;
 
+import com.alibaba.dubbo.performance.demo.agent.consumeragent.TCPChannel;
 import com.alibaba.dubbo.performance.demo.agent.consumeragent.TCPProviderAgentMsgHandler;
 import com.alibaba.dubbo.performance.demo.agent.registry.EtcdRegistry;
 import com.alibaba.dubbo.performance.demo.agent.registry.IRegistry;
@@ -30,13 +31,21 @@ public class TCPProviderAgent {
 
     private IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
 
+    private static ProviderChannelGroup group=null;
+
+    public static ProviderChannelGroup getChannelGroup(){
+        return group;
+    }
+
     public void start(int port) throws Exception{
         EventLoopGroup bossGroup=new NioEventLoopGroup(1);
         EventLoopGroup workGroup=new NioEventLoopGroup();
+
         //EventLoopGroup bossGroup=new EpollEventLoopGroup(1);
         //EventLoopGroup workGroup=new EpollEventLoopGroup();
         Thread.sleep(1000);
-        ProviderChannelManager.initChannel(workGroup);
+
+        group=new ProviderChannelGroup(13,workGroup);
 
         try {
             channel = new ServerBootstrap()
