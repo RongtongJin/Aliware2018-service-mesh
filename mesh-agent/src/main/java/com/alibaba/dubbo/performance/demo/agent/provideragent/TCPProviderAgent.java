@@ -31,11 +31,11 @@ public class TCPProviderAgent {
 
     private IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
 
-    private static ProviderChannelGroup group=null;
-
-    public static ProviderChannelGroup getChannelGroup(){
-        return group;
-    }
+//    private static ProviderChannelGroup group=null;
+//
+//    public static ProviderChannelGroup getChannelGroup(){
+//        return group;
+//    }
 
     public void start(int port) throws Exception{
         EventLoopGroup bossGroup=new NioEventLoopGroup(1);
@@ -45,7 +45,8 @@ public class TCPProviderAgent {
         //EventLoopGroup workGroup=new EpollEventLoopGroup();
         Thread.sleep(1000);
 
-        group=new ProviderChannelGroup(13,workGroup);
+//        group=new ProviderChannelGroup(13,workGroup);
+        ProviderChannelManager.initChannel(workGroup);
 
         try {
             channel = new ServerBootstrap()
