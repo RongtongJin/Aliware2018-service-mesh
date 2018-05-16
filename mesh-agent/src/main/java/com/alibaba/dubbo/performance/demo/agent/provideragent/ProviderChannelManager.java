@@ -39,7 +39,7 @@ public class ProviderChannelManager{
                         pipeline.addLast(new DubboRpcEncoder2());
                         pipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE,12,4,0,0));
                         //pipeline.addLast(new DubboRpcDecoder());
-                        pipeline.addLast(new RpcMsgHandler2());
+                        pipeline.addLast(new RpcMsgHandler3());
                     }
                 })
                 .connect("127.0.0.1", port).sync().channel();

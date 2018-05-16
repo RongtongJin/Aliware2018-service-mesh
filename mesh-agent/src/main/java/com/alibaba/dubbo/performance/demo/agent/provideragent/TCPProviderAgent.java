@@ -36,14 +36,14 @@ public class TCPProviderAgent {
         //EventLoopGroup bossGroup=new EpollEventLoopGroup(1);
         //EventLoopGroup workGroup=new EpollEventLoopGroup();
         Thread.sleep(1000);
-        //ProviderChannelManager.initChannel(eventLoopGroup);
+        ProviderChannelManager.initChannel(workGroup);
 
         try {
             channel = new ServerBootstrap()
                     .group(bossGroup,workGroup)
                     .channel(NioServerSocketChannel.class)
                     //.channel(EpollServerSocketChannel.class)
-                    .option(ChannelOption.SO_BACKLOG,2048)
+                    .option(ChannelOption.SO_BACKLOG,128)
                     .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                     .childOption(ChannelOption.SO_KEEPALIVE, true)
                     .childOption(ChannelOption.TCP_NODELAY,true)

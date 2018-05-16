@@ -121,15 +121,15 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
 //        System.out.println("send finish..");
     }
 
-    @Override
-    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-        UDPChannelManager.getChannel().flush();
-    }
-
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        cause.printStackTrace();
-        //ctx.close();
-    }
+//    @Override
+//    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+//        UDPChannelManager.getChannel().flush();
+//    }
+//
+//    @Override
+//    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+//        cause.printStackTrace();
+//        //ctx.close();
+//    }
 
 }
