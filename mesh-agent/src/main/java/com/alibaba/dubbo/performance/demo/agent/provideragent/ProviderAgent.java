@@ -34,8 +34,6 @@ public class ProviderAgent {
 
         Class<? extends DatagramChannel> channelClass= epollAvail ? EpollDatagramChannel.class:NioDatagramChannel.class;
 
-
-
         ProviderChannelManager.initChannel(eventLoopGroup);
 
         try {
