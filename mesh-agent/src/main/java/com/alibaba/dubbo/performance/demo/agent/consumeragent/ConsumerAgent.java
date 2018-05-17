@@ -1,5 +1,7 @@
 package com.alibaba.dubbo.performance.demo.agent.consumeragent;
 
+import com.alibaba.dubbo.performance.demo.agent.protocal.MyHttpRequestDecoder;
+import com.alibaba.dubbo.performance.demo.agent.protocal.MyHttpResponseEncoder;
 import com.alibaba.dubbo.performance.demo.agent.provideragent.ProviderAgent;
 import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
 import com.alibaba.dubbo.performance.demo.agent.registry.EtcdRegistry;
@@ -28,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class ConsumerAgent {
+public final class ConsumerAgent {
 
     private static Log log = LogFactory.getLog(ConsumerAgent.class);
     private IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
@@ -51,7 +53,7 @@ public class ConsumerAgent {
 
         //UDPChannelManager.initChannel(workerGroup);
 
-        channelGroup=new TCPChannelGroup(12,workerGroup,new Endpoint(IpHelper.getHostIp(),30000));
+       // channelGroup=new TCPChannelGroup(12,workerGroup,new Endpoint(IpHelper.getHostIp(),30000));
 
         try {
             ServerBootstrap b = new ServerBootstrap();
@@ -61,11 +63,13 @@ public class ConsumerAgent {
                         @Override
                         public void initChannel(SocketChannel ch) throws Exception {
                             // server端发送的是httpResponse，所以要使用HttpResponseEncoder进行编码
-                            ch.pipeline().addLast(new HttpResponseEncoder());
+
+                            ch.pipeline().addLast("decoder",new MyHttpRequestDecoder());
+
                             // server端接收到的是httpRequest，所以要使用HttpRequestDecoder进行解码
-                            ch.pipeline().addLast(new HttpRequestDecoder());
+                            ch.pipeline().addLast("encoder",new MyHttpResponseEncoder());
                             //fix me:设置的最大长度会不会影响性能
-                            ch.pipeline().addLast(new HttpObjectAggregator(2048));
+                           // ch.pipeline().addLast(new HttpObjectAggregator(2048));
                             ch.pipeline().addLast(new ConsumerMsgHandler(endpoints));
                         }
                     })
@@ -75,11 +79,14 @@ public class ConsumerAgent {
                     .childOption(ChannelOption.TCP_NODELAY,true)
                     .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                     .childOption(ChannelOption.SO_REUSEADDR, Boolean.TRUE)
-                    .childOption(ChannelOption.AUTO_CLOSE, Boolean.TRUE)
+                    .childOption(ChannelOption.AUTO_CLOSE, Boolean.FALSE)
                     .childOption(ChannelOption.ALLOW_HALF_CLOSURE, Boolean.FALSE);
             ChannelFuture f = b.bind(port).sync();
-            System.out.println("ConsumerAgent start on "+port);
-            f.channel().closeFuture().sync();
+            if(f.isSuccess()){
+                log.info("ConsumerAgent start on "+port);
+                f.channel().closeFuture().sync();
+            }
+
         } finally {
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();

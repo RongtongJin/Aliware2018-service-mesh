@@ -1,5 +1,6 @@
 package com.alibaba.dubbo.performance.demo.agent.consumeragent;
 
+import com.alibaba.dubbo.performance.demo.agent.protocal.AgentHttpRequest;
 import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
 import com.alibaba.dubbo.performance.demo.agent.registry.IpHelper;
 import io.netty.buffer.ByteBuf;
@@ -27,7 +28,7 @@ import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 
-public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
+public class ConsumerMsgHandler extends SimpleChannelInboundHandler<AgentHttpRequest> {
 
     private static Log log = LogFactory.getLog(ConsumerMsgHandler.class);
 
@@ -45,16 +46,20 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
 
 
     @Override
-    public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest msg) throws Exception{
+    public void channelRead0(ChannelHandlerContext ctx, AgentHttpRequest msg) throws Exception{
 
-        ByteBuf buf = msg.content();
-//        System.out.println(buf.toString(io.netty.util.CharsetUtil.UTF_8));
-        buf.retain();
-
-        Long id=genId.getAndIncrement();
+       // ByteBuf buf = msg.bodyBuf;
+       // System.out.println(buf.toString(io.netty.util.CharsetUtil.UTF_8));
+//        buf.retain();
+       // FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+      //  httpResponse.content().writeBytes("123123".getBytes());
+       // httpResponse.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/html;charset=UTF-8");
+     //   httpResponse.headers().setInt(HttpHeaderNames.CONTENT_LENGTH, httpResponse.content().readableBytes());
+        ctx.writeAndFlush(msg);
+//        Long id=genId.getAndIncrement();
 //
 //        //fix me:存储如此多的id会不会成为性能瓶颈？？或者ConcurrentHashMap能不能进行优化
-        ChannelHolder.put(id,ctx.channel());
+  //      ChannelHolder.put(id,ctx.channel());
 //        //fix me:为什么不能用CompositeByteBuf
 
 //        //fix me:用直接内存好还是heap内存好？HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE
@@ -63,11 +68,11 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
         //sendBuf.writeBytes(buf,136,buf.readableBytes()-136);
         //System.out.println(byteBuf.toString(CharsetUtil.UTF_8));
 
-        CompositeByteBuf sendBuf=ctx.alloc().compositeDirectBuffer();
-        ByteBuf idBuf=ctx.alloc().ioBuffer();
-        idBuf.writeLong(id);
-        ByteBuf paraBuf=buf.slice(136,buf.readableBytes()-136);
-        sendBuf.addComponents(true,idBuf,paraBuf);
+//        CompositeByteBuf sendBuf=ctx.alloc().compositeDirectBuffer();
+//        ByteBuf idBuf=ctx.alloc().ioBuffer();
+//        idBuf.writeLong(id);
+//        ByteBuf paraBuf=buf.slice(136,buf.readableBytes()-136);
+//        sendBuf.addComponents(true,idBuf,paraBuf);
         //sendBuf.writeBytes(System.lineSeparator().getBytes());
 
         //System.out.println(sendBuf.toString(CharsetUtil.UTF_8));
@@ -116,7 +121,7 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
 
         /*tcp发给provider agent*/
 //        Endpoint endpoint = endpoints.get(random.nextInt(endpoints.size()));
-          ConsumerAgent.getTCPChannelGroup().nextChannel().writeAndFlush(sendBuf);
+        //  ConsumerAgent.getTCPChannelGroup().nextChannel().writeAndFlush(sendBuf);
 
 //        System.out.println("send finish..");
     }

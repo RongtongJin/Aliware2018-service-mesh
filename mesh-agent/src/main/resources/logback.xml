@@ -18,7 +18,7 @@
         </encoder>
     </appender>
 
-    <!-- 日志输出级别 -->
+    <!-- 日志输出级别ERROR级别啊 -->
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="FILE"/>
