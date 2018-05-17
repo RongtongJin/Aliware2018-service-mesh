@@ -47,7 +47,7 @@ public class ProviderChannelManager{
                         pipeline.addLast(new RpcMsgHandler());
                     }
                 })
-                .connect("127.0.0.1", port).sync().channel();
+                .connect("localhost", port).sync().channel();
     }
 
 
