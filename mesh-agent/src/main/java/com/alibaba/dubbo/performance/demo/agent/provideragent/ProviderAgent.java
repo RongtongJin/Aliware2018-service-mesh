@@ -25,13 +25,16 @@ public class ProviderAgent {
     private IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
 
     public void start(int port) throws Exception{
+
+        Thread.sleep(3000);
+
         boolean epollAvail= Epoll.isAvailable();
 
         EventLoopGroup eventLoopGroup=epollAvail ? new EpollEventLoopGroup(): new NioEventLoopGroup();
 
         Class<? extends DatagramChannel> channelClass= epollAvail ? EpollDatagramChannel.class:NioDatagramChannel.class;
 
-        Thread.sleep(1000);
+
 
         ProviderChannelManager.initChannel(eventLoopGroup);
 
