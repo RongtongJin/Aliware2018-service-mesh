@@ -51,7 +51,10 @@ public class ProviderAgent {
             channel=bootstrap.bind(new InetSocketAddress(port)).sync().channel();
             System.out.println("ProviderAgent start on "+port);
             channel.closeFuture().await();
-        }finally {
+        }catch (Exception e){
+
+            e.printStackTrace();
+        } finally {
             eventLoopGroup.shutdownGracefully();
         }
     }
