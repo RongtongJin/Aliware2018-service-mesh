@@ -5,7 +5,6 @@ import com.alibaba.dubbo.performance.demo.agent.provideragent.model.RpcRequest;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.util.CharsetUtil;
 
 public class TCPConsumerAgentMsgHandler extends SimpleChannelInboundHandler<ByteBuf> {
     @Override
@@ -25,7 +24,7 @@ public class TCPConsumerAgentMsgHandler extends SimpleChannelInboundHandler<Byte
         ReturnChannelHolder.put(id,ctx.channel());
         RpcRequest request=new RpcRequest(id,dataBuf);
         //TCPProviderAgent.getChannelGroup().nextChannel().writeAndFlush(request);
-        ProviderChannelManager.getChannel().writeAndFlush(request);
+        TCPProviderChannelManager.getChannel().writeAndFlush(request);
        // System.out.println(sendBuf.toString(CharsetUtil.UTF_8));
         //ctx.writeAndFlush(sendBuf);
     }

@@ -35,6 +35,7 @@ public class ConsumerAgent {
     public void start(int port) throws Exception {
 
         endpoints = registry.find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
+
         boolean epollAvail=Epoll.isAvailable();
         EventLoopGroup bossGroup=null;
         EventLoopGroup workerGroup=null;
@@ -47,9 +48,9 @@ public class ConsumerAgent {
         }
         Class<? extends ServerChannel> channelClass = epollAvail ? EpollServerSocketChannel.class : NioServerSocketChannel.class;
 
-        //UDPChannelManager.initChannel(workerGroup);
+        UDPChannelManager.initChannel(workerGroup);
 
-        channelGroup=new TCPChannelGroup(12,workerGroup,new Endpoint(IpHelper.getHostIp(),30000));
+        //channelGroup=new TCPChannelGroup(12,workerGroup,new Endpoint(IpHelper.getHostIp(),30000));
 
         try {
             ServerBootstrap b = new ServerBootstrap();

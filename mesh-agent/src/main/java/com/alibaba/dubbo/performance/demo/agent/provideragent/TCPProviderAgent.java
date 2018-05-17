@@ -1,29 +1,18 @@
 package com.alibaba.dubbo.performance.demo.agent.provideragent;
 
-import com.alibaba.dubbo.performance.demo.agent.consumeragent.TCPChannel;
-import com.alibaba.dubbo.performance.demo.agent.consumeragent.TCPProviderAgentMsgHandler;
 import com.alibaba.dubbo.performance.demo.agent.registry.EtcdRegistry;
 import com.alibaba.dubbo.performance.demo.agent.registry.IRegistry;
-import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
-import io.netty.handler.codec.LineBasedFrameDecoder;
-
-import java.net.InetSocketAddress;
 
 public class TCPProviderAgent {
 
@@ -38,6 +27,8 @@ public class TCPProviderAgent {
 //    }
 
     public void start(int port) throws Exception{
+
+        Thread.sleep(1000);
 
         boolean epollAvail=Epoll.isAvailable();
         EventLoopGroup bossGroup=null;
@@ -54,7 +45,7 @@ public class TCPProviderAgent {
         Thread.sleep(1000);
 
 //        group=new ProviderChannelGroup(13,workGroup);
-        ProviderChannelManager.initChannel(workGroup);
+        TCPProviderChannelManager.initChannel(workGroup);
 
         try {
             channel = new ServerBootstrap()
