@@ -28,7 +28,9 @@ public class ProviderAgent {
 
         Thread.sleep(3000);
 
-        boolean epollAvail= Epoll.isAvailable();
+        //boolean epollAvail= Epoll.isAvailable();
+
+        boolean epollAvail= false;
 
         EventLoopGroup eventLoopGroup=epollAvail ? new EpollEventLoopGroup(): new NioEventLoopGroup();
 

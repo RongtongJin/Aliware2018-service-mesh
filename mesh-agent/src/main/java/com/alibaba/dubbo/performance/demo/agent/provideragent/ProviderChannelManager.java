@@ -1,6 +1,7 @@
 package com.alibaba.dubbo.performance.demo.agent.provideragent;
 
 
+import com.alibaba.dubbo.performance.demo.agent.registry.IpHelper;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 
@@ -25,7 +26,9 @@ public class ProviderChannelManager{
     public static void initChannel(EventLoopGroup group) throws Exception{
         int port = Integer.valueOf(System.getProperty("dubbo.protocol.port"));
         //int port=20889;
-        Class<? extends SocketChannel> channelClass= Epoll.isAvailable() ? EpollSocketChannel.class:NioSocketChannel.class;
+        //boolean epollAvail=Epoll.isAvailable();
+        boolean epollAvail=false;
+        Class<? extends SocketChannel> channelClass= epollAvail ? EpollSocketChannel.class:NioSocketChannel.class;
         channel = new Bootstrap()
                 .group(group)
                 .channel(channelClass)
@@ -44,7 +47,7 @@ public class ProviderChannelManager{
                         pipeline.addLast(new RpcMsgHandler());
                     }
                 })
-                .connect("127.0.0.1", port).sync().channel();
+                .connect(IpHelper.getHostIp(), port).sync().channel();
     }
 
 
