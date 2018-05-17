@@ -3,6 +3,7 @@ package com.alibaba.dubbo.performance.demo.agent.provideragent;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
+import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -14,9 +15,10 @@ public class ProviderChannel {
     public void initChannel(EventLoopGroup group) throws Exception{
         int port = Integer.valueOf(System.getProperty("dubbo.protocol.port"));
         //int port=20889;
+        Class<? extends SocketChannel> channelClass= Epoll.isAvailable() ? EpollSocketChannel.class:NioSocketChannel.class;
         channel = new Bootstrap()
                 .group(group)
-                .channel(NioSocketChannel.class)
+                .channel(channelClass)
                 //.group(new EpollEventLoopGroup())
                 //.channel(EpollSocketChannel.class)
                 .option(ChannelOption.SO_KEEPALIVE, true)

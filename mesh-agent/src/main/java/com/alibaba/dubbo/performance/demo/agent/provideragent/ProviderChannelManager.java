@@ -5,6 +5,7 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 
 import io.netty.channel.*;
+import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollDatagramChannel;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollSocketChannel;
@@ -24,9 +25,10 @@ public class ProviderChannelManager{
     public static void initChannel(EventLoopGroup group) throws Exception{
         int port = Integer.valueOf(System.getProperty("dubbo.protocol.port"));
         //int port=20889;
+        Class<? extends SocketChannel> channelClass= Epoll.isAvailable() ? EpollSocketChannel.class:NioSocketChannel.class;
         channel = new Bootstrap()
                 .group(group)
-                .channel(NioSocketChannel.class)
+                .channel(channelClass)
                 //.group(new EpollEventLoopGroup())
                 //.channel(EpollSocketChannel.class)
                 .option(ChannelOption.SO_KEEPALIVE, true)

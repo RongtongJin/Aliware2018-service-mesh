@@ -7,9 +7,11 @@ import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollDatagramChannel;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.DatagramChannel;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 
 import java.net.InetSocketAddress;
@@ -23,8 +25,12 @@ public class ProviderAgent {
     private IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
 
     public void start(int port) throws Exception{
-        EventLoopGroup eventLoopGroup=new NioEventLoopGroup();
-        //EventLoopGroup eventLoopGroup=new EpollEventLoopGroup();
+        boolean epollAvail= Epoll.isAvailable();
+
+        EventLoopGroup eventLoopGroup=epollAvail ? new EpollEventLoopGroup(): new NioEventLoopGroup();
+
+        Class<? extends DatagramChannel> channelClass= epollAvail ? EpollDatagramChannel.class:NioDatagramChannel.class;
+
         Thread.sleep(1000);
 
         ProviderChannelManager.initChannel(eventLoopGroup);
@@ -32,7 +38,7 @@ public class ProviderAgent {
         try {
             Bootstrap bootstrap=new Bootstrap()
                     .group(eventLoopGroup)
-                    .channel(NioDatagramChannel.class)
+                    .channel(channelClass)
                     //.channel(EpollDatagramChannel.class)
                     .option(ChannelOption.SO_BACKLOG, 1024)    //设置缓存队列
                     .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)

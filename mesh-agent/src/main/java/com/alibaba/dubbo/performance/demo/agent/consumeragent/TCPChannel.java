@@ -3,12 +3,12 @@ package com.alibaba.dubbo.performance.demo.agent.consumeragent;
 import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
+import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
-import io.netty.handler.codec.LineBasedFrameDecoder;
 
 
 public class TCPChannel {
@@ -17,9 +17,11 @@ public class TCPChannel {
     public TCPChannel(){}
 
     public void initChannel(EventLoopGroup group, Endpoint endpoint) throws Exception{
+
+        Class<? extends SocketChannel> channelClass=Epoll.isAvailable() ? EpollSocketChannel.class:NioSocketChannel.class;
         channel = new Bootstrap()
                 .group(group)
-                .channel(NioSocketChannel.class)
+                .channel(channelClass)
                 //.channel(EpollSocketChannel.class)
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.TCP_NODELAY, true)

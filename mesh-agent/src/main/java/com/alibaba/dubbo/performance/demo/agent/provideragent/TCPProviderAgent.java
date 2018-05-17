@@ -38,11 +38,19 @@ public class TCPProviderAgent {
 //    }
 
     public void start(int port) throws Exception{
-        EventLoopGroup bossGroup=new NioEventLoopGroup(1);
-        EventLoopGroup workGroup=new NioEventLoopGroup();
 
-        //EventLoopGroup bossGroup=new EpollEventLoopGroup(1);
-        //EventLoopGroup workGroup=new EpollEventLoopGroup();
+        boolean epollAvail=Epoll.isAvailable();
+        EventLoopGroup bossGroup=null;
+        EventLoopGroup workGroup=null;
+        if(epollAvail){
+            bossGroup = new EpollEventLoopGroup(1);
+            workGroup = new EpollEventLoopGroup();
+        }else{
+            bossGroup = new NioEventLoopGroup(1);
+            workGroup = new NioEventLoopGroup();
+        }
+        Class<? extends ServerChannel> channelClass = epollAvail ? EpollServerSocketChannel.class : NioServerSocketChannel.class;
+
         Thread.sleep(1000);
 
 //        group=new ProviderChannelGroup(13,workGroup);
@@ -51,9 +59,9 @@ public class TCPProviderAgent {
         try {
             channel = new ServerBootstrap()
                     .group(bossGroup,workGroup)
-                    .channel(NioServerSocketChannel.class)
+                    .channel(channelClass)
                     //.channel(EpollServerSocketChannel.class)
-                    .option(ChannelOption.SO_BACKLOG,128)
+                    //.option(ChannelOption.SO_BACKLOG,128)
                     .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                     .childOption(ChannelOption.SO_KEEPALIVE, true)
                     .childOption(ChannelOption.TCP_NODELAY,true)

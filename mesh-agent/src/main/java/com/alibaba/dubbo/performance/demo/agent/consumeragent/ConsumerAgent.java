@@ -7,14 +7,8 @@ import com.alibaba.dubbo.performance.demo.agent.registry.IRegistry;
 import com.alibaba.dubbo.performance.demo.agent.registry.IpHelper;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.epoll.EpollChannelOption;
-import io.netty.channel.epoll.EpollDatagramChannelConfig;
-import io.netty.channel.epoll.EpollEventLoopGroup;
-import io.netty.channel.epoll.EpollServerSocketChannel;
+import io.netty.channel.*;
+import io.netty.channel.epoll.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -33,21 +27,25 @@ public class ConsumerAgent {
     private static Log log = LogFactory.getLog(ConsumerAgent.class);
     private IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
     private Map<String,Endpoint> endpoints = null;
-
     private static TCPChannelGroup channelGroup=null;
+
 
     public static TCPChannelGroup getTCPChannelGroup(){return channelGroup;}
 
     public void start(int port) throws Exception {
 
         endpoints = registry.find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
-
-
-        EventLoopGroup bossGroup = new NioEventLoopGroup(1);
-        //EventLoopGroup bossGroup = new EpollEventLoopGroup(1);
-
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
-        //EventLoopGroup workerGroup = new EpollEventLoopGroup();
+        boolean epollAvail=Epoll.isAvailable();
+        EventLoopGroup bossGroup=null;
+        EventLoopGroup workerGroup=null;
+        if(epollAvail){
+            bossGroup = new EpollEventLoopGroup(1);
+            workerGroup = new EpollEventLoopGroup();
+        }else{
+            bossGroup = new NioEventLoopGroup(1);
+            workerGroup = new NioEventLoopGroup();
+        }
+        Class<? extends ServerChannel> channelClass = epollAvail ? EpollServerSocketChannel.class : NioServerSocketChannel.class;
 
         //UDPChannelManager.initChannel(workerGroup);
 
@@ -55,7 +53,7 @@ public class ConsumerAgent {
 
         try {
             ServerBootstrap b = new ServerBootstrap();
-            b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
+            b.group(bossGroup, workerGroup).channel(channelClass)
             //b.group(bossGroup, workerGroup).channel(EpollServerSocketChannel.class)
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
@@ -69,7 +67,7 @@ public class ConsumerAgent {
                             ch.pipeline().addLast(new ConsumerMsgHandler(endpoints));
                         }
                     })
-                    .option(ChannelOption.SO_BACKLOG,2048)
+                    .option(ChannelOption.SO_BACKLOG,128)
                     .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                     .childOption(ChannelOption.SO_KEEPALIVE, true)
                     .childOption(ChannelOption.TCP_NODELAY,true)
