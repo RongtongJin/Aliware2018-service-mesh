@@ -37,8 +37,6 @@ public class TCPProviderAgent {
 
     public void start(int port) throws Exception{
 
-
-
         boolean epollAvail=Epoll.isAvailable();
         EventLoopGroup bossGroup=null;
         EventLoopGroup workerGroup=null;
@@ -51,9 +49,11 @@ public class TCPProviderAgent {
         }
         Class<? extends ServerChannel> channelClass = epollAvail ? EpollServerSocketChannel.class : NioServerSocketChannel.class;
 
-        while(!TcpConnectTest.isHostConnectable("127.0.0.1",20880)){
-            Thread.sleep(1000);
-        }
+//        while(!TcpConnectTest.isHostConnectable("127.0.0.1",20880)){
+//            Thread.sleep(1000);
+//        }
+
+        Thread.sleep(16000);
 //        group=new ProviderChannelGroup(13,workGroup);
         TCPProviderChannelManager.initChannel(workerGroup);
 

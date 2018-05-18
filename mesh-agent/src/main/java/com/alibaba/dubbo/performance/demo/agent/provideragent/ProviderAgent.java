@@ -33,9 +33,11 @@ public class ProviderAgent {
 
         Class<? extends DatagramChannel> channelClass= epollAvail ? EpollDatagramChannel.class:NioDatagramChannel.class;
 
-        while(!TcpConnectTest.isHostConnectable("127.0.0.1",20880)){
-            Thread.sleep(1000);
-        }
+//        while(!TcpConnectTest.isHostConnectable("127.0.0.1",20880)){
+//            Thread.sleep(1000);
+//        }
+
+        Thread.sleep(16000);
 
         ProviderChannelManager.initChannel(eventLoopGroup);
 

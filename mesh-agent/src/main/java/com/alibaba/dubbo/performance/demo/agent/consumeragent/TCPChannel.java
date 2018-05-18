@@ -17,9 +17,9 @@ public class TCPChannel {
 
     public TCPChannel(EventLoopGroup group, Endpoint endpoint) throws Exception{
 
-        while(!TcpConnectTest.isHostConnectable(endpoint.getHost(),endpoint.getPort())){
-            Thread.sleep(1000);
-        }
+//        while(!TcpConnectTest.isHostConnectable(endpoint.getHost(),endpoint.getPort())){
+//            Thread.sleep(1000);
+//        }
 
         Class<? extends SocketChannel> channelClass=Epoll.isAvailable() ? EpollSocketChannel.class:NioSocketChannel.class;
         channel = new Bootstrap()
