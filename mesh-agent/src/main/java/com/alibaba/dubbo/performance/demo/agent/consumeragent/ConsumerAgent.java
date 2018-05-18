@@ -53,15 +53,8 @@ public class ConsumerAgent {
         }
         Class<? extends ServerChannel> channelClass = epollAvail ? EpollServerSocketChannel.class : NioServerSocketChannel.class;
 
-        while(!TcpConnectTest.isHostConnectable(IpHelper.getHostIp(),30000)){
-            Thread.sleep(1000);
-        }
-
         tcpChannelMap=new HashMap<>();
         for(Map.Entry<String,Endpoint> entry:endpoints.entrySet()){
-            while(!TcpConnectTest.isHostConnectable(entry.getValue().getHost(),entry.getValue().getPort())){
-                Thread.sleep(1000);
-            }
             tcpChannelMap.put(entry.getKey(),new TCPChannel(workerGroup,entry.getValue()));
         }
 

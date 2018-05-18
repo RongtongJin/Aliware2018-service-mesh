@@ -1,6 +1,7 @@
 package com.alibaba.dubbo.performance.demo.agent.consumeragent;
 
 import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
+import com.alibaba.dubbo.performance.demo.agent.utils.TcpConnectTest;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.epoll.Epoll;
@@ -15,6 +16,11 @@ public class TCPChannel {
     private Channel channel=null;
 
     public TCPChannel(EventLoopGroup group, Endpoint endpoint) throws Exception{
+
+        while(!TcpConnectTest.isHostConnectable(endpoint.getHost(),endpoint.getPort())){
+            Thread.sleep(1000);
+        }
+
         Class<? extends SocketChannel> channelClass=Epoll.isAvailable() ? EpollSocketChannel.class:NioSocketChannel.class;
         channel = new Bootstrap()
                 .group(group)
