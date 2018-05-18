@@ -1,7 +1,6 @@
 package com.alibaba.dubbo.performance.demo.agent.protocal;
 
-import com.alibaba.dubbo.performance.demo.agent.utils.ConstUtils;
-import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
+import com.alibaba.dubbo.performance.demo.agent.utils.ConstUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
@@ -40,25 +39,25 @@ public class AgentHttpResponse {
         tmp.clear();
         int start=0;
         if(hashCode<0){
-            tmp.put(ConstUtils.N);
+            tmp.put(ConstUtil.N);
             hashCode=0-hashCode;
             start=1;
         }
         while(hashCode!=0){
-            tmp.put((byte)(hashCode%10+ ConstUtils.ZERO));
+            tmp.put((byte)(hashCode%10+ ConstUtil.ZERO));
             hashCode/=10;
         }
         int cnt=tmp.position();
         if(cnt<10){
-            byteBuffer.writeByte((byte)(cnt+ ConstUtils.ZERO));
+            byteBuffer.writeByte((byte)(cnt+ ConstUtil.ZERO));
         }else{
-            byteBuffer.writeByte(ConstUtils.ONE);
-            byteBuffer.writeByte((byte)(cnt-10+ ConstUtils.ZERO));
+            byteBuffer.writeByte(ConstUtil.ONE);
+            byteBuffer.writeByte((byte)(cnt-10+ ConstUtil.ZERO));
         }
-        byteBuffer.writeByte(ConstUtils.SEP);
-        byteBuffer.writeByte(ConstUtils.SEP);
+        byteBuffer.writeByte(ConstUtil.SEP);
+        byteBuffer.writeByte(ConstUtil.SEP);
         if(start==1){
-            byteBuffer.writeByte(ConstUtils.N);
+            byteBuffer.writeByte(ConstUtil.N);
         }
         for(int i=cnt-1;i>=start;i--){
             byteBuffer.writeByte(tmp.get(i));

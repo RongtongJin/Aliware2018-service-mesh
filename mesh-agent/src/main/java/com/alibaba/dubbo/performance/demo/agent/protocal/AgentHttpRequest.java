@@ -7,7 +7,7 @@ import io.netty.channel.ChannelHandlerContext;
 
 public final class AgentHttpRequest {
     public int len;
-    public ByteBuf bodyBuf = Unpooled.directBuffer(2048);
+    public ByteBuf bodyBuf;
     public AgentHttpRequest(ByteBuf byteBuffer, ChannelHandlerContext ctx){
         len=byteBuffer.readableBytes()+8;
         this.bodyBuf.clear();
@@ -16,7 +16,10 @@ public final class AgentHttpRequest {
         this.bodyBuf.writeBytes(byteBuffer);
     }
     AgentHttpRequest(){
-
+        bodyBuf = Unpooled.directBuffer(2048);
+    }
+    AgentHttpRequest(ByteBuf bodyBuf){
+        this.bodyBuf=bodyBuf;
     }
     AgentHttpRequest setBody(ByteBuf byteBuffer, ChannelHandlerContext ctx){
         this.bodyBuf.clear();

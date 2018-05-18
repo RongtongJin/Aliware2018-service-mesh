@@ -2,64 +2,46 @@ package com.alibaba.dubbo.performance.demo.agent.consumeragent;
 
 import com.alibaba.dubbo.performance.demo.agent.protocal.AgentHttpRequest;
 import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
-import com.alibaba.dubbo.performance.demo.agent.registry.IpHelper;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.CompositeByteBuf;
-import io.netty.buffer.Unpooled;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.http.*;
-
-import io.netty.channel.socket.DatagramPacket;
-import io.netty.util.CharsetUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.net.InetAddress;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
-
-import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_LENGTH;
-import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
-import static io.netty.handler.codec.http.HttpResponseStatus.OK;
-import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 
 public class ConsumerMsgHandler extends SimpleChannelInboundHandler<AgentHttpRequest> {
 
     private static Log log = LogFactory.getLog(ConsumerMsgHandler.class);
 
-    private static AtomicLong genId=new AtomicLong();
-
-    private Map<String,Endpoint> endpoints=null;
-
+    private static AtomicLong genId = new AtomicLong();
     private static Random random = new Random();
+    private Map<String, Endpoint> endpoints = null;
 
     //private static java.net.InetSocketAddress target=new java.net.InetSocketAddress("127.0.0.1",20000);
 
-    public ConsumerMsgHandler(Map<String,Endpoint> endpoints){
-        this.endpoints=endpoints;
+    public ConsumerMsgHandler(Map<String, Endpoint> endpoints) {
+        this.endpoints = endpoints;
     }
 
 
     @Override
-    public void channelRead0(ChannelHandlerContext ctx, AgentHttpRequest msg) throws Exception{
+    public void channelRead0(ChannelHandlerContext ctx, AgentHttpRequest msg) throws Exception {
 
-       // ByteBuf buf = msg.bodyBuf;
-       // System.out.println(buf.toString(io.netty.util.CharsetUtil.UTF_8));
+        // ByteBuf buf = msg.bodyBuf;
+        // System.out.println(buf.toString(io.netty.util.CharsetUtil.UTF_8));
 //        buf.retain();
-       // FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-      //  httpResponse.content().writeBytes("123123".getBytes());
-       // httpResponse.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/html;charset=UTF-8");
-     //   httpResponse.headers().setInt(HttpHeaderNames.CONTENT_LENGTH, httpResponse.content().readableBytes());
+        // FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+        //  httpResponse.content().writeBytes("123123".getBytes());
+        // httpResponse.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/html;charset=UTF-8");
+        //   httpResponse.headers().setInt(HttpHeaderNames.CONTENT_LENGTH, httpResponse.content().readableBytes());
         ctx.writeAndFlush(msg);
 //        Long id=genId.getAndIncrement();
 //
 //        //fix me:存储如此多的id会不会成为性能瓶颈？？或者ConcurrentHashMap能不能进行优化
-  //      ChannelHolder.put(id,ctx.channel());
+        //      ChannelHolder.put(id,ctx.channel());
 //        //fix me:为什么不能用CompositeByteBuf
 
 //        //fix me:用直接内存好还是heap内存好？HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE

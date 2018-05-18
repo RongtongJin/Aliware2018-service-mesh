@@ -1,14 +1,12 @@
 package com.alibaba.dubbo.performance.demo.agent.provideragent;
 
 import com.alibaba.dubbo.performance.demo.agent.provideragent.model.RpcRequest;
-import com.alibaba.dubbo.performance.demo.agent.utils.Bytes;
+import com.alibaba.dubbo.performance.demo.agent.utils.BytesUtil;
 import com.alibaba.dubbo.performance.demo.agent.utils.JsonUtils;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
-import io.netty.util.CharsetUtil;
 
 import java.io.*;
 import java.util.HashMap;
@@ -33,7 +31,7 @@ public class DubboRpcEncoder extends MessageToByteEncoder{
 
     static {
         //header
-        Bytes.short2bytes(MAGIC, header);
+        BytesUtil.short2bytes(MAGIC, header);
         // set request and serialization flag.
         header[2] = (byte) (FLAG_REQUEST | 6);
         header[2] |= FLAG_TWOWAY;

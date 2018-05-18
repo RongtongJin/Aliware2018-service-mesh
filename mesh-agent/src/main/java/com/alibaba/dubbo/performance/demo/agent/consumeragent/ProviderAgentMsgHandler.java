@@ -1,17 +1,12 @@
 package com.alibaba.dubbo.performance.demo.agent.consumeragent;
 
-import com.alibaba.dubbo.performance.demo.agent.utils.Bytes;
-import com.alibaba.fastjson.JSON;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.handler.codec.http.HttpHeaderValues;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

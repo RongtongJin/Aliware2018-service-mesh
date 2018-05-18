@@ -21,9 +21,9 @@ package com.alibaba.dubbo.performance.demo.agent.utils;
  * CodecUtils.
  */
 
-public class Bytes {
+public class BytesUtil {
 
-    private Bytes() {
+    private BytesUtil() {
     }
 
     /**

@@ -3,7 +3,7 @@
 //
 //
 //import com.alibaba.dubbo.performance.demo.agent.provideragent.model.RpcResponse;
-//import com.alibaba.dubbo.performance.demo.agent.utils.Bytes;
+//import com.alibaba.dubbo.performance.demo.agent.utils.BytesUtil;
 //import io.netty.buffer.ByteBuf;
 //import io.netty.channel.ChannelHandlerContext;
 //import io.netty.handler.codec.ByteToMessageDecoder;
@@ -72,7 +72,7 @@
 //        byte[] header = new byte[HEADER_LENGTH];
 //        byteBuf.readBytes(header);
 //        byte[] dataLen = Arrays.copyOfRange(header,12,16);
-//        int len = Bytes.bytes2int(dataLen);
+//        int len = BytesUtil.bytes2int(dataLen);
 //        int tt = len + HEADER_LENGTH;
 //        if (readable < tt) {
 //            return DecodeResult.NEED_MORE_INPUT;
@@ -93,7 +93,7 @@
 //        //System.err.println(s);
 //
 //        byte[] requestIdBytes = Arrays.copyOfRange(data,4,12);
-//        long requestId = Bytes.bytes2long(requestIdBytes,0);
+//        long requestId = BytesUtil.bytes2long(requestIdBytes,0);
 //
 //        RpcResponse response = new RpcResponse();
 //        response.setRequestId(requestId);
