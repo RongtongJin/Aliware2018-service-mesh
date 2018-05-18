@@ -52,7 +52,7 @@ public class TCPProviderAgent {
                     .group(bossGroup,workGroup)
                     .channel(channelClass)
                     //.channel(EpollServerSocketChannel.class)
-                    //.option(ChannelOption.SO_BACKLOG,128)
+                    .option(ChannelOption.SO_BACKLOG,128)
                     .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                     .childOption(ChannelOption.SO_KEEPALIVE, true)
                     .childOption(ChannelOption.TCP_NODELAY,true)

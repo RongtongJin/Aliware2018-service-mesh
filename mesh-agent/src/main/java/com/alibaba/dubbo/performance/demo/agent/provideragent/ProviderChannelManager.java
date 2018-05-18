@@ -27,7 +27,6 @@ public class ProviderChannelManager{
         int port = Integer.valueOf(System.getProperty("dubbo.protocol.port"));
         //int port=20889;
         boolean epollAvail=Epoll.isAvailable();
-        //boolean epollAvail=false;
         Class<? extends SocketChannel> channelClass= epollAvail ? EpollSocketChannel.class:NioSocketChannel.class;
         channel = new Bootstrap()
                 .group(group)
