@@ -1,5 +1,6 @@
 package com.alibaba.dubbo.performance.demo.agent.provideragent;
 
+import com.alibaba.dubbo.performance.demo.agent.consumeragent.ConsumerAgent;
 import com.alibaba.dubbo.performance.demo.agent.registry.EtcdRegistry;
 import com.alibaba.dubbo.performance.demo.agent.registry.IRegistry;
 import io.netty.bootstrap.ServerBootstrap;
@@ -25,31 +26,37 @@ public class TCPProviderAgent {
 //    public static ProviderChannelGroup getChannelGroup(){
 //        return group;
 //    }
+    private static Channel consumerAgentChannel=null;
+
+    public static void setConsumerAgentChannel(Channel ch){
+        consumerAgentChannel=ch;
+    }
+
+    public static Channel getConsumerAgentChannel(){return consumerAgentChannel;}
 
     public void start(int port) throws Exception{
 
-        Thread.sleep(1000);
+        Thread.sleep(17000);
 
         boolean epollAvail=Epoll.isAvailable();
         EventLoopGroup bossGroup=null;
-        EventLoopGroup workGroup=null;
+        EventLoopGroup workerGroup=null;
         if(epollAvail){
             bossGroup = new EpollEventLoopGroup(1);
-            workGroup = new EpollEventLoopGroup();
+            workerGroup = new EpollEventLoopGroup();
         }else{
             bossGroup = new NioEventLoopGroup(1);
-            workGroup = new NioEventLoopGroup();
+            workerGroup = new NioEventLoopGroup();
         }
         Class<? extends ServerChannel> channelClass = epollAvail ? EpollServerSocketChannel.class : NioServerSocketChannel.class;
 
-        Thread.sleep(1000);
 
 //        group=new ProviderChannelGroup(13,workGroup);
-        TCPProviderChannelManager.initChannel(workGroup);
+        TCPProviderChannelManager.initChannel(workerGroup);
 
         try {
             channel = new ServerBootstrap()
-                    .group(bossGroup,workGroup)
+                    .group(bossGroup,workerGroup)
                     .channel(channelClass)
                     //.channel(EpollServerSocketChannel.class)
                     .option(ChannelOption.SO_BACKLOG,128)
@@ -72,7 +79,7 @@ public class TCPProviderAgent {
             channel.closeFuture().await();
         }finally {
             bossGroup.shutdownGracefully();
-            workGroup.shutdownGracefully();
+            workerGroup.shutdownGracefully();
         }
     }
 

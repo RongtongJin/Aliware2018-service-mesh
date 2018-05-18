@@ -14,10 +14,7 @@ import io.netty.handler.codec.LengthFieldPrepender;
 public class TCPChannel {
     private Channel channel=null;
 
-    public TCPChannel(){}
-
-    public void initChannel(EventLoopGroup group, Endpoint endpoint) throws Exception{
-
+    public TCPChannel(EventLoopGroup group, Endpoint endpoint) throws Exception{
         Class<? extends SocketChannel> channelClass=Epoll.isAvailable() ? EpollSocketChannel.class:NioSocketChannel.class;
         channel = new Bootstrap()
                 .group(group)

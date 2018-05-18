@@ -15,6 +15,7 @@ public class RpcMsgHandler3  extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+
         ByteBuf byteBuf=(ByteBuf)msg;
         byte byte2=byteBuf.getByte(2);
         byte status=byteBuf.getByte(3);
@@ -22,13 +23,14 @@ public class RpcMsgHandler3  extends ChannelInboundHandlerAdapter {
             int len = System.lineSeparator().length();
             long id=byteBuf.getLong(4);
             ByteBuf hashCodeBuf = byteBuf.slice(17 + len, byteBuf.readableBytes() - 17 - 2 * len);
-            Channel ch=ReturnChannelHolder.get(id);
-            ReturnChannelHolder.remove(id);
+//            Channel ch=ReturnChannelHolder.get(id);
+//            ReturnChannelHolder.remove(id);
             CompositeByteBuf sendBuf= ctx.alloc().compositeDirectBuffer();
             ByteBuf idBuf=ctx.alloc().ioBuffer(8);
             idBuf.writeLong(id);
             sendBuf.addComponents(true,idBuf,hashCodeBuf);
-            ch.writeAndFlush(sendBuf);
+//            ch.writeAndFlush(sendBuf);
+            TCPProviderAgent.getConsumerAgentChannel().writeAndFlush(sendBuf);
         }else{
             byteBuf.release();
         }

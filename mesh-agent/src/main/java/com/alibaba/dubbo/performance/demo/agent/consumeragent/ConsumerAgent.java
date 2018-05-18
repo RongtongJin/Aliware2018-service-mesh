@@ -17,8 +17,10 @@ import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.omg.PortableInterceptor.USER_EXCEPTION;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,14 +29,16 @@ public class ConsumerAgent {
     private static Log log = LogFactory.getLog(ConsumerAgent.class);
     private IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
     private Map<String,Endpoint> endpoints = null;
-    private static TCPChannelGroup channelGroup=null;
-
-
-    public static TCPChannelGroup getTCPChannelGroup(){return channelGroup;}
+    private static Map<String,TCPChannel> tcpChannelMap=null;
+//    private static TCPChannelGroup channelGroup=null;
+//
+//
+//    public static TCPChannelGroup getTCPChannelGroup(){return channelGroup;}
 
     public void start(int port) throws Exception {
 
         endpoints = registry.find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
+
 
         boolean epollAvail=Epoll.isAvailable();
         EventLoopGroup bossGroup=null;
@@ -48,7 +52,15 @@ public class ConsumerAgent {
         }
         Class<? extends ServerChannel> channelClass = epollAvail ? EpollServerSocketChannel.class : NioServerSocketChannel.class;
 
-        UDPChannelManager.initChannel(workerGroup);
+        tcpChannelMap=new HashMap<>();
+        for(Map.Entry<String,Endpoint> entry:endpoints.entrySet()){
+            tcpChannelMap.put(entry.getKey(),new TCPChannel(workerGroup,entry.getValue()));
+        }
+
+        //IDEA TEST USE
+ //       tcpChannelMap.put("ideaTest",new TCPChannel(workerGroup,new Endpoint(IpHelper.getHostIp(),30000)));
+
+        //UDPChannelManager.initChannel(workerGroup);
 
         //channelGroup=new TCPChannelGroup(12,workerGroup,new Endpoint(IpHelper.getHostIp(),30000));
 
@@ -83,6 +95,10 @@ public class ConsumerAgent {
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();
         }
+    }
+
+    public static Map<String,TCPChannel> getTcpChannelMap(){
+        return tcpChannelMap;
     }
 
     public static void main(String[] args) throws Exception{

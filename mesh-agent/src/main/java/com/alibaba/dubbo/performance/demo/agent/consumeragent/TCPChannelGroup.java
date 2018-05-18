@@ -16,8 +16,7 @@ public class TCPChannelGroup {
         tcpChannels=new TCPChannel[num];
         try {
             for(int i=0;i<num;i++){
-                tcpChannels[i]=new TCPChannel();
-                tcpChannels[i].initChannel(group,ep);
+                tcpChannels[i]=new TCPChannel(group,ep);
             }
         }catch (Exception e){
             e.printStackTrace();

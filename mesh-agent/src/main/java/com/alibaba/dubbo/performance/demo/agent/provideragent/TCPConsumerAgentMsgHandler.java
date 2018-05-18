@@ -7,13 +7,17 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 public class TCPConsumerAgentMsgHandler extends SimpleChannelInboundHandler<ByteBuf> {
+
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        TCPProviderAgent.setConsumerAgentChannel(ctx.channel());
+    }
+
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, ByteBuf byteBuf) throws Exception {
         long id=byteBuf.readLong();
         byteBuf.retain();
-       // System.out.println(id);
-//        byte[] bytes = new byte[buf.readableBytes()];
-//        buf.readBytes(bytes);
+//        System.out.println(id);
         ByteBuf dataBuf=byteBuf.slice(8,byteBuf.readableBytes());
 //        System.out.println(dataBuf.toString(CharsetUtil.UTF_8));
 //        byte [] data=java.lang.String.valueOf(dataBuf.toString(io.netty.util.CharsetUtil.UTF_8).hashCode()).getBytes();

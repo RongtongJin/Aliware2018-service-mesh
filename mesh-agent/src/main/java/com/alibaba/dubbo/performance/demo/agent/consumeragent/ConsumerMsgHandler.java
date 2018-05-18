@@ -37,6 +37,8 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
 
     private static Random random = new Random();
 
+    private static Map<String,TCPChannel> tcpChannelMap=ConsumerAgent.getTcpChannelMap();
+
 
     public ConsumerMsgHandler(Map<String,Endpoint> endpoints){
         this.endpoints=endpoints;
@@ -51,16 +53,8 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
         buf.retain();
 
         Long id=genId.getAndIncrement();
-//
-//        //fix me:存储如此多的id会不会成为性能瓶颈？？或者ConcurrentHashMap能不能进行优化
-        ChannelHolder.put(id,ctx.channel());
-//        //fix me:为什么不能用CompositeByteBuf
 
-//        //fix me:用直接内存好还是heap内存好？HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE
-        //ByteBuf sendBuf=ctx.alloc().ioBuffer(8+buf.readableBytes()-136);
-        //sendBuf.writeLong(id);
-        //sendBuf.writeBytes(buf,136,buf.readableBytes()-136);
-        //System.out.println(byteBuf.toString(CharsetUtil.UTF_8));
+        ChannelHolder.put(id,ctx.channel());
 
         CompositeByteBuf sendBuf=ctx.alloc().compositeDirectBuffer();
         ByteBuf idBuf=ctx.alloc().ioBuffer();
@@ -69,7 +63,6 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
         sendBuf.addComponents(true,idBuf,paraBuf);
         //sendBuf.writeBytes(System.lineSeparator().getBytes());
 
-        //System.out.println(sendBuf.toString(CharsetUtil.UTF_8));
 
         /*发给provider consumer做测试*/
 //        ByteBuf sendBuf=buf.slice(136,buf.readableBytes()-136);
@@ -85,38 +78,53 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
 
 
         /*负载均衡代码*/
-        //按照性能简单负载均衡
+        //udp按照性能简单负载均衡,fix me:利用id 可以不生成随机数
+//        int x=random.nextInt(6);
+//        Endpoint endpoint=null;
+//        if(x==0){
+//            endpoint=endpoints.get("small");
+//        }else if(x<=2){
+//            endpoint=endpoints.get("medium");
+//        }else{
+//            endpoint=endpoints.get("large");
+//        }
+
+        //tcp按照性能简单负载均衡,fix me:利用id 可以不生成随机数
         int x=random.nextInt(6);
-        Endpoint endpoint=null;
+        TCPChannel ch=null;
         if(x==0){
-            endpoint=endpoints.get("small");
+            ch=tcpChannelMap.get("small");
         }else if(x<=2){
-            endpoint=endpoints.get("medium");
+            ch=tcpChannelMap.get("medium");
         }else{
-            endpoint=endpoints.get("large");
+            ch=tcpChannelMap.get("large");
         }
 
-        //idea下测试使用ls
 
+
+        //idea下测试使用udp
         //Endpoint endpoint=new Endpoint(IpHelper.getHostIp(),30000);
+
+        //idea下测试使用tcp
+//        TCPChannel ch=tcpChannelMap.get("ideaTest");
 
         /*udp发给provider agent*/
         //简单的负载均衡，随机取一个
 //        Endpoint endpoint = endpoints.get(random.nextInt(endpoints.size()));
 
-        DatagramPacket dp=new DatagramPacket(sendBuf,new java.net.InetSocketAddress(endpoint.getHost(),endpoint.getPort()));
-
-        UDPChannelManager.getChannel().writeAndFlush(dp).addListener(cf -> {
-            if (!cf.isSuccess()) {
-                log.error("error in udpChannel write.");
-                cf.cause().printStackTrace();
-            }
-        });
+//        DatagramPacket dp=new DatagramPacket(sendBuf,new java.net.InetSocketAddress(endpoint.getHost(),endpoint.getPort()));
+//
+//        UDPChannelManager.getChannel().writeAndFlush(dp).addListener(cf -> {
+//            if (!cf.isSuccess()) {
+//                log.error("error in udpChannel write.");
+//                cf.cause().printStackTrace();
+//            }
+//        });
 
         /*tcp发给provider agent*/
 //        Endpoint endpoint = endpoints.get(random.nextInt(endpoints.size()));
          // ConsumerAgent.getTCPChannelGroup().nextChannel().writeAndFlush(sendBuf);
-
+        ch.getChannel().writeAndFlush(sendBuf);
 //        System.out.println("send finish..");
     }
 
