@@ -3,6 +3,7 @@ package com.alibaba.dubbo.performance.demo.agent.provideragent;
 import com.alibaba.dubbo.performance.demo.agent.consumeragent.ConsumerAgent;
 import com.alibaba.dubbo.performance.demo.agent.registry.EtcdRegistry;
 import com.alibaba.dubbo.performance.demo.agent.registry.IRegistry;
+import com.alibaba.dubbo.performance.demo.agent.utils.TcpConnectTest;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
@@ -36,7 +37,7 @@ public class TCPProviderAgent {
 
     public void start(int port) throws Exception{
 
-        Thread.sleep(17000);
+
 
         boolean epollAvail=Epoll.isAvailable();
         EventLoopGroup bossGroup=null;
@@ -50,7 +51,9 @@ public class TCPProviderAgent {
         }
         Class<? extends ServerChannel> channelClass = epollAvail ? EpollServerSocketChannel.class : NioServerSocketChannel.class;
 
-
+        while(!TcpConnectTest.isHostConnectable("127.0.0.1",20880)){
+            Thread.sleep(1000);
+        }
 //        group=new ProviderChannelGroup(13,workGroup);
         TCPProviderChannelManager.initChannel(workerGroup);
 

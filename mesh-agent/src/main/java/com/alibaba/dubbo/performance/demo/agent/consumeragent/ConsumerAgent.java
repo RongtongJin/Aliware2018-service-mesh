@@ -5,6 +5,7 @@ import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
 import com.alibaba.dubbo.performance.demo.agent.registry.EtcdRegistry;
 import com.alibaba.dubbo.performance.demo.agent.registry.IRegistry;
 import com.alibaba.dubbo.performance.demo.agent.registry.IpHelper;
+import com.alibaba.dubbo.performance.demo.agent.utils.TcpConnectTest;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
@@ -19,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.omg.PortableInterceptor.USER_EXCEPTION;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,7 +41,6 @@ public class ConsumerAgent {
 
         endpoints = registry.find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
 
-
         boolean epollAvail=Epoll.isAvailable();
         EventLoopGroup bossGroup=null;
         EventLoopGroup workerGroup=null;
@@ -52,13 +53,20 @@ public class ConsumerAgent {
         }
         Class<? extends ServerChannel> channelClass = epollAvail ? EpollServerSocketChannel.class : NioServerSocketChannel.class;
 
+        while(!TcpConnectTest.isHostConnectable(IpHelper.getHostIp(),30000)){
+            Thread.sleep(1000);
+        }
+
         tcpChannelMap=new HashMap<>();
         for(Map.Entry<String,Endpoint> entry:endpoints.entrySet()){
+            while(!TcpConnectTest.isHostConnectable(entry.getValue().getHost(),entry.getValue().getPort())){
+                Thread.sleep(1000);
+            }
             tcpChannelMap.put(entry.getKey(),new TCPChannel(workerGroup,entry.getValue()));
         }
 
         //IDEA TEST USE
- //       tcpChannelMap.put("ideaTest",new TCPChannel(workerGroup,new Endpoint(IpHelper.getHostIp(),30000)));
+        //tcpChannelMap.put("ideaTest",new TCPChannel(workerGroup,new Endpoint(IpHelper.getHostIp(),30000)));
 
         //UDPChannelManager.initChannel(workerGroup);
 
