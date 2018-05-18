@@ -94,7 +94,7 @@ public final class ConsumerAgent {
     }
 
     public static void main(String[] args) throws Exception{
-        new ConsumerAgent().start(20000);
+        ConsumerAgent consumerAgent= new ConsumerAgent();
+        consumerAgent.start(20000);
     }
-
 }
