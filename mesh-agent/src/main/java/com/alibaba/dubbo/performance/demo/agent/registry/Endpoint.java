@@ -8,7 +8,11 @@ public class Endpoint {
         this.host = host;
         this.port = port;
     }
-
+    public Endpoint(String hostport){
+        int i=hostport.lastIndexOf(':');
+        this.host=hostport.substring(0,i);
+        this.port=Integer.parseInt(hostport.substring(i+1,hostport.length()));
+    }
     public String getHost() {
         return host;
     }
