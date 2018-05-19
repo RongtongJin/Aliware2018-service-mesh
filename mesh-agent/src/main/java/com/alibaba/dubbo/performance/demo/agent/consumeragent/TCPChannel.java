@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 public class TCPChannel {
     private volatile Channel channel=null;
-    private Bootstrap bootstrap;
+    private volatile Bootstrap bootstrap;
     private Object lock = new Object();
     private EventLoopGroup workerGroup;
     private Endpoint endpoint;
@@ -44,18 +44,13 @@ public class TCPChannel {
         if (null == channel) {
             synchronized (lock) {
                 if(null==channel){
-                    Boolean isConnect=false;
-                    while(!isConnect){
-                        try {
-                            System.out.println("-----------------------");
-                            channel = bootstrap.connect(endpoint.getHost(), endpoint.getPort()).sync().channel();
-                            System.out.println("ip="+endpoint.getHost());
-                            System.out.println("port="+endpoint.getPort());
-                            isConnect=true;
-                        }catch (Exception e){
-                            e.printStackTrace();
-                            Thread.sleep(250);
-                        }
+                    try {
+                        System.out.println("-----------------------");
+                        channel = bootstrap.connect(endpoint.getHost(), endpoint.getPort()).sync().channel();
+                        System.out.println("ip=" + endpoint.getHost());
+                        System.out.println("port=" + endpoint.getPort());
+                    }catch (Exception e){
+                        e.printStackTrace();
                     }
                 }
             }

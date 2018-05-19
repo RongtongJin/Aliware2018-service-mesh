@@ -14,7 +14,7 @@ public class TCPProviderChannelManager {
     private static volatile Channel channel=null;
     private static EventLoopGroup workerGroup=null;
     private static Object lock = new Object();
-    private static Bootstrap bootstrap;
+    private static volatile Bootstrap bootstrap;
 
     public static void setWorkerGroup(EventLoopGroup group){
         workerGroup=group;
