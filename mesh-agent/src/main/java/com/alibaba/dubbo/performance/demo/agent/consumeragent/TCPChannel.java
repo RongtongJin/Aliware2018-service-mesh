@@ -53,6 +53,7 @@ public class TCPChannel {
                             System.out.println("port="+endpoint.getPort());
                             isConnect=true;
                         }catch (Exception e){
+                            e.printStackTrace();
                             Thread.sleep(250);
                         }
                     }
