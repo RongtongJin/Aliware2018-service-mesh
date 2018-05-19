@@ -22,6 +22,8 @@ public class TCPChannel {
     private Endpoint endpoint;
 
     public TCPChannel(EventLoopGroup group, Endpoint endpoint){
+        System.out.println("init==ip="+endpoint.getHost());
+        System.out.println("init==port="+endpoint.getPort());
         this.workerGroup=group;
         this.endpoint=endpoint;
     }
@@ -45,6 +47,7 @@ public class TCPChannel {
                     Boolean isConnect=false;
                     while(!isConnect){
                         try {
+                            System.out.println("-----------------------");
                             channel = bootstrap.connect(endpoint.getHost(), endpoint.getPort()).sync().channel();
                             System.out.println("ip="+endpoint.getHost());
                             System.out.println("port="+endpoint.getPort());
