@@ -22,7 +22,7 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<AgentHttpReq
 
     //private static java.net.InetSocketAddress target=new java.net.InetSocketAddress("127.0.0.1",20000);
 
-    public ConsumerMsgHandler(Map<String, Endpoint> endpoints) {
+    public ConsumerMsgHandler() {
         this.endpoints = endpoints;
     }
 

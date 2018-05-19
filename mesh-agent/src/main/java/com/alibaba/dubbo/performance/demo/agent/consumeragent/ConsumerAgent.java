@@ -2,9 +2,8 @@ package com.alibaba.dubbo.performance.demo.agent.consumeragent;
 
 import com.alibaba.dubbo.performance.demo.agent.protocal.MyHttpRequestDecoder;
 import com.alibaba.dubbo.performance.demo.agent.protocal.MyHttpResponseEncoder;
-import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
-import com.alibaba.dubbo.performance.demo.agent.registry.EtcdRegistry;
-import com.alibaba.dubbo.performance.demo.agent.registry.IRegistry;
+import com.alibaba.dubbo.performance.demo.agent.protocal.TramissionHandler;
+import com.alibaba.dubbo.performance.demo.agent.utils.SimpleRegistryUtil;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
@@ -14,28 +13,21 @@ import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class ConsumerAgent {
-    private static Log log = LogFactory.getLog(ConsumerAgent.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConsumerAgent.class);
     private static TCPChannelGroup channelGroup = null;
-    private IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
-    private Map<String, Endpoint> endpoints = null;
+    //private IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
 
     public static TCPChannelGroup getTCPChannelGroup() {
         return channelGroup;
     }
 
     public static void main(String[] args) throws Exception {
-        ConsumerAgent consumerAgent = new ConsumerAgent();
-        // consumerAgent.endpoints= registry.find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
-        consumerAgent.start(20001);
-    }
+        TramissionHandler.cacheEndpoints(System.getProperty("etcd.url"));
 
-    public void start(int port) throws Exception {
         boolean epollAvail = Epoll.isAvailable();
         EventLoopGroup bossGroup = null;
         EventLoopGroup workerGroup = null;
@@ -45,10 +37,45 @@ public final class ConsumerAgent {
             workerGroup = new EpollEventLoopGroup();
             channelClass = EpollServerSocketChannel.class;
         } else {
-            bossGroup = new NioEventLoopGroup(2);
-            workerGroup = new NioEventLoopGroup(16);
+            bossGroup = new NioEventLoopGroup(1);
+            workerGroup = new NioEventLoopGroup(8);
             channelClass = NioServerSocketChannel.class;
         }
+
+
+        TramissionHandler.iniClients(workerGroup);
+        TramissionHandler.startClients();
+
+        ConsumerAgent consumerAgent = new ConsumerAgent();
+        consumerAgent.start0(20000,bossGroup,workerGroup,channelClass);
+    }
+    public void start(int port) throws  Exception{
+
+        TramissionHandler.cacheEndpoints(System.getProperty("etcd.url"));
+
+        boolean epollAvail = Epoll.isAvailable();
+        EventLoopGroup bossGroup = null;
+        EventLoopGroup workerGroup = null;
+        Class<? extends ServerChannel> channelClass = null;
+
+        if (epollAvail) {
+            bossGroup = new EpollEventLoopGroup(1);
+            workerGroup = new EpollEventLoopGroup();
+            channelClass = EpollServerSocketChannel.class;
+        } else {
+            bossGroup = new NioEventLoopGroup(1);
+            workerGroup = new NioEventLoopGroup(8);
+            channelClass = NioServerSocketChannel.class;
+        }
+
+
+        TramissionHandler.iniClients(workerGroup);
+        TramissionHandler.startClients();
+
+        ConsumerAgent consumerAgent = new ConsumerAgent();
+        consumerAgent.start0(port,bossGroup,workerGroup,channelClass);
+    }
+    public void start0(int port,EventLoopGroup bossGroup,EventLoopGroup workerGroup,Class<? extends ServerChannel> channelClass ) throws Exception {
         //UDPChannelManager.initChannel(workerGroup);
         try {
             ServerBootstrap b = new ServerBootstrap();
@@ -62,7 +89,7 @@ public final class ConsumerAgent {
                             ch.pipeline().addLast("encoder", new MyHttpResponseEncoder());
                             //fix me:设置的最大长度会不会影响性能
                             // ch.pipeline().addLast(new HttpObjectAggregator(2048));
-                            ch.pipeline().addLast(new ConsumerMsgHandler(endpoints));
+                            ch.pipeline().addLast();
                         }
                     })
                     .option(ChannelOption.SO_BACKLOG, 2048)
@@ -75,7 +102,7 @@ public final class ConsumerAgent {
                     .childOption(ChannelOption.ALLOW_HALF_CLOSURE, Boolean.FALSE);
             ChannelFuture f = b.bind(port).sync();
             if (f.isSuccess()) {
-                log.info("ConsumerAgent start on " + port);
+                LOGGER.info("ConsumerAgent start on " + port);
                 f.channel().closeFuture().sync();
             }
 

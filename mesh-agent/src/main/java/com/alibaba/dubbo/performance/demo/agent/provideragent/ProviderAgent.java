@@ -20,7 +20,7 @@ public class ProviderAgent {
 
     private static volatile InetSocketAddress msgReturner=null;
 
-    private IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
+   // private IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
 
     public void start(int port) throws Exception{
         EventLoopGroup eventLoopGroup=new NioEventLoopGroup();
@@ -59,6 +59,8 @@ public class ProviderAgent {
     public static InetSocketAddress getMsgReturner(){return msgReturner;}
 
     public static void main(String[] args) throws Exception{
-        new ProviderAgent().start(30000);
+        ProviderAgent providerAgent=new ProviderAgent();
+
+        providerAgent.start(30000);
     }
 }

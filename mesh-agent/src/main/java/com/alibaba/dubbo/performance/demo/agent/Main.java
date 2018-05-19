@@ -1,8 +1,7 @@
 package com.alibaba.dubbo.performance.demo.agent;
 
 import com.alibaba.dubbo.performance.demo.agent.consumeragent.ConsumerAgent;
-import com.alibaba.dubbo.performance.demo.agent.provideragent.ProviderAgent;
-import com.alibaba.dubbo.performance.demo.agent.provideragent.TCPProviderAgent;
+import com.alibaba.dubbo.performance.demo.agent.provideragent.tcp.TCPProviderAgent;
 
 public class Main {
     public static void main(String[] args) throws Exception{

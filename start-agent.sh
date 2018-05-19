@@ -7,7 +7,7 @@ ETCD_URL=http://$ETCD_HOST:$ETCD_PORT
 echo ETCD_URL = $ETCD_URL
 
 if [[ "$1" == "consumer" ]]; then
-  echo "lsxSxarting consumer agent..."
+  echo "lsx consumer agent..."
   java -jar \
        -Xms1536M \
        -Xmx1536M \
