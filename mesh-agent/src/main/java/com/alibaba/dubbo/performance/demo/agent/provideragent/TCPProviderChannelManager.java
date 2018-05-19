@@ -11,7 +11,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
 public class TCPProviderChannelManager {
-    private static Channel channel=null;
+    private static volatile Channel channel=null;
     private static EventLoopGroup workerGroup=null;
     private static Object lock = new Object();
     private static Bootstrap bootstrap;

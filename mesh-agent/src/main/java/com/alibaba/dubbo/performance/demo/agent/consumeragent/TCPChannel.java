@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 
 public class TCPChannel {
-    private Channel channel=null;
+    private volatile Channel channel=null;
     private Bootstrap bootstrap;
     private Object lock = new Object();
     private EventLoopGroup workerGroup;
