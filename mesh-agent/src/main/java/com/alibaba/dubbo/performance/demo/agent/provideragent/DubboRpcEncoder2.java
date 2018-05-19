@@ -101,14 +101,14 @@ public class DubboRpcEncoder2 extends ChannelOutboundHandlerAdapter {
 //        System.out.println(req.getId());
 //        System.out.println(req.getParameter().toString(CharsetUtil.UTF_8));
         int bodyLen=frontBody.readableBytes()+req.getParameter().readableBytes()+tailBody.readableBytes();
-        ByteBuf headerDup=headerBuf.copy();
+        ByteBuf headerDup=headerBuf.duplicate().retain();
         int saveWriterIndex=headerDup.writerIndex();
         headerDup.writerIndex(4);
         headerDup.writeLong(req.getId());
         headerDup.writeInt(bodyLen);
         headerDup.writerIndex(saveWriterIndex);
         CompositeByteBuf sendBuf=ctx.alloc().compositeDirectBuffer();
-        sendBuf.addComponents(true,headerDup,frontBody.copy(),req.getParameter(),tailBody.copy());
+        sendBuf.addComponents(true,headerDup,frontBody.duplicate().retain(),req.getParameter(),tailBody.duplicate().retain());
         ctx.writeAndFlush(sendBuf,promise);
     }
 }
