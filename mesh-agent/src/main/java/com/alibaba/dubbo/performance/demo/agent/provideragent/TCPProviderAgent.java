@@ -42,10 +42,10 @@ public class TCPProviderAgent {
         EventLoopGroup workerGroup=null;
         if(epollAvail){
             bossGroup = new EpollEventLoopGroup(1);
-            workerGroup = new EpollEventLoopGroup(2);
+            workerGroup = new EpollEventLoopGroup();
         }else{
             bossGroup = new NioEventLoopGroup(1);
-            workerGroup = new NioEventLoopGroup(2);
+            workerGroup = new NioEventLoopGroup();
         }
         Class<? extends ServerChannel> channelClass = epollAvail ? EpollServerSocketChannel.class : NioServerSocketChannel.class;
 
@@ -78,7 +78,7 @@ public class TCPProviderAgent {
                             pipeline.addLast(new TCPConsumerAgentMsgHandler());
                         }
                     }).bind(port).sync().channel();
-            System.out.println("TCPProviderAgent start on "+port);
+            System.out.println("1TCPProviderAgent start on "+port);
             channel.closeFuture().await();
         }finally {
             bossGroup.shutdownGracefully();
