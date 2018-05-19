@@ -53,7 +53,7 @@ public class ConsumerAgent {
         }
         Class<? extends ServerChannel> channelClass = epollAvail ? EpollServerSocketChannel.class : NioServerSocketChannel.class;
 
-        Thread.sleep(1000);
+        Thread.sleep(15000);
 
         tcpChannelMap=new HashMap<>();
         for(Map.Entry<String,Endpoint> entry:endpoints.entrySet()){
