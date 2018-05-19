@@ -55,7 +55,7 @@ public class TCPProviderAgent {
 
 //        Thread.sleep(16000);
 //        group=new ProviderChannelGroup(13,workGroup);
-        TCPProviderChannelManager.initChannel(workerGroup);
+        TCPProviderChannelManager.setWorkerGroup(workerGroup);
 
         try {
             channel = new ServerBootstrap()

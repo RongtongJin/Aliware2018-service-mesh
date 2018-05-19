@@ -16,7 +16,7 @@ public class ProviderChannelGroup {
         try {
             for(int i=0;i<num;i++){
                 providerChannnels[i]=new ProviderChannel();
-                providerChannnels[i].initChannel(group);
+                providerChannnels[i].setWorkerGroup(group);
             }
         }catch (Exception e){
             e.printStackTrace();

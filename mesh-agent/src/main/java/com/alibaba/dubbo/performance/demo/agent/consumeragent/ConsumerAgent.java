@@ -32,6 +32,7 @@ public class ConsumerAgent {
     private IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
     private Map<String,Endpoint> endpoints = null;
     private static Map<String,TCPChannel> tcpChannelMap=null;
+
 //    private static TCPChannelGroup channelGroup=null;
 //
 //
@@ -41,9 +42,9 @@ public class ConsumerAgent {
 
         endpoints = registry.find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
 
-        boolean epollAvail=Epoll.isAvailable();
         EventLoopGroup bossGroup=null;
         EventLoopGroup workerGroup=null;
+        boolean epollAvail=Epoll.isAvailable();
         if(epollAvail){
             bossGroup = new EpollEventLoopGroup(1);
             workerGroup = new EpollEventLoopGroup();

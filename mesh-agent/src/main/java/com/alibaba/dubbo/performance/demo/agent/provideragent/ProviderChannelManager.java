@@ -21,15 +21,23 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
  */
 public class ProviderChannelManager{
 
-    private static  Channel channel=null;
+    private static Channel channel=null;
+    private static EventLoopGroup workerGroup=null;
+    private static Object lock = new Object();
+    private static Bootstrap bootstrap;
 
-    public static void initChannel(EventLoopGroup group) throws Exception{
-        //int port = Integer.valueOf(System.getProperty("dubbo.protocol.port"));
-        //int port=20889;
+    public static void setWorkerGroup(EventLoopGroup group){
+        workerGroup=group;
+    }
+
+
+    public static void initBootstrap(){
+
         boolean epollAvail=Epoll.isAvailable();
-        Class<? extends SocketChannel> channelClass= epollAvail ? EpollSocketChannel.class:NioSocketChannel.class;
-        Bootstrap bootstrap = new Bootstrap()
-                .group(group)
+        Class<? extends SocketChannel> channelClass = epollAvail ? EpollSocketChannel.class:NioSocketChannel.class;
+
+        bootstrap = new Bootstrap()
+                .group(workerGroup)
                 .channel(channelClass)
                 //.group(new EpollEventLoopGroup())
                 //.channel(EpollSocketChannel.class)
@@ -47,19 +55,29 @@ public class ProviderChannelManager{
                         pipeline.addLast(new RpcMsgHandler());
                     }
                 });
-        Boolean isConnect=false;
-        while (!isConnect){
-            try {
-                channel=bootstrap.connect("127.0.0.1",20880).sync().channel();
-                isConnect=true;
-            }catch (Exception e){
-                Thread.sleep(250);
-            }
-        }
     }
 
-
     public static Channel getChannel() throws Exception{
+        if (null != channel) {
+            return channel;
+        }
+
+        if (null == bootstrap) {
+            synchronized (lock) {
+                if (null == bootstrap) {
+                    initBootstrap();
+                }
+            }
+        }
+
+        if (null == channel) {
+            synchronized (lock){
+                if (null == channel){
+                    channel = bootstrap.connect("127.0.0.1", 20880).sync().channel();
+                }
+            }
+        }
+
         return channel;
     }
 

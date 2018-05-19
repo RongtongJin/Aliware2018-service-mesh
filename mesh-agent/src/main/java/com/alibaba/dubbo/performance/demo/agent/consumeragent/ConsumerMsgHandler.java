@@ -89,7 +89,7 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
 //            endpoint=endpoints.get("large");
 //        }
 
-        //tcp按照性能简单负载均衡,fix me:利用id 可以不生成随机数
+//        tcp按照性能简单负载均衡,fix me:利用id 可以不生成随机数
         int x=random.nextInt(6);
         TCPChannel ch=null;
         if(x==0){

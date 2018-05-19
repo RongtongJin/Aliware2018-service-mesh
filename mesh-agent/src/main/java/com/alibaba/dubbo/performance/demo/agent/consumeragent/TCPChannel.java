@@ -16,16 +16,44 @@ import java.util.concurrent.TimeUnit;
 
 public class TCPChannel {
     private Channel channel=null;
+    private Bootstrap bootstrap;
+    private Object lock = new Object();
+    private EventLoopGroup workerGroup;
+    private Endpoint endpoint;
 
-    public TCPChannel(EventLoopGroup group, Endpoint endpoint) throws Exception{
+    public TCPChannel(EventLoopGroup group, Endpoint endpoint){
+        this.workerGroup=group;
+        this.endpoint=endpoint;
+    }
 
-//        while(!TcpConnectTest.isHostConnectable(endpoint.getHost(),endpoint.getPort())){
-//            Thread.sleep(1000);
-//        }
+    public Channel getChannel() throws Exception {
+        if (null != channel) {
+            return channel;
+        }
 
+        if (null == bootstrap) {
+            synchronized (lock) {
+                if (null == bootstrap) {
+                    initBootstrap();
+                }
+            }
+        }
+
+        if (null == channel) {
+            synchronized (lock) {
+                if(null==channel){
+                    channel=bootstrap.connect(endpoint.getHost(),endpoint.getPort()).sync().channel();
+                }
+            }
+        }
+
+        return channel;
+    }
+
+    public void initBootstrap(){
         Class<? extends SocketChannel> channelClass=Epoll.isAvailable() ? EpollSocketChannel.class:NioSocketChannel.class;
-        Bootstrap bootstrap = new Bootstrap()
-                .group(group)
+        bootstrap = new Bootstrap()
+                .group(workerGroup)
                 .channel(channelClass)
                 //.channel(EpollSocketChannel.class)
                 .option(ChannelOption.SO_KEEPALIVE, true)
@@ -41,18 +69,5 @@ public class TCPChannel {
                         pipeline.addLast(new TCPProviderAgentMsgHandler());
                     }
                 });
-        Boolean isConnect=false;
-        while (!isConnect){
-            try {
-                channel=bootstrap.connect(endpoint.getHost(),endpoint.getPort()).sync().channel();
-                isConnect=true;
-            }catch (Exception e){
-                Thread.sleep(250);
-            }
-        }
-    }
-
-    public Channel getChannel() throws Exception {
-        return channel;
     }
 }
