@@ -19,7 +19,7 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 public class TCPProviderAgentMsgHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
-    private static ExecutorService threadsPool= Executors.newSingleThreadExecutor();
+    //private static ExecutorService threadsPool= Executors.newSingleThreadExecutor();
 
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf) throws Exception {
@@ -27,8 +27,8 @@ public class TCPProviderAgentMsgHandler extends SimpleChannelInboundHandler<Byte
         byteBuf.retain();
         Channel sendChannel=ChannelHolder.get(id);
         //测试后发现每次remove id后性能更高
-        //ChannelHolder.remove(id);
-        threadsPool.submit(new Task(id));
+        ChannelHolder.remove(id);
+        //threadsPool.submit(new Task(id));
         //是否要加这个连接判断
 //        byte[] bytes=new byte[buf.readableBytes()];
 //        buf.readBytes(bytes);
@@ -53,14 +53,14 @@ public class TCPProviderAgentMsgHandler extends SimpleChannelInboundHandler<Byte
         });
     }
 
-    private static class Task implements Runnable{
-        private long id;
-        public Task(long id){
-            this.id=id;
-        }
-        @Override
-        public void run() {
-            ChannelHolder.remove(id);
-        }
-    }
+//    private static class Task implements Runnable{
+//        private long id;
+//        public Task(long id){
+//            this.id=id;
+//        }
+//        @Override
+//        public void run() {
+//            ChannelHolder.remove(id);
+//        }
+//    }
 }
