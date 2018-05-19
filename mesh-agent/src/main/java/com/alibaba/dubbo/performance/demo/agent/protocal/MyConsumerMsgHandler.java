@@ -1,35 +1,22 @@
-package com.alibaba.dubbo.performance.demo.agent.consumeragent;
+package com.alibaba.dubbo.performance.demo.agent.protocal;
 
-import com.alibaba.dubbo.performance.demo.agent.protocal.AgentHttpRequest;
-import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
+import com.alibaba.dubbo.performance.demo.agent.consumeragent.ChannelHolder;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicLong;
 
+public class MyConsumerMsgHandler extends SimpleChannelInboundHandler<AgentHttpRequest> {
 
-public class ConsumerMsgHandler extends SimpleChannelInboundHandler<AgentHttpRequest> {
+    private static Log log = LogFactory.getLog(MyConsumerMsgHandler.class);
 
-    private static Log log = LogFactory.getLog(ConsumerMsgHandler.class);
-
-    private static AtomicLong genId = new AtomicLong();
-    private static Random random = new Random();
-    private Map<String, Endpoint> endpoints = null;
-
-    //private static java.net.InetSocketAddress target=new java.net.InetSocketAddress("127.0.0.1",20000);
-
-    public ConsumerMsgHandler() {
-        this.endpoints = endpoints;
+    public MyConsumerMsgHandler() {
     }
 
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, AgentHttpRequest msg) throws Exception {
-
         // ByteBuf buf = msg.bodyBuf;
         // System.out.println(buf.toString(io.netty.util.CharsetUtil.UTF_8));
 //        buf.retain();
@@ -37,7 +24,10 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<AgentHttpReq
         //  httpResponse.content().writeBytes("123123".getBytes());
         // httpResponse.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/html;charset=UTF-8");
         //   httpResponse.headers().setInt(HttpHeaderNames.CONTENT_LENGTH, httpResponse.content().readableBytes());
-        ctx.writeAndFlush(msg);
+
+        TranmissionHandler.forwarded(msg);
+//        ctx.writeAndFlush(msg);
+        //ctx.alloc().ioBuffer()
 //        Long id=genId.getAndIncrement();
 //
 //        //fix me:存储如此多的id会不会成为性能瓶颈？？或者ConcurrentHashMap能不能进行优化

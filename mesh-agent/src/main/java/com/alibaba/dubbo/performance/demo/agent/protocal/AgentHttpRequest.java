@@ -2,30 +2,35 @@ package com.alibaba.dubbo.performance.demo.agent.protocal;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 
 
 public final class AgentHttpRequest {
     public int len;
     public ByteBuf bodyBuf;
-    public AgentHttpRequest(ByteBuf byteBuffer, ChannelHandlerContext ctx){
+    public AgentHttpRequest(ByteBuf byteBuffer, Channel ctx){
         len=byteBuffer.readableBytes()+8;
         this.bodyBuf.clear();
         this.bodyBuf.writeInt(len);
         this.bodyBuf.writeInt(ctx.hashCode());
         this.bodyBuf.writeBytes(byteBuffer);
     }
-    AgentHttpRequest(){
-        bodyBuf = Unpooled.directBuffer(2048);
-    }
     AgentHttpRequest(ByteBuf bodyBuf){
         this.bodyBuf=bodyBuf;
     }
-    AgentHttpRequest setBody(ByteBuf byteBuffer, ChannelHandlerContext ctx){
+    AgentHttpRequest setBody(ByteBuf byteBuffer, Channel ctx){
         this.bodyBuf.clear();
         len=byteBuffer.readableBytes()+8;
         this.bodyBuf.writeInt(len);
         this.bodyBuf.writeInt(ctx.hashCode());
+        this.bodyBuf.writeBytes(byteBuffer);
+        return this;
+    }
+    AgentHttpRequest setStrBody(long id,ByteBuf byteBuffer){
+        //this.bodyBuf.clear();
+       // this.bodyBuf.writeShort(byteBuffer.readableBytes()+10);
+        this.bodyBuf.writeLong(id);
         this.bodyBuf.writeBytes(byteBuffer);
         return this;
     }
@@ -41,6 +46,9 @@ public final class AgentHttpRequest {
 
     }
     public int getHash() throws Exception {
+       return bodyBuf.toString(8,bodyBuf.readableBytes()-8,io.netty.util.CharsetUtil.UTF_8).hashCode();
+    }
+    public int getHash0() throws Exception {
         int i=len-1;
         while(i>=8&&this.bodyBuf.getByte(i)!='='){
             i--;

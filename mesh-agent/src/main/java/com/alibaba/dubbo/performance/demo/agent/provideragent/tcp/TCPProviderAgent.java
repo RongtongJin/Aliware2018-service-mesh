@@ -2,6 +2,7 @@ package com.alibaba.dubbo.performance.demo.agent.provideragent.tcp;
 
 import com.alibaba.dubbo.performance.demo.agent.provideragent.ProviderChannelManager;
 import com.alibaba.dubbo.performance.demo.agent.provideragent.TCPConsumerAgentMsgHandler;
+import com.alibaba.dubbo.performance.demo.agent.provideragent.protocal.Mydecoder;
 import com.alibaba.dubbo.performance.demo.agent.utils.SimpleRegistryUtil;
 import com.alibaba.dubbo.performance.demo.agent.utils.TcpConnectUtil;
 import io.netty.bootstrap.ServerBootstrap;
@@ -39,7 +40,8 @@ public class TCPProviderAgent {
             Thread.sleep(1000);
         }
 //        group=new ProviderChannelGroup(13,workGroup);
-        TCPProviderChannelManager.initChannel(workerGroup);
+        TCPProviderChannelManager.setWorkerGroup(workerGroup);
+
 
         try {
             channel = new ServerBootstrap()
@@ -58,11 +60,12 @@ public class TCPProviderAgent {
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
                             ChannelPipeline pipeline = socketChannel.pipeline();
                             pipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE,0,2,0,2));
+                           // pipeline.addLast("decoder",new Mydecoder());
                             pipeline.addLast(new LengthFieldPrepender(2,false));
                             pipeline.addLast(new TCPConsumerAgentMsgHandler());
                         }
                     }).bind(port).sync().channel();
-            System.out.println("TCPProviderAgent start on "+port);
+            System.out.println("TCP ProviderAgent start on "+port);
             channel.closeFuture().await();
         }finally {
             bossGroup.shutdownGracefully();

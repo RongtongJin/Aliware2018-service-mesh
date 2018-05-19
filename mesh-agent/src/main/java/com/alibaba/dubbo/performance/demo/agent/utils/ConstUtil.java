@@ -18,6 +18,7 @@ public interface ConstUtil {
     byte e = 'e';
     byte n = 'n';
     byte EMP = ' ';
-    int REQUEST_SIZE=2048;
+    int REQUEST_SIZE=1024*2;
+    byte[] template="HTTP/1.1 200 OK\ncontent-length:".getBytes(); //31
 
 }

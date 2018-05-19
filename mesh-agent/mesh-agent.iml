@@ -49,6 +49,9 @@
     <orderEntry type="library" name="Maven: commons-codec:commons-codec:1.10" level="project" />
     <orderEntry type="library" name="Maven: com.squareup.okhttp3:okhttp:3.10.0" level="project" />
     <orderEntry type="library" name="Maven: com.squareup.okio:okio:1.14.0" level="project" />
+    <orderEntry type="library" name="Maven: com.koloboke:koloboke-api-jdk8:1.0.0" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: com.koloboke:koloboke-impl-jdk8:1.0.0" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: com.koloboke:koloboke-impl-common-jdk8:1.0.0" level="project" />
     <orderEntry type="library" name="Maven: com.coreos:jetcd-core:0.0.1" level="project" />
     <orderEntry type="library" name="Maven: io.grpc:grpc-core:1.5.0" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:guava:19.0" level="project" />

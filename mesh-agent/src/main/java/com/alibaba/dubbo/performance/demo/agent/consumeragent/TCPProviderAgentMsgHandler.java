@@ -7,6 +7,8 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpResponse;
 
+import java.nio.charset.Charset;
+
 import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_LENGTH;
 import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
@@ -27,6 +29,7 @@ public class TCPProviderAgentMsgHandler extends SimpleChannelInboundHandler<Byte
 //        Integer res= JSON.parseObject(bytes, Integer.class);
         //System.out.println(id);
         ByteBuf hashCodeBuf = byteBuf.slice(8,byteBuf.readableBytes());
+       // System.err.println("结果:"+hashCodeBuf.toString(0,byteBuf.readableBytes(), Charset.defaultCharset()));
         //System.out.println(hashCodeBuf.toString(io.netty.util.CharsetUtil.UTF_8));
         FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1,
                 OK, hashCodeBuf);
@@ -36,6 +39,9 @@ public class TCPProviderAgentMsgHandler extends SimpleChannelInboundHandler<Byte
         response.headers().set(CONTENT_LENGTH,
                 response.content().readableBytes());
 
+//        byteBuffer.writeBytes(template);
+//        String hash=String.valueOf(msg.getHash());
+//        byteBuffer.writeBytes((hash.length()+"\n\n"+hash).getBytes());
         //response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
         sendChannel.writeAndFlush(response).addListener(cf->{
             if(!cf.isSuccess()){

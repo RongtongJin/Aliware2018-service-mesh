@@ -1,9 +1,6 @@
 package com.alibaba.dubbo.performance.demo.agent.consumeragent;
 
-import com.alibaba.dubbo.performance.demo.agent.protocal.MyHttpRequestDecoder;
-import com.alibaba.dubbo.performance.demo.agent.protocal.MyHttpResponseEncoder;
-import com.alibaba.dubbo.performance.demo.agent.protocal.TramissionHandler;
-import com.alibaba.dubbo.performance.demo.agent.utils.SimpleRegistryUtil;
+import com.alibaba.dubbo.performance.demo.agent.protocal.*;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
@@ -13,6 +10,7 @@ import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.http.HttpResponseEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,33 +23,10 @@ public final class ConsumerAgent {
         return channelGroup;
     }
 
-    public static void main(String[] args) throws Exception {
-        TramissionHandler.cacheEndpoints(System.getProperty("etcd.url"));
 
-        boolean epollAvail = Epoll.isAvailable();
-        EventLoopGroup bossGroup = null;
-        EventLoopGroup workerGroup = null;
-        Class<? extends ServerChannel> channelClass = null;
-        if (epollAvail) {
-            bossGroup = new EpollEventLoopGroup(1);
-            workerGroup = new EpollEventLoopGroup();
-            channelClass = EpollServerSocketChannel.class;
-        } else {
-            bossGroup = new NioEventLoopGroup(1);
-            workerGroup = new NioEventLoopGroup(8);
-            channelClass = NioServerSocketChannel.class;
-        }
-
-
-        TramissionHandler.iniClients(workerGroup);
-        TramissionHandler.startClients();
-
-        ConsumerAgent consumerAgent = new ConsumerAgent();
-        consumerAgent.start0(20000,bossGroup,workerGroup,channelClass);
-    }
     public void start(int port) throws  Exception{
 
-        TramissionHandler.cacheEndpoints(System.getProperty("etcd.url"));
+        TranmissionHandler.cacheEndpoints(System.getProperty("etcd.url"));
 
         boolean epollAvail = Epoll.isAvailable();
         EventLoopGroup bossGroup = null;
@@ -59,18 +34,17 @@ public final class ConsumerAgent {
         Class<? extends ServerChannel> channelClass = null;
 
         if (epollAvail) {
-            bossGroup = new EpollEventLoopGroup(1);
+            bossGroup = new EpollEventLoopGroup();
             workerGroup = new EpollEventLoopGroup();
             channelClass = EpollServerSocketChannel.class;
         } else {
-            bossGroup = new NioEventLoopGroup(1);
-            workerGroup = new NioEventLoopGroup(8);
+            bossGroup = new NioEventLoopGroup();
+            workerGroup = new NioEventLoopGroup();
             channelClass = NioServerSocketChannel.class;
         }
 
-
-        TramissionHandler.iniClients(workerGroup);
-        TramissionHandler.startClients();
+        TranmissionHandler.iniClients(workerGroup);
+        TranmissionHandler.startClientsAndChannel();
 
         ConsumerAgent consumerAgent = new ConsumerAgent();
         consumerAgent.start0(port,bossGroup,workerGroup,channelClass);
@@ -83,13 +57,14 @@ public final class ConsumerAgent {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         public void initChannel(SocketChannel ch) throws Exception {
+                            MyChannelHolder.put(ch.hashCode(),ch);
                             // server端发送的是httpResponse，所以要使用HttpResponseEncoder进行编码
                             ch.pipeline().addLast("decoder", new MyHttpRequestDecoder());
                             // server端接收到的是httpRequest，所以要使用HttpRequestDecoder进行解码
-                            ch.pipeline().addLast("encoder", new MyHttpResponseEncoder());
+                            ch.pipeline().addLast("encoder", new HttpResponseEncoder());
                             //fix me:设置的最大长度会不会影响性能
                             // ch.pipeline().addLast(new HttpObjectAggregator(2048));
-                            ch.pipeline().addLast();
+                            ch.pipeline().addLast(new MyConsumerMsgHandler());
                         }
                     })
                     .option(ChannelOption.SO_BACKLOG, 2048)
@@ -110,5 +85,29 @@ public final class ConsumerAgent {
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();
         }
+    }
+    public static void main(String[] args) throws Exception {
+        TranmissionHandler.cacheEndpoints(System.getProperty("etcd.url"));
+
+        boolean epollAvail = Epoll.isAvailable();
+        EventLoopGroup bossGroup = null;
+        EventLoopGroup workerGroup = null;
+        Class<? extends ServerChannel> channelClass = null;
+        if (epollAvail) {
+            bossGroup = new EpollEventLoopGroup(1);
+            workerGroup = new EpollEventLoopGroup();
+            channelClass = EpollServerSocketChannel.class;
+        } else {
+            bossGroup = new NioEventLoopGroup(1);
+            workerGroup = new NioEventLoopGroup(8);
+            channelClass = NioServerSocketChannel.class;
+        }
+
+
+        TranmissionHandler.iniClients(workerGroup);
+        TranmissionHandler.startClientsAndChannel();
+
+        ConsumerAgent consumerAgent = new ConsumerAgent();
+        consumerAgent.start0(20000,bossGroup,workerGroup,channelClass);
     }
 }
