@@ -3,15 +3,15 @@ package com.alibaba.dubbo.performance.demo.agent.provideragent.model;
 import io.netty.buffer.ByteBuf;
 
 public class RpcRequest {
-    private long id;
+    private ByteBuf id;
     private ByteBuf parameter=null;
 
-    public RpcRequest(long id, ByteBuf parameter){
+    public RpcRequest(ByteBuf id, ByteBuf parameter){
         this.id=id;
         this.parameter=parameter;
     }
 
-    public long getId() {
+    public ByteBuf  getId() {
         return id;
     }
 

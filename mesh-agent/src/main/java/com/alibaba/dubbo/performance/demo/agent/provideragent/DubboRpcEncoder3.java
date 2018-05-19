@@ -9,6 +9,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
 import io.netty.util.CharsetUtil;
+import io.netty.util.ReferenceCountUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -17,7 +18,7 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DubboRpcEncoder2 extends ChannelOutboundHandlerAdapter {
+public class DubboRpcEncoder3 extends ChannelOutboundHandlerAdapter {
     // header length.
     protected static final int HEADER_LENGTH = 16;
     // magic header.
@@ -97,19 +98,21 @@ public class DubboRpcEncoder2 extends ChannelOutboundHandlerAdapter {
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-        RpcRequest req = (RpcRequest)msg;
+        ByteBuf byteBuf = (ByteBuf) msg;
+        ByteBuf idBuf=byteBuf.slice(0,8);
+        ByteBuf dataBuf=byteBuf.slice(8,byteBuf.readableBytes()-8).retain();
 //        System.out.println(req.getId());
 //        System.out.println(req.getParameter().toString(CharsetUtil.UTF_8));
-        int bodyLen=frontBody.readableBytes()+req.getParameter().readableBytes()+tailBody.readableBytes();
+        int bodyLen=frontBody.readableBytes()+dataBuf.readableBytes()+tailBody.readableBytes();
         ByteBuf headerDup=headerBuf.duplicate().retain();
         int saveWriterIndex=headerDup.writerIndex();
         headerDup.writerIndex(4);
-        headerDup.writeBytes(req.getId());
-        req.getId().release();
+        headerDup.writeBytes(idBuf);
         headerDup.writeInt(bodyLen);
         headerDup.writerIndex(saveWriterIndex);
         CompositeByteBuf sendBuf=ctx.alloc().compositeDirectBuffer();
-        sendBuf.addComponents(true,headerDup,frontBody.duplicate().retain(),req.getParameter(),tailBody.duplicate().retain());
+        sendBuf.addComponents(true,headerDup,frontBody.duplicate().retain(),dataBuf,tailBody.duplicate().retain());
+        ReferenceCountUtil.release(byteBuf);
         ctx.writeAndFlush(sendBuf,promise);
     }
 }

@@ -9,30 +9,23 @@ import io.netty.buffer.CompositeByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.SimpleChannelInboundHandler;
 
-public class RpcMsgHandler3  extends ChannelInboundHandlerAdapter {
+public class RpcMsgHandler3  extends SimpleChannelInboundHandler<ByteBuf> {
     protected static final byte FLAG_EVENT = (byte) 0x20;
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+    public void channelRead0(ChannelHandlerContext ctx, ByteBuf byteBuf) throws Exception {
 
-        ByteBuf byteBuf=(ByteBuf)msg;
         byte byte2=byteBuf.getByte(2);
         byte status=byteBuf.getByte(3);
         if((byte2&FLAG_EVENT)==0&&status==20) {
             int len = System.lineSeparator().length();
-            long id=byteBuf.getLong(4);
-            ByteBuf hashCodeBuf = byteBuf.slice(17 + len, byteBuf.readableBytes() - 17 - 2 * len);
-//            Channel ch=ReturnChannelHolder.get(id);
-//            ReturnChannelHolder.remove(id);
+            ByteBuf idBuf=byteBuf.slice(4,8).retain();
+            ByteBuf hashCodeBuf = byteBuf.slice(17 + len, byteBuf.readableBytes() - 17 - 2 * len).retain();
             CompositeByteBuf sendBuf= ctx.alloc().compositeDirectBuffer();
-            ByteBuf idBuf=ctx.alloc().ioBuffer(8);
-            idBuf.writeLong(id);
             sendBuf.addComponents(true,idBuf,hashCodeBuf);
-//            ch.writeAndFlush(sendBuf);
             TCPProviderAgent.getConsumerAgentChannel().writeAndFlush(sendBuf);
-        }else{
-            byteBuf.release();
         }
     }
 }

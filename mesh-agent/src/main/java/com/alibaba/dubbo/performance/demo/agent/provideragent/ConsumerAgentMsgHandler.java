@@ -17,23 +17,22 @@ import java.security.Provider;
 /**
  * Created by 79422 on 2018/5/4.
  */
-public class ConsumerAgentMsgHandler extends ChannelInboundHandlerAdapter {
+public class ConsumerAgentMsgHandler extends SimpleChannelInboundHandler<DatagramPacket> {
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg2) throws Exception {
-        DatagramPacket msg=(DatagramPacket)msg2;
+    public void channelRead0(ChannelHandlerContext ctx, DatagramPacket msg) throws Exception {
         //fix me:每次做肯定有一定的性能损耗
         ProviderAgent.setMsgReturner(msg.sender());
-        ByteBuf buf = msg.content();
+        ByteBuf byteBuf = msg.content();
         //buf.retain();
-        long id=buf.readLong();
-        ByteBuf dataBuf=buf.slice(8,buf.readableBytes());
+        ByteBuf idBuf=byteBuf.slice(0,8).retain();
+        ByteBuf dataBuf=byteBuf.slice(8,byteBuf.readableBytes()-8).retain();
        // dataBuf.retain();
 //        System.out.println(id);
 //        System.out.println(dataBuf.toString(CharsetUtil.UTF_8));
 //        byte[] data=new byte[dataBuf.readableBytes()];
 //        dataBuf.readBytes(data);
-        RpcRequest request=new RpcRequest(id,dataBuf);
+        RpcRequest request=new RpcRequest(idBuf,dataBuf);
 
 
         ProviderChannelManager.getChannel().writeAndFlush(request);

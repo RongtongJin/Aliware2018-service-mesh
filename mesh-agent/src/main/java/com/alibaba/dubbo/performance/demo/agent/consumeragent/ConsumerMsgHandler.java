@@ -51,7 +51,6 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
 
         ByteBuf buf = msg.content();
 //        System.out.println(buf.toString(io.netty.util.CharsetUtil.UTF_8));
-        buf.retain();
 
         Long id=genId.getAndIncrement();
 
@@ -60,8 +59,7 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
         CompositeByteBuf sendBuf=ctx.alloc().compositeDirectBuffer();
         ByteBuf idBuf=ctx.alloc().ioBuffer();
         idBuf.writeLong(id);
-        ByteBuf paraBuf=buf.slice(136,buf.readableBytes()-136);
-        sendBuf.addComponents(true,idBuf,paraBuf);
+        sendBuf.addComponents(true,idBuf,buf.slice(136,buf.readableBytes()-136).retain());
         //sendBuf.writeBytes(System.lineSeparator().getBytes());
 
 
