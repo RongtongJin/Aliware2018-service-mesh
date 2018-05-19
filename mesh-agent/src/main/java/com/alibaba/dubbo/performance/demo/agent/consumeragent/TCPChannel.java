@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 public class TCPChannel {
     private volatile Channel channel=null;
-    private volatile Bootstrap bootstrap;
+//    private volatile Bootstrap bootstrap;
     private Object lock = new Object();
     private EventLoopGroup workerGroup;
     private Endpoint endpoint;
@@ -33,22 +33,30 @@ public class TCPChannel {
             return channel;
         }
 
-        if (null == bootstrap) {
-            synchronized (lock) {
-                if (null == bootstrap) {
-                    initBootstrap();
-                }
-            }
-        }
-
         if (null == channel) {
             synchronized (lock) {
                 if(null==channel){
                     try {
-                        System.out.println("-----------------------");
-                        channel = bootstrap.connect(endpoint.getHost(), endpoint.getPort()).sync().channel();
-                        System.out.println("ip=" + endpoint.getHost());
-                        System.out.println("port=" + endpoint.getPort());
+                        Class<? extends SocketChannel> channelClass=Epoll.isAvailable() ? EpollSocketChannel.class:NioSocketChannel.class;
+                        channel = new Bootstrap()
+                                .group(workerGroup)
+                                .channel(channelClass)
+                                //.channel(EpollSocketChannel.class)
+                                .option(ChannelOption.SO_KEEPALIVE, true)
+                                .option(ChannelOption.TCP_NODELAY, true)
+                                //.option(ChannelOption.SO_SNDBUF,1024*1024)
+                                //.option(ChannelOption.SO_RCVBUF,100*1024)
+                                .handler(new ChannelInitializer<SocketChannel>() {
+                                    @Override
+                                    protected void initChannel(SocketChannel socketChannel) throws Exception {
+                                        ChannelPipeline pipeline = socketChannel.pipeline();
+                                        pipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE,0,2,0,2));
+                                        pipeline.addLast(new LengthFieldPrepender(2,false));
+                                        pipeline.addLast(new TCPProviderAgentMsgHandler());
+                                    }
+                                })
+                                .connect(endpoint.getHost(), endpoint.getPort()).sync().channel();
+                        System.out.println("ip="+endpoint.getHost()+",port="+endpoint.getPort());
                     }catch (Exception e){
                         e.printStackTrace();
                     }
@@ -59,24 +67,4 @@ public class TCPChannel {
         return channel;
     }
 
-    public void initBootstrap(){
-        Class<? extends SocketChannel> channelClass=Epoll.isAvailable() ? EpollSocketChannel.class:NioSocketChannel.class;
-        bootstrap = new Bootstrap()
-                .group(workerGroup)
-                .channel(channelClass)
-                //.channel(EpollSocketChannel.class)
-                .option(ChannelOption.SO_KEEPALIVE, true)
-                .option(ChannelOption.TCP_NODELAY, true)
-                //.option(ChannelOption.SO_SNDBUF,1024*1024)
-                //.option(ChannelOption.SO_RCVBUF,100*1024)
-                .handler(new ChannelInitializer<SocketChannel>() {
-                    @Override
-                    protected void initChannel(SocketChannel socketChannel) throws Exception {
-                        ChannelPipeline pipeline = socketChannel.pipeline();
-                        pipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE,0,2,0,2));
-                        pipeline.addLast(new LengthFieldPrepender(2,false));
-                        pipeline.addLast(new TCPProviderAgentMsgHandler());
-                    }
-                });
-    }
 }

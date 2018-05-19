@@ -14,63 +14,41 @@ public class TCPProviderChannelManager {
     private static volatile Channel channel=null;
     private static EventLoopGroup workerGroup=null;
     private static Object lock = new Object();
-    private static volatile Bootstrap bootstrap;
+
 
     public static void setWorkerGroup(EventLoopGroup group){
         workerGroup=group;
     }
 
 
-    public static void initBootstrap(){
-
-        boolean epollAvail=Epoll.isAvailable();
-        Class<? extends SocketChannel> channelClass = epollAvail ? EpollSocketChannel.class:NioSocketChannel.class;
-
-        bootstrap = new Bootstrap()
-                .group(workerGroup)
-                .channel(channelClass)
-                .option(ChannelOption.SO_KEEPALIVE, true)
-                .option(ChannelOption.TCP_NODELAY, true)
-                //.option(ChannelOption.CONNECT_TIMEOUT_MILLIS,17000)
-                .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-                .handler(new ChannelInitializer<SocketChannel>() {
-                    @Override
-                    protected void initChannel(SocketChannel socketChannel) throws Exception {
-                        ChannelPipeline pipeline = socketChannel.pipeline();
-                        pipeline.addLast(new DubboRpcEncoder2());
-                        pipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE,12,4,0,0));
-                        //pipeline.addLast(new DubboRpcDecoder());
-                        pipeline.addLast(new RpcMsgHandler3());
-                    }
-                });
-    }
-
     public static Channel getChannel() throws Exception{
         if (null != channel) {
             return channel;
         }
 
-        if (null == bootstrap) {
-            synchronized (lock) {
-                if (null == bootstrap) {
-                    initBootstrap();
-                }
-            }
-        }
-
         if (null == channel) {
             synchronized (lock){
                 if (null == channel){
-                    Boolean isConnect=false;
-                    while(!isConnect){
-                        try {
-                            channel = bootstrap.connect("127.0.0.1", 20880).sync().channel();
-                            System.out.println("connect"+ IpHelper.getHostIp());
-                            isConnect=true;
-                        }catch (Exception e){
-                            Thread.sleep(250);
-                        }
-                    }
+                    Class<? extends SocketChannel> channelClass= Epoll.isAvailable() ? EpollSocketChannel.class:NioSocketChannel.class;
+                    channel = new Bootstrap()
+                            .group(workerGroup)
+                            .channel(channelClass)
+                            //.group(new EpollEventLoopGroup())
+                            //.channel(EpollSocketChannel.class)
+                            .option(ChannelOption.SO_KEEPALIVE, true)
+                            .option(ChannelOption.TCP_NODELAY, true)
+                            .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
+                            .handler(new ChannelInitializer<SocketChannel>() {
+                                @Override
+                                protected void initChannel(SocketChannel socketChannel) throws Exception {
+                                    ChannelPipeline pipeline = socketChannel.pipeline();
+                                    pipeline.addLast(new DubboRpcEncoder2());
+                                    pipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE,12,4,0,0));
+                                    //pipeline.addLast(new DubboRpcDecoder());
+                                    pipeline.addLast(new RpcMsgHandler3());
+                                }
+                            })
+                            .connect("127.0.0.1", 20880).sync().channel();
                 }
             }
         }

@@ -106,7 +106,7 @@ public class ConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequ
 //        Endpoint endpoint=new Endpoint(IpHelper.getHostIp(),30000);
 
         //idea下测试使用tcp
- //       TCPChannel ch=tcpChannelMap.get("ideaTest");
+//        TCPChannel ch=tcpChannelMap.get("ideaTest");
 
         /*udp发给provider agent*/
         //简单的负载均衡，随机取一个
