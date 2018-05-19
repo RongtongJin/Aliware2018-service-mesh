@@ -42,7 +42,15 @@ public class TCPChannel {
         if (null == channel) {
             synchronized (lock) {
                 if(null==channel){
-                    channel=bootstrap.connect(endpoint.getHost(),endpoint.getPort()).sync().channel();
+                    Boolean isConnect=false;
+                    while(!isConnect){
+                        try {
+                            channel = bootstrap.connect(endpoint.getHost(), endpoint.getPort()).sync().channel();
+                            isConnect=true;
+                        }catch (Exception e){
+                            Thread.sleep(250);
+                        }
+                    }
                 }
             }
         }

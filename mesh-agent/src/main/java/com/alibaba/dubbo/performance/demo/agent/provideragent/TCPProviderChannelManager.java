@@ -62,7 +62,15 @@ public class TCPProviderChannelManager {
         if (null == channel) {
             synchronized (lock){
                 if (null == channel){
-                    channel = bootstrap.connect("127.0.0.1", 20880).sync().channel();
+                    Boolean isConnect=false;
+                    while(!isConnect){
+                        try {
+                            channel = bootstrap.connect("127.0.0.1", 20880).sync().channel();
+                            isConnect=true;
+                        }catch (Exception e){
+                            Thread.sleep(250);
+                        }
+                    }
                 }
             }
         }
