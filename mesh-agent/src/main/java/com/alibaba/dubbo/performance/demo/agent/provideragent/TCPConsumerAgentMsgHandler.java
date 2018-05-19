@@ -25,7 +25,7 @@ public class TCPConsumerAgentMsgHandler extends SimpleChannelInboundHandler<Byte
 //        sendBuf.writeLong(id);
 //        sendBuf.writeBytes(data);
 //        System.out.println(id);
-        ReturnChannelHolder.put(id,ctx.channel());
+//        ReturnChannelHolder.put(id,ctx.channel());
         RpcRequest request=new RpcRequest(id,dataBuf);
         //TCPProviderAgent.getChannelGroup().nextChannel().writeAndFlush(request);
         TCPProviderChannelManager.getChannel().writeAndFlush(request);

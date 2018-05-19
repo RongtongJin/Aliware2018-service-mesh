@@ -46,10 +46,10 @@ public class ConsumerAgent {
         EventLoopGroup workerGroup=null;
         if(epollAvail){
             bossGroup = new EpollEventLoopGroup(1);
-            workerGroup = new EpollEventLoopGroup();
+            workerGroup = new EpollEventLoopGroup(8);
         }else{
             bossGroup = new NioEventLoopGroup(1);
-            workerGroup = new NioEventLoopGroup();
+            workerGroup = new NioEventLoopGroup(8);
         }
         Class<? extends ServerChannel> channelClass = epollAvail ? EpollServerSocketChannel.class : NioServerSocketChannel.class;
 
@@ -84,6 +84,7 @@ public class ConsumerAgent {
                             //fix me:设置的最大长度会不会影响性能
                             ch.pipeline().addLast(new HttpObjectAggregator(2048));
                             ch.pipeline().addLast(new ConsumerMsgHandler(endpoints));
+
                         }
                     })
                     .option(ChannelOption.SO_BACKLOG,128)
