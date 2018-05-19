@@ -62,6 +62,7 @@ public class ConsumerAgent {
 
 
 
+
         //IDEA TEST USE
         //tcpChannelMap.put("ideaTest",new TCPChannel(workerGroup,new Endpoint(IpHelper.getHostIp(),30000)));
 
