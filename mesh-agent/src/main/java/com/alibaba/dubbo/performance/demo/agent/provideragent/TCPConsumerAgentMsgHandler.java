@@ -17,7 +17,7 @@ public class TCPConsumerAgentMsgHandler extends SimpleChannelInboundHandler<Byte
     protected void channelRead0(ChannelHandlerContext ctx, ByteBuf byteBuf) throws Exception {
         long id=byteBuf.readLong();
         byteBuf.retain();
-//        System.out.println(id);
+        System.out.println(id);
         ByteBuf dataBuf=byteBuf.slice(8,byteBuf.readableBytes());
 //        System.out.println(dataBuf.toString(CharsetUtil.UTF_8));
 //        byte [] data=java.lang.String.valueOf(dataBuf.toString(io.netty.util.CharsetUtil.UTF_8).hashCode()).getBytes();

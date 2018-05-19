@@ -46,6 +46,8 @@ public class TCPChannel {
                     while(!isConnect){
                         try {
                             channel = bootstrap.connect(endpoint.getHost(), endpoint.getPort()).sync().channel();
+                            System.out.println("ip="+endpoint.getHost());
+                            System.out.println("port="+endpoint.getPort());
                             isConnect=true;
                         }catch (Exception e){
                             Thread.sleep(250);

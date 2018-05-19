@@ -1,5 +1,6 @@
 package com.alibaba.dubbo.performance.demo.agent.provideragent;
 
+import com.alibaba.dubbo.performance.demo.agent.registry.IpHelper;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
@@ -28,8 +29,6 @@ public class TCPProviderChannelManager {
         bootstrap = new Bootstrap()
                 .group(workerGroup)
                 .channel(channelClass)
-                //.group(new EpollEventLoopGroup())
-                //.channel(EpollSocketChannel.class)
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.TCP_NODELAY, true)
                 //.option(ChannelOption.CONNECT_TIMEOUT_MILLIS,17000)
@@ -66,6 +65,7 @@ public class TCPProviderChannelManager {
                     while(!isConnect){
                         try {
                             channel = bootstrap.connect("127.0.0.1", 20880).sync().channel();
+                            System.out.println("connect"+ IpHelper.getHostIp());
                             isConnect=true;
                         }catch (Exception e){
                             Thread.sleep(250);
