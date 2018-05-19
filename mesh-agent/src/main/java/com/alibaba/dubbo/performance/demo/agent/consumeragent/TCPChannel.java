@@ -11,6 +11,8 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 
+import java.util.concurrent.TimeUnit;
+
 
 public class TCPChannel {
     private Channel channel=null;
@@ -22,7 +24,7 @@ public class TCPChannel {
 //        }
 
         Class<? extends SocketChannel> channelClass=Epoll.isAvailable() ? EpollSocketChannel.class:NioSocketChannel.class;
-        channel = new Bootstrap()
+        Bootstrap bootstrap = new Bootstrap()
                 .group(group)
                 .channel(channelClass)
                 //.channel(EpollSocketChannel.class)
@@ -38,8 +40,16 @@ public class TCPChannel {
                         pipeline.addLast(new LengthFieldPrepender(2,false));
                         pipeline.addLast(new TCPProviderAgentMsgHandler());
                     }
-                })
-                .connect(endpoint.getHost(), endpoint.getPort()).sync().channel();
+                });
+        Boolean isConnect=false;
+        while (!isConnect){
+            try {
+                channel=bootstrap.connect(endpoint.getHost(),endpoint.getPort()).sync().channel();
+                isConnect=true;
+            }catch (Exception e){
+                Thread.sleep(250);
+            }
+        }
     }
 
     public Channel getChannel() throws Exception {

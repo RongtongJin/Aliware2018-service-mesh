@@ -53,7 +53,7 @@ public class TCPProviderAgent {
 //            Thread.sleep(1000);
 //        }
 
-        Thread.sleep(16000);
+//        Thread.sleep(16000);
 //        group=new ProviderChannelGroup(13,workGroup);
         TCPProviderChannelManager.initChannel(workerGroup);
 

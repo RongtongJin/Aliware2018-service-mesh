@@ -16,7 +16,7 @@ public class ProviderChannel {
         int port = Integer.valueOf(System.getProperty("dubbo.protocol.port"));
         //int port=20889;
         Class<? extends SocketChannel> channelClass= Epoll.isAvailable() ? EpollSocketChannel.class:NioSocketChannel.class;
-        channel = new Bootstrap()
+        Bootstrap bootstrap = new Bootstrap()
                 .group(group)
                 .channel(channelClass)
                 //.group(new EpollEventLoopGroup())
@@ -33,8 +33,16 @@ public class ProviderChannel {
                         //pipeline.addLast(new DubboRpcDecoder());
                         pipeline.addLast(new RpcMsgHandler3());
                     }
-                })
-                .connect("127.0.0.1", port).sync().channel();
+                });
+        Boolean isConnect=false;
+        while (!isConnect){
+            try {
+                channel=bootstrap.connect("127.0.0.1",20880).sync().channel();
+                isConnect=true;
+            }catch (Exception e){
+                Thread.sleep(250);
+            }
+        }
     }
 
     public Channel getChannel() throws Exception{

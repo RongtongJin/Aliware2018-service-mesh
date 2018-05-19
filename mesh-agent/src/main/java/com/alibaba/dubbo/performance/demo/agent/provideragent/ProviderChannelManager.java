@@ -24,17 +24,18 @@ public class ProviderChannelManager{
     private static  Channel channel=null;
 
     public static void initChannel(EventLoopGroup group) throws Exception{
-        int port = Integer.valueOf(System.getProperty("dubbo.protocol.port"));
+        //int port = Integer.valueOf(System.getProperty("dubbo.protocol.port"));
         //int port=20889;
         boolean epollAvail=Epoll.isAvailable();
         Class<? extends SocketChannel> channelClass= epollAvail ? EpollSocketChannel.class:NioSocketChannel.class;
-        channel = new Bootstrap()
+        Bootstrap bootstrap = new Bootstrap()
                 .group(group)
                 .channel(channelClass)
                 //.group(new EpollEventLoopGroup())
                 //.channel(EpollSocketChannel.class)
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.TCP_NODELAY, true)
+                //.option(ChannelOption.CONNECT_TIMEOUT_MILLIS,17000)
                 .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
@@ -45,8 +46,16 @@ public class ProviderChannelManager{
                         //pipeline.addLast(new DubboRpcDecoder());
                         pipeline.addLast(new RpcMsgHandler());
                     }
-                })
-                .connect("127.0.0.1", port).sync().channel();
+                });
+        Boolean isConnect=false;
+        while (!isConnect){
+            try {
+                channel=bootstrap.connect("127.0.0.1",20880).sync().channel();
+                isConnect=true;
+            }catch (Exception e){
+                Thread.sleep(250);
+            }
+        }
     }
 
 
