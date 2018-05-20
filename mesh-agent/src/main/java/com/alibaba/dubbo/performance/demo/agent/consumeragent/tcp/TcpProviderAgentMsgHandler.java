@@ -1,30 +1,26 @@
-package com.alibaba.dubbo.performance.demo.agent.consumeragent;
+package com.alibaba.dubbo.performance.demo.agent.consumeragent.tcp;
 
+import com.alibaba.dubbo.performance.demo.agent.consumeragent.model.ChannelHolder;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpResponse;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_LENGTH;
 import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
-public class TCPProviderAgentMsgHandler extends SimpleChannelInboundHandler<ByteBuf> {
+public class TcpProviderAgentMsgHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
     //private static ExecutorService threadsPool= Executors.newSingleThreadExecutor();
 
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf) throws Exception {
         Long id=byteBuf.readLong();
-        Channel sendChannel=ChannelHolder.get(id);
+        Channel sendChannel= ChannelHolder.get(id);
         //测试后发现每次remove id后性能更高
         ChannelHolder.remove(id);
         //threadsPool.submit(new Task(id));

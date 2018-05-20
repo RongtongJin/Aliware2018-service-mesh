@@ -1,7 +1,6 @@
-package com.alibaba.dubbo.performance.demo.agent.consumeragent;
+package com.alibaba.dubbo.performance.demo.agent.consumeragent.tcp;
 
 import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
-import com.alibaba.dubbo.performance.demo.agent.utils.TcpConnectTest;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.epoll.Epoll;
@@ -12,14 +11,10 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 
 
-public class TCPChannel {
+public class TcpChannel {
     private Channel channel=null;
 
-    public TCPChannel(EventLoopGroup group, Endpoint endpoint) throws Exception{
-
-//        while(!TcpConnectTest.isHostConnectable(endpoint.getHost(),endpoint.getPort())){
-//            Thread.sleep(1000);
-//        }
+    public TcpChannel(EventLoopGroup group, Endpoint endpoint) throws Exception{
 
         Class<? extends SocketChannel> channelClass=Epoll.isAvailable() ? EpollSocketChannel.class:NioSocketChannel.class;
         channel = new Bootstrap()
@@ -36,7 +31,7 @@ public class TCPChannel {
                         ChannelPipeline pipeline = socketChannel.pipeline();
                         pipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE,0,2,0,2));
                         pipeline.addLast(new LengthFieldPrepender(2,false));
-                        pipeline.addLast(new TCPProviderAgentMsgHandler());
+                        pipeline.addLast(new TcpProviderAgentMsgHandler());
                     }
                 })
                 .connect(endpoint.getHost(), endpoint.getPort()).sync().channel();

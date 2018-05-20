@@ -1,8 +1,7 @@
-package com.alibaba.dubbo.performance.demo.agent.provideragent;
+package com.alibaba.dubbo.performance.demo.agent.provideragent.udp;
 
 import com.alibaba.dubbo.performance.demo.agent.registry.EtcdRegistry;
 import com.alibaba.dubbo.performance.demo.agent.registry.IRegistry;
-import com.alibaba.dubbo.performance.demo.agent.utils.TcpConnectTest;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
@@ -17,7 +16,7 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 
 import java.net.InetSocketAddress;
 
-public class ProviderAgent {
+public class UdpProviderAgent {
 
     private static Channel channel=null;
 
@@ -29,17 +28,13 @@ public class ProviderAgent {
 
         boolean epollAvail= Epoll.isAvailable();
 
-        EventLoopGroup eventLoopGroup=epollAvail ? new EpollEventLoopGroup(): new NioEventLoopGroup();
+        EventLoopGroup eventLoopGroup=epollAvail ? new EpollEventLoopGroup(2): new NioEventLoopGroup(2);
 
         Class<? extends DatagramChannel> channelClass= epollAvail ? EpollDatagramChannel.class:NioDatagramChannel.class;
 
-//        while(!TcpConnectTest.isHostConnectable("127.0.0.1",20880)){
-//            Thread.sleep(1000);
-//        }
+        Thread.sleep(1000);
 
-        Thread.sleep(16000);
-
-        ProviderChannelManager.initChannel(eventLoopGroup);
+        UdpProviderChannelManager.initChannel(eventLoopGroup);
 
         try {
             Bootstrap bootstrap=new Bootstrap()
@@ -47,10 +42,11 @@ public class ProviderAgent {
                     .channel(channelClass)
                     //.channel(EpollDatagramChannel.class)
                     //.option(ChannelOption.SO_BACKLOG, 1024)    //设置缓存队列
+                    //.option(EpollChannelOption.SO_REUSEPORT,true)
                     .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                     //.option(ChannelOption.SO_RCVBUF)// 设置UDP读缓冲区为1M
                     //.option(ChannelOption.SO_SNDBUF) // 设置UDP写缓冲区为1M
-                    .handler(new ConsumerAgentMsgHandler());
+                    .handler(new UdpConsumerAgentMsgHandler());
             channel=bootstrap.bind(new InetSocketAddress(port)).sync().channel();
             System.out.println("ProviderAgent start on "+port);
             channel.closeFuture().await();
@@ -62,7 +58,7 @@ public class ProviderAgent {
         }
     }
 
-    public static Channel getUDPChannel(){
+    public static Channel getUdpChannel(){
         return channel;
     }
 
@@ -74,6 +70,6 @@ public class ProviderAgent {
     public static InetSocketAddress getMsgReturner(){return msgReturner;}
 
     public static void main(String[] args) throws Exception{
-        new ProviderAgent().start(30000);
+        new UdpProviderAgent().start(30000);
     }
 }

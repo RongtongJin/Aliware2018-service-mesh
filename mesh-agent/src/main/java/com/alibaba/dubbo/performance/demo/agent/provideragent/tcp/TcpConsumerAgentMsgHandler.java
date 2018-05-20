@@ -1,14 +1,11 @@
-package com.alibaba.dubbo.performance.demo.agent.provideragent;
+package com.alibaba.dubbo.performance.demo.agent.provideragent.tcp;
 
-import com.alibaba.dubbo.performance.demo.agent.provideragent.model.RpcRequest;
 import com.alibaba.dubbo.performance.demo.agent.utils.Bytes;
 import com.alibaba.dubbo.performance.demo.agent.utils.JsonUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.CompositeByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelOutboundHandlerAdapter;
-import io.netty.channel.ChannelPromise;
-import io.netty.util.CharsetUtil;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
 
 import java.io.ByteArrayOutputStream;
@@ -18,7 +15,8 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DubboRpcEncoder3 extends ChannelOutboundHandlerAdapter {
+public class TcpConsumerAgentMsgHandler extends ChannelInboundHandlerAdapter {
+
     // header length.
     protected static final int HEADER_LENGTH = 16;
     // magic header.
@@ -27,11 +25,11 @@ public class DubboRpcEncoder3 extends ChannelOutboundHandlerAdapter {
     protected static final byte FLAG_REQUEST = (byte) 0x80;
     protected static final byte FLAG_TWOWAY = (byte) 0x40;
 
-    private ByteBuf headerBuf=null;
+    private static ByteBuf headerBuf=null;
 
-    private ByteBuf frontBody=null;
+    private static ByteBuf frontBody=null;
 
-    private ByteBuf tailBody=null;
+    private static ByteBuf tailBody=null;
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
@@ -97,7 +95,12 @@ public class DubboRpcEncoder3 extends ChannelOutboundHandlerAdapter {
     }
 
     @Override
-    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        TcpProviderAgent.setConsumerAgentChannel(ctx.channel());
+    }
+
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         ByteBuf byteBuf = (ByteBuf) msg;
         ByteBuf idBuf=byteBuf.slice(0,8);
         ByteBuf dataBuf=byteBuf.slice(8,byteBuf.readableBytes()-8).retain();
@@ -113,6 +116,6 @@ public class DubboRpcEncoder3 extends ChannelOutboundHandlerAdapter {
         CompositeByteBuf sendBuf=ctx.alloc().compositeDirectBuffer();
         sendBuf.addComponents(true,headerDup,frontBody.duplicate().retain(),dataBuf,tailBody.duplicate().retain());
         ReferenceCountUtil.release(byteBuf);
-        ctx.writeAndFlush(sendBuf,promise);
+        TcpProviderChannelManager.getChannel().writeAndFlush(sendBuf);
     }
 }
