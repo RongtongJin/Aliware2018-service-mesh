@@ -33,7 +33,7 @@ public class UdpConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpR
     @Override
     public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest msg) throws Exception{
         ByteBuf buf = msg.content();
-        System.out.println(buf.toString(io.netty.util.CharsetUtil.UTF_8));
+//        System.out.println(buf.toString(io.netty.util.CharsetUtil.UTF_8));
         long id=genId.getAndIncrement();
         ChannelHolder.put(id,ctx.channel());
 //        PooledByteBufAllocator.DEFAULT.

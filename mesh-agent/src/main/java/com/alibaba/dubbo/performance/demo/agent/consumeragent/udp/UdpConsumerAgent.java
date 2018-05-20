@@ -20,6 +20,7 @@ import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 
 import java.net.InetSocketAddress;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,7 +48,7 @@ public class UdpConsumerAgent {
 
         Thread.sleep(1000);
 
-        udpChannelMap=new HashMap<>();
+        udpChannelMap=new EnumMap<>(EnumKey.class);
         for(Map.Entry<EnumKey,Endpoint> entry:endpoints.entrySet()){
             udpChannelMap.put(entry.getKey(),new InetSocketAddress(entry.getValue().getHost(),entry.getValue().getPort()));
         }
@@ -82,7 +83,7 @@ public class UdpConsumerAgent {
                     .childOption(ChannelOption.SO_REUSEADDR, Boolean.TRUE)
                     .childOption(ChannelOption.ALLOW_HALF_CLOSURE, Boolean.FALSE);
             ChannelFuture f = b.bind(port).sync();
-            System.out.println("ConsumerAgent start on "+port);
+            System.out.println("UdpConsumerAgent start on "+port);
             f.channel().closeFuture().sync();
         } finally {
             workerGroup.shutdownGracefully();

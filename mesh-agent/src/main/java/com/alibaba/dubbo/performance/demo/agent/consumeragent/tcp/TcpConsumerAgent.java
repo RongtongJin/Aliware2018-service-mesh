@@ -18,6 +18,7 @@ import io.netty.handler.codec.http.HttpResponseEncoder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,7 +47,7 @@ public class TcpConsumerAgent {
 
         Thread.sleep(1000);
 
-        tcpChannelMap=new HashMap<>();
+        tcpChannelMap=new EnumMap<>(EnumKey.class);
         for(Map.Entry<EnumKey,Endpoint> entry:endpoints.entrySet()){
             tcpChannelMap.put(entry.getKey(),new TcpChannel(workerGroup,entry.getValue()));
         }
@@ -80,7 +81,7 @@ public class TcpConsumerAgent {
                     .childOption(ChannelOption.SO_REUSEADDR, Boolean.TRUE)
                     .childOption(ChannelOption.ALLOW_HALF_CLOSURE, Boolean.FALSE);
             ChannelFuture f = b.bind(port).sync();
-            System.out.println("ConsumerAgent start on "+port);
+            System.out.println("TcpConsumerAgent start on "+port);
             f.channel().closeFuture().sync();
         } finally {
             workerGroup.shutdownGracefully();
