@@ -44,7 +44,7 @@ public class UdpConsumerAgent {
         }
         Class<? extends ServerChannel> channelClass = epollAvail ? EpollServerSocketChannel.class : NioServerSocketChannel.class;
 
-        Thread.sleep(1000);
+        Thread.sleep(15000);
 
         udpChannelMap=new HashMap<>();
         for(Map.Entry<String,Endpoint> entry:endpoints.entrySet()){
@@ -52,7 +52,7 @@ public class UdpConsumerAgent {
         }
 
         //IDEA TEST USE
-        udpChannelMap.put("ideaTest",new InetSocketAddress(IpHelper.getHostIp(),30000));
+        //udpChannelMap.put("ideaTest",new InetSocketAddress(IpHelper.getHostIp(),30000));
 
         UdpChannelManager.initChannel(workerGroup);
 

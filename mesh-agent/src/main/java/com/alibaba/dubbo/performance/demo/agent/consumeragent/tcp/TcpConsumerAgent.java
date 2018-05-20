@@ -43,7 +43,7 @@ public class TcpConsumerAgent {
         }
         Class<? extends ServerChannel> channelClass = epollAvail ? EpollServerSocketChannel.class : NioServerSocketChannel.class;
 
-        Thread.sleep(1000);
+        Thread.sleep(15000);
 
         tcpChannelMap=new HashMap<>();
         for(Map.Entry<String,Endpoint> entry:endpoints.entrySet()){
@@ -51,7 +51,7 @@ public class TcpConsumerAgent {
         }
 
         //IDEA TEST USE
-        tcpChannelMap.put("ideaTest",new TcpChannel(workerGroup,new Endpoint(IpHelper.getHostIp(),30000)));
+        //tcpChannelMap.put("ideaTest",new TcpChannel(workerGroup,new Endpoint(IpHelper.getHostIp(),30000)));
 
 
         try {

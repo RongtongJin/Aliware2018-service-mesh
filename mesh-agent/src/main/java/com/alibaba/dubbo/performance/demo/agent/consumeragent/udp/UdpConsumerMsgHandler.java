@@ -59,11 +59,7 @@ public class UdpConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpR
 
         DatagramPacket dp=new DatagramPacket(sendBuf,addr);
 
-        UdpChannelManager.getChannel().writeAndFlush(dp).addListener(cf -> {
-            if (!cf.isSuccess()) {
-                cf.cause().printStackTrace();
-            }
-        });
+        UdpChannelManager.getChannel().writeAndFlush(dp);
     }
 
     @Override

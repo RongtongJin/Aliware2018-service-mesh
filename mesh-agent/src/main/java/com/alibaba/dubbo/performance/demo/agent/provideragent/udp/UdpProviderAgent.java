@@ -32,7 +32,7 @@ public class UdpProviderAgent {
 
         Class<? extends DatagramChannel> channelClass= epollAvail ? EpollDatagramChannel.class:NioDatagramChannel.class;
 
-        Thread.sleep(1000);
+        Thread.sleep(16000);
 
         UdpProviderChannelManager.initChannel(eventLoopGroup);
 

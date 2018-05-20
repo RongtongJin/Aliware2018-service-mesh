@@ -42,7 +42,7 @@ public class TcpProviderAgent {
         }
         Class<? extends ServerChannel> channelClass = epollAvail ? EpollServerSocketChannel.class : NioServerSocketChannel.class;
 
-        Thread.sleep(1000);
+        Thread.sleep(16000);
 
         TcpProviderChannelManager.initChannel(workerGroup);
 

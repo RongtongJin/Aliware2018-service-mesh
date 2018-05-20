@@ -66,8 +66,6 @@ public class TcpConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpR
 
 
         /*tcp发给provider agent*/
-//        Endpoint endpoint = endpoints.get(random.nextInt(endpoints.size()));
-         // ConsumerAgent.getTCPChannelGroup().nextChannel().writeAndFlush(sendBuf);
         ch.getChannel().writeAndFlush(sendBuf);
 //        System.out.println("send finish..");
     }
