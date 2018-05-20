@@ -4,6 +4,7 @@ import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
 import com.alibaba.dubbo.performance.demo.agent.registry.EtcdRegistry;
 import com.alibaba.dubbo.performance.demo.agent.registry.IRegistry;
 import com.alibaba.dubbo.performance.demo.agent.registry.IpHelper;
+import com.alibaba.dubbo.performance.demo.agent.utils.EnumKey;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
@@ -24,8 +25,8 @@ public class TcpConsumerAgent {
 
     private static Log log = LogFactory.getLog(TcpConsumerAgent.class);
     private IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
-    private Map<String,Endpoint> endpoints = null;
-    private Map<String,TcpChannel> tcpChannelMap=null;
+    private Map<EnumKey,Endpoint> endpoints = null;
+    private Map<EnumKey,TcpChannel> tcpChannelMap=null;
 
     public void start(int port) throws Exception {
 
@@ -43,15 +44,15 @@ public class TcpConsumerAgent {
         }
         Class<? extends ServerChannel> channelClass = epollAvail ? EpollServerSocketChannel.class : NioServerSocketChannel.class;
 
-        Thread.sleep(15000);
+        Thread.sleep(1000);
 
         tcpChannelMap=new HashMap<>();
-        for(Map.Entry<String,Endpoint> entry:endpoints.entrySet()){
+        for(Map.Entry<EnumKey,Endpoint> entry:endpoints.entrySet()){
             tcpChannelMap.put(entry.getKey(),new TcpChannel(workerGroup,entry.getValue()));
         }
 
         //IDEA TEST USE
-        //tcpChannelMap.put("ideaTest",new TcpChannel(workerGroup,new Endpoint(IpHelper.getHostIp(),30000)));
+      //  tcpChannelMap.put("ideaTest",new TcpChannel(workerGroup,new Endpoint(IpHelper.getHostIp(),30000)));
 
 
         try {

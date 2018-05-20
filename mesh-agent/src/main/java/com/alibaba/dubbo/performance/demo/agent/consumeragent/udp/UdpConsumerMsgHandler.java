@@ -3,6 +3,7 @@ package com.alibaba.dubbo.performance.demo.agent.consumeragent.udp;
 import com.alibaba.dubbo.performance.demo.agent.consumeragent.model.ChannelHolder;
 import com.alibaba.dubbo.performance.demo.agent.provideragent.udp.UdpProviderAgent;
 import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
+import com.alibaba.dubbo.performance.demo.agent.utils.EnumKey;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.CompositeByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -19,12 +20,12 @@ import java.util.concurrent.atomic.AtomicLong;
 public class UdpConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private static AtomicLong genId=new AtomicLong();
 
-    private Map<String,InetSocketAddress> udpChannelMap;
+    private Map<EnumKey,InetSocketAddress> udpChannelMap;
 
     private static Random random = new Random();
 
 
-    public UdpConsumerMsgHandler(Map<String,InetSocketAddress> udpChannelMap){
+    public UdpConsumerMsgHandler(Map<EnumKey,InetSocketAddress> udpChannelMap){
         this.udpChannelMap=udpChannelMap;
     }
 
@@ -32,8 +33,8 @@ public class UdpConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpR
     @Override
     public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest msg) throws Exception{
         ByteBuf buf = msg.content();
-//        System.out.println(buf.toString(io.netty.util.CharsetUtil.UTF_8));
-        Long id=genId.getAndIncrement();
+        System.out.println(buf.toString(io.netty.util.CharsetUtil.UTF_8));
+        long id=genId.getAndIncrement();
         ChannelHolder.put(id,ctx.channel());
 //        PooledByteBufAllocator.DEFAULT.
         CompositeByteBuf sendBuf=ctx.alloc().compositeDirectBuffer();
@@ -45,17 +46,17 @@ public class UdpConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpR
         /*负载均衡代码*/
         //udp按照性能简单负载均衡,fix me:利用id 可以不生成随机数
 
-        int x=random.nextInt(6);
-        if(x==0){
-            addr=udpChannelMap.get("small");
-        }else if(x<=2){
-            addr=udpChannelMap.get("medium");
-        }else{
-            addr=udpChannelMap.get("large");
-        }
-
+//        int x=random.nextInt(6);
+//        if(x==0){
+//            addr=udpChannelMap.get("small");
+//        }else if(x<=2){
+//            addr=udpChannelMap.get("medium");
+//        }else{
+//            addr=udpChannelMap.get("large");
+//        }
+        addr=udpChannelMap.get(EnumKey.getNext((int)id));
         //idea下测试使用udp
-//        addr=udpChannelMap.get("ideaTest");
+        //addr=udpChannelMap.get("ideaTest");
 
         DatagramPacket dp=new DatagramPacket(sendBuf,addr);
 

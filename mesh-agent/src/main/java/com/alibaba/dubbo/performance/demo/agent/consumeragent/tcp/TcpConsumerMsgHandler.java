@@ -2,6 +2,7 @@ package com.alibaba.dubbo.performance.demo.agent.consumeragent.tcp;
 
 import com.alibaba.dubbo.performance.demo.agent.consumeragent.model.ChannelHolder;
 import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
+import com.alibaba.dubbo.performance.demo.agent.utils.EnumKey;
 import io.netty.buffer.*;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -23,10 +24,10 @@ public class TcpConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpR
 
     private static Random random = new Random();
 
-    private Map<String,TcpChannel> tcpChannelMap;
+    private Map<EnumKey,TcpChannel> tcpChannelMap;
 
 
-    public TcpConsumerMsgHandler(Map<String,TcpChannel> tcpChannelMap){
+    public TcpConsumerMsgHandler(Map<EnumKey,TcpChannel> tcpChannelMap){
         this.tcpChannelMap=tcpChannelMap;
     }
 
@@ -36,7 +37,7 @@ public class TcpConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpR
 
         ByteBuf buf = msg.content();
 //        System.out.println(buf.toString(io.netty.util.CharsetUtil.UTF_8));
-        Long id=genId.getAndIncrement();
+        long id=genId.getAndIncrement();
 
         ChannelHolder.put(id,ctx.channel());
 
@@ -51,18 +52,18 @@ public class TcpConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpR
 
 
         //tcp按照性能简单负载均衡,fix me:利用id 可以不生成随机数
-        int x=random.nextInt(6);
-        if(x==0){
-            ch=tcpChannelMap.get("small");
-        }else if(x<=2){
-            ch=tcpChannelMap.get("medium");
-        }else{
-            ch=tcpChannelMap.get("large");
-        }
-
+//        int x=random.nextInt(6);
+//        if(x==0){
+//            ch=tcpChannelMap.get("small");
+//        }else if(x<=2){
+//            ch=tcpChannelMap.get("medium");
+//        }else{
+//            ch=tcpChannelMap.get("large");
+//        }
+        ch=tcpChannelMap.get(EnumKey.getNext((int)id));
 
         //idea下测试使用tcp
-//        ch=tcpChannelMap.get("ideaTest");
+      //  ch=tcpChannelMap.get("ideaTest");
 
 
         /*tcp发给provider agent*/
