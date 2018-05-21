@@ -12,10 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Executors;
 
 public class EtcdRegistry implements IRegistry{
@@ -86,7 +83,7 @@ public class EtcdRegistry implements IRegistry{
 
         //List<Endpoint> endpoints = new ArrayList<>();
 
-        Map<EnumKey,Endpoint> level2EndPoint=new HashMap<>();
+        Map<EnumKey,Endpoint> level2EndPoint=new EnumMap<EnumKey, Endpoint>(EnumKey.class);
 
         for (com.coreos.jetcd.data.KeyValue kv : response.getKvs()){
             String k = kv.getKey().toStringUtf8();
@@ -103,7 +100,7 @@ public class EtcdRegistry implements IRegistry{
             }else {
                 level2EndPoint.put(EnumKey.L,new Endpoint(host,port));
             }
-
+            System.out.println(levelStr+"->"+host+":"+port);
         }
         return level2EndPoint;
     }

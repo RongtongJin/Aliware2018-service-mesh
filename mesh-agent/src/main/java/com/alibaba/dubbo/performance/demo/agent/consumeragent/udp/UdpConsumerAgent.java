@@ -33,8 +33,6 @@ public class UdpConsumerAgent {
 
     public void start(int port) throws Exception {
 
-
-
         boolean epollAvail= Epoll.isAvailable();
         EventLoopGroup bossGroup=null;
         EventLoopGroup workerGroup=null;

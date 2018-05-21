@@ -34,6 +34,7 @@ public class TcpProviderChannelManager {
                     }
                 })
                 .connect("127.0.0.1", port).sync().channel();
+        System.out.println("connect server...");
     }
 
 

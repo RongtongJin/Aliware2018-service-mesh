@@ -35,6 +35,7 @@ public class TcpChannel {
                     }
                 })
                 .connect(endpoint.getHost(), endpoint.getPort()).sync().channel();
+        System.out.println("connect to"+endpoint.getHost()+":"+endpoint.getPort());
     }
 
     public Channel getChannel() throws Exception {
