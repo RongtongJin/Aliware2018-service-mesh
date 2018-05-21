@@ -5,6 +5,7 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
 import io.netty.channel.epoll.Epoll;
+import io.netty.channel.epoll.EpollChannelOption;
 import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -22,9 +23,10 @@ public class TcpProviderChannelManager {
                 .channel(channelClass)
                 //.group(new EpollEventLoopGroup())
                 //.channel(EpollSocketChannel.class)
-                .option(ChannelOption.SO_KEEPALIVE, true)
-                .option(ChannelOption.TCP_NODELAY, true)
+                .option(ChannelOption.SO_KEEPALIVE, Boolean.TRUE)
+                .option(ChannelOption.TCP_NODELAY, Boolean.TRUE)
                 .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
+                .option(EpollChannelOption.TCP_QUICKACK,Boolean.TRUE)
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel socketChannel) throws Exception {

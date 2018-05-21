@@ -81,7 +81,8 @@ public class TcpConsumerAgent {
                     .childOption(ChannelOption.TCP_NODELAY,true)
                     .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                     .childOption(ChannelOption.SO_REUSEADDR, Boolean.TRUE)
-                    .childOption(ChannelOption.ALLOW_HALF_CLOSURE, Boolean.FALSE);
+                    .childOption(ChannelOption.ALLOW_HALF_CLOSURE, Boolean.FALSE)
+                    .childOption(EpollChannelOption.TCP_QUICKACK,Boolean.TRUE);
             ChannelFuture f = b.bind(port).sync();
             System.out.println("TcpConsumerAgent start on "+port);
             f.channel().closeFuture().sync();

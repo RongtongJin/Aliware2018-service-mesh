@@ -7,6 +7,7 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
 import io.netty.channel.epoll.Epoll;
+import io.netty.channel.epoll.EpollChannelOption;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -61,6 +62,7 @@ public class TcpProviderAgent {
                     .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                     .childOption(ChannelOption.SO_REUSEADDR, Boolean.TRUE)
                     .childOption(ChannelOption.ALLOW_HALF_CLOSURE, Boolean.FALSE)
+                    .childOption(EpollChannelOption.TCP_QUICKACK,Boolean.TRUE)
                     //.childOption(EpollChannelOption.TCP_QUICKACK,Boolean.TRUE)
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
