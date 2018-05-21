@@ -6,6 +6,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.CompositeByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.util.CharsetUtil;
 import io.netty.util.ReferenceCountUtil;
 
 import java.io.ByteArrayOutputStream;
@@ -25,11 +26,11 @@ public class TcpConsumerAgentMsgHandler extends ChannelInboundHandlerAdapter {
     protected static final byte FLAG_REQUEST = (byte) 0x80;
     protected static final byte FLAG_TWOWAY = (byte) 0x40;
 
-    private static ByteBuf headerBuf=null;
+    private ByteBuf headerBuf=null;
 
-    private static ByteBuf frontBody=null;
+    private ByteBuf frontBody=null;
 
-    private static ByteBuf tailBody=null;
+    private ByteBuf tailBody=null;
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
@@ -104,6 +105,7 @@ public class TcpConsumerAgentMsgHandler extends ChannelInboundHandlerAdapter {
         ByteBuf byteBuf = (ByteBuf) msg;
         ByteBuf idBuf=byteBuf.slice(0,8);
         ByteBuf dataBuf=byteBuf.slice(8,byteBuf.readableBytes()-8).retain();
+        System.out.println(dataBuf.toString(CharsetUtil.UTF_8));
 //        System.out.println(req.getId());
 //        System.out.println(req.getParameter().toString(CharsetUtil.UTF_8));
         int bodyLen=frontBody.readableBytes()+dataBuf.readableBytes()+tailBody.readableBytes();
