@@ -9,6 +9,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.epoll.Epoll;
+import io.netty.channel.epoll.EpollChannelOption;
 import io.netty.channel.epoll.EpollDatagramChannel;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -45,7 +46,7 @@ public class UdpProviderAgent {
                     .channel(channelClass)
                     //.channel(EpollDatagramChannel.class)
                     //.option(ChannelOption.SO_BACKLOG, 1024)    //设置缓存队列
-                    //.option(EpollChannelOption.SO_REUSEPORT,true)
+                    .option(EpollChannelOption.SO_REUSEPORT,true)
                     .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                     //.option(ChannelOption.SO_RCVBUF)// 设置UDP读缓冲区为1M
                     //.option(ChannelOption.SO_SNDBUF) // 设置UDP写缓冲区为1M
