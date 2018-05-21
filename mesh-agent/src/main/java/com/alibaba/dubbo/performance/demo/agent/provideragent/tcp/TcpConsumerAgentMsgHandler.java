@@ -105,6 +105,7 @@ public class TcpConsumerAgentMsgHandler extends ChannelInboundHandlerAdapter {
         ByteBuf byteBuf = (ByteBuf) msg;
         ByteBuf idBuf=byteBuf.slice(0,8);
         ByteBuf dataBuf=byteBuf.slice(8,byteBuf.readableBytes()-8).retain();
+        System.out.println(idBuf.getLong(0));
         System.out.println(dataBuf.toString(CharsetUtil.UTF_8));
 //        System.out.println(req.getId());
 //        System.out.println(req.getParameter().toString(CharsetUtil.UTF_8));
