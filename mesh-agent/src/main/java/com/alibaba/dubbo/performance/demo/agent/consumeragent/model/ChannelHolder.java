@@ -1,4 +1,4 @@
-package com.alibaba.dubbo.performance.demo.agent.consumeragent;
+package com.alibaba.dubbo.performance.demo.agent.consumeragent.model;
 
 
 import io.netty.channel.Channel;
@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ChannelHolder {
     //传String还是传Long效率高呢
     //key:DatagramPacket ID             value: TCP Channel
-    private static ConcurrentHashMap<Long,Channel> map=new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<Long,Channel> map=new ConcurrentHashMap<>(1024);
 
     public static void put(long id,Channel ch) {map.put(id,ch);}
 

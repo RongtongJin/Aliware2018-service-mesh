@@ -1,11 +1,11 @@
-package com.alibaba.dubbo.performance.demo.agent.consumeragent;
+package com.alibaba.dubbo.performance.demo.agent.consumeragent.tcp;
 
-import com.alibaba.dubbo.performance.demo.agent.provideragent.ProviderAgent;
 import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
 import com.alibaba.dubbo.performance.demo.agent.registry.EtcdRegistry;
 import com.alibaba.dubbo.performance.demo.agent.registry.IRegistry;
 import com.alibaba.dubbo.performance.demo.agent.registry.IpHelper;
-import com.alibaba.dubbo.performance.demo.agent.utils.TcpConnectTest;
+import com.alibaba.dubbo.performance.demo.agent.utils.ConstUtil;
+import com.alibaba.dubbo.performance.demo.agent.utils.EnumKey;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
@@ -18,57 +18,46 @@ import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.omg.PortableInterceptor.USER_EXCEPTION;
 
-import java.net.InetAddress;
-import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-public class ConsumerAgent {
+public class TcpConsumerAgent {
 
-    private static Log log = LogFactory.getLog(ConsumerAgent.class);
+    private static Log log = LogFactory.getLog(TcpConsumerAgent.class);
     private IRegistry registry = new EtcdRegistry(System.getProperty("etcd.url"));
-    private Map<String,Endpoint> endpoints = null;
-    private static Map<String,TCPChannel> tcpChannelMap=null;
-
-//    private static TCPChannelGroup channelGroup=null;
-//
-//
-//    public static TCPChannelGroup getTCPChannelGroup(){return channelGroup;}
+    private Map<EnumKey,Endpoint> endpoints = null;
+    private Map<EnumKey,TcpChannel> tcpChannelMap=null;
 
     public void start(int port) throws Exception {
 
-        endpoints = registry.find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
-
+        boolean epollAvail=Epoll.isAvailable();
         EventLoopGroup bossGroup=null;
         EventLoopGroup workerGroup=null;
-        boolean epollAvail=Epoll.isAvailable();
         if(epollAvail){
             bossGroup = new EpollEventLoopGroup(1);
-            workerGroup = new EpollEventLoopGroup();
+            workerGroup = new EpollEventLoopGroup(8);
         }else{
             bossGroup = new NioEventLoopGroup(1);
-            workerGroup = new NioEventLoopGroup();
+            workerGroup = new NioEventLoopGroup(8);
         }
         Class<? extends ServerChannel> channelClass = epollAvail ? EpollServerSocketChannel.class : NioServerSocketChannel.class;
 
-//        Thread.sleep(15000);
-
-        tcpChannelMap=new HashMap<>();
-        for(Map.Entry<String,Endpoint> entry:endpoints.entrySet()){
-            tcpChannelMap.put(entry.getKey(),new TCPChannel(workerGroup,entry.getValue()));
+        if(!ConstUtil.IDEA_MODE){
+            Thread.sleep(15000);
         }
 
+        endpoints = registry.find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
 
+        tcpChannelMap=new EnumMap<>(EnumKey.class);
+        for(Map.Entry<EnumKey,Endpoint> entry:endpoints.entrySet()){
+            tcpChannelMap.put(entry.getKey(),new TcpChannel(workerGroup,entry.getValue()));
+        }
 
         //IDEA TEST USE
-       // tcpChannelMap.put("ideaTest",new TCPChannel(workerGroup,new Endpoint(IpHelper.getHostIp(),30000)));
+      //  tcpChannelMap.put("ideaTest",new TcpChannel(workerGroup,new Endpoint(IpHelper.getHostIp(),30000)));
 
-        //UDPChannelManager.initChannel(workerGroup);
-
-        //channelGroup=new TCPChannelGroup(12,workerGroup,new Endpoint(IpHelper.getHostIp(),30000));
 
         try {
             ServerBootstrap b = new ServerBootstrap();
@@ -83,7 +72,8 @@ public class ConsumerAgent {
                             ch.pipeline().addLast(new HttpRequestDecoder());
                             //fix me:设置的最大长度会不会影响性能
                             ch.pipeline().addLast(new HttpObjectAggregator(2048));
-                            ch.pipeline().addLast(new ConsumerMsgHandler(endpoints));
+                            ch.pipeline().addLast(new TcpConsumerMsgHandler(tcpChannelMap));
+
                         }
                     })
                     .option(ChannelOption.SO_BACKLOG,128)
@@ -92,10 +82,9 @@ public class ConsumerAgent {
                     .childOption(ChannelOption.TCP_NODELAY,true)
                     .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                     .childOption(ChannelOption.SO_REUSEADDR, Boolean.TRUE)
-                    .childOption(ChannelOption.AUTO_CLOSE, Boolean.TRUE)
                     .childOption(ChannelOption.ALLOW_HALF_CLOSURE, Boolean.FALSE);
             ChannelFuture f = b.bind(port).sync();
-            System.out.println("ConsumerAgent start on "+port);
+            System.out.println("TcpConsumerAgent start on "+port);
             f.channel().closeFuture().sync();
         } finally {
             workerGroup.shutdownGracefully();
@@ -103,12 +92,8 @@ public class ConsumerAgent {
         }
     }
 
-    public static Map<String,TCPChannel> getTcpChannelMap(){
-        return tcpChannelMap;
-    }
-
     public static void main(String[] args) throws Exception{
-        new ConsumerAgent().start(20000);
+        new TcpConsumerAgent().start(20000);
     }
 
 }

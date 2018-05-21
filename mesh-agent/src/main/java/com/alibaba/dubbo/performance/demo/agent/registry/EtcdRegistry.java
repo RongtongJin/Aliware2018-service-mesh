@@ -1,5 +1,6 @@
 package com.alibaba.dubbo.performance.demo.agent.registry;
 
+import com.alibaba.dubbo.performance.demo.agent.utils.EnumKey;
 import com.coreos.jetcd.Client;
 import com.coreos.jetcd.KV;
 import com.coreos.jetcd.Lease;
@@ -11,10 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Executors;
 
 public class EtcdRegistry implements IRegistry{
@@ -77,7 +75,7 @@ public class EtcdRegistry implements IRegistry{
         );
     }
 
-    public Map<String,Endpoint> find(String serviceName) throws Exception {
+    public Map<EnumKey,Endpoint> find(String serviceName) throws Exception {
 
         String strKey = MessageFormat.format("/{0}",serviceName);
         ByteSequence key  = ByteSequence.fromString(strKey);
@@ -85,7 +83,7 @@ public class EtcdRegistry implements IRegistry{
 
         //List<Endpoint> endpoints = new ArrayList<>();
 
-        Map<String,Endpoint> level2EndPoint=new HashMap<>();
+        Map<EnumKey,Endpoint> level2EndPoint=new EnumMap<EnumKey, Endpoint>(EnumKey.class);
 
         for (com.coreos.jetcd.data.KeyValue kv : response.getKvs()){
             String k = kv.getKey().toStringUtf8();
@@ -95,8 +93,14 @@ public class EtcdRegistry implements IRegistry{
             String v= kv.getValue().toStringUtf8();
             String host = v.split(":")[0];
             int port = Integer.valueOf(v.split(":")[1]);
-
-            level2EndPoint.put(levelStr,new Endpoint(host,port));
+            if("small".equals(levelStr)){
+                level2EndPoint.put(EnumKey.S,new Endpoint(host,port));
+            }else if("medium".equals(levelStr)){
+                level2EndPoint.put(EnumKey.M,new Endpoint(host,port));
+            }else {
+                level2EndPoint.put(EnumKey.L,new Endpoint(host,port));
+            }
+            System.out.println(levelStr+"->"+host+":"+port);
         }
         return level2EndPoint;
     }

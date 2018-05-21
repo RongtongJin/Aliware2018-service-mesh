@@ -1,5 +1,6 @@
-package com.alibaba.dubbo.performance.demo.agent.consumeragent;
+package com.alibaba.dubbo.performance.demo.agent.consumeragent.tcp;
 
+import com.alibaba.dubbo.performance.demo.agent.consumeragent.model.ChannelHolder;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -12,21 +13,23 @@ import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
-public class TCPProviderAgentMsgHandler extends SimpleChannelInboundHandler<ByteBuf> {
+public class TcpProviderAgentMsgHandler extends SimpleChannelInboundHandler<ByteBuf> {
+
+    //private static ExecutorService threadsPool= Executors.newSingleThreadExecutor();
 
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf) throws Exception {
         Long id=byteBuf.readLong();
-        byteBuf.retain();
-        Channel sendChannel=ChannelHolder.get(id);
+        Channel sendChannel= ChannelHolder.get(id);
         //测试后发现每次remove id后性能更高
         ChannelHolder.remove(id);
+        //threadsPool.submit(new Task(id));
         //是否要加这个连接判断
 //        byte[] bytes=new byte[buf.readableBytes()];
 //        buf.readBytes(bytes);
 //        Integer res= JSON.parseObject(bytes, Integer.class);
         //System.out.println(id);
-        ByteBuf hashCodeBuf = byteBuf.slice(8,byteBuf.readableBytes());
+        ByteBuf hashCodeBuf = byteBuf.slice(8,byteBuf.readableBytes()).retain();
         //System.out.println(hashCodeBuf.toString(io.netty.util.CharsetUtil.UTF_8));
         FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1,
                 OK, hashCodeBuf);
@@ -44,4 +47,15 @@ public class TCPProviderAgentMsgHandler extends SimpleChannelInboundHandler<Byte
             }
         });
     }
+
+//    private static class Task implements Runnable{
+//        private long id;
+//        public Task(long id){
+//            this.id=id;
+//        }
+//        @Override
+//        public void run() {
+//            ChannelHolder.remove(id);
+//        }
+//    }
 }
