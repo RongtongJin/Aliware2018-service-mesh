@@ -29,7 +29,7 @@ public class TcpChannel {
                     @Override
                     protected void initChannel(SocketChannel socketChannel) throws Exception {
                         ChannelPipeline pipeline = socketChannel.pipeline();
-                        pipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE,0,2,0,2));
+                        pipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE,0,1,0,1));
                         pipeline.addLast(new LengthFieldPrepender(2,false));
                         pipeline.addLast(new TcpProviderAgentMsgHandler());
                     }

@@ -67,7 +67,7 @@ public class TcpProviderAgent {
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
                             ChannelPipeline pipeline = socketChannel.pipeline();
                             pipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE,0,2,0,2));
-                            pipeline.addLast(new LengthFieldPrepender(2,false));
+                            pipeline.addLast(new LengthFieldPrepender(1,false));
                             pipeline.addLast(new TcpConsumerAgentMsgHandler());
                         }
                     }).bind(port).sync().channel();

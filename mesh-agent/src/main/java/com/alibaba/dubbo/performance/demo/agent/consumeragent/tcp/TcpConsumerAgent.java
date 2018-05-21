@@ -20,7 +20,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Map;
 
 public class TcpConsumerAgent {
