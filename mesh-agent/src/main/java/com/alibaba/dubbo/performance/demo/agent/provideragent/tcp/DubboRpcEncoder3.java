@@ -1,11 +1,14 @@
 package com.alibaba.dubbo.performance.demo.agent.provideragent.tcp;
 
+
+import com.alibaba.dubbo.performance.demo.agent.provideragent.model.RpcRequest;
 import com.alibaba.dubbo.performance.demo.agent.utils.Bytes;
 import com.alibaba.dubbo.performance.demo.agent.utils.JsonUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.CompositeByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.ChannelOutboundHandlerAdapter;
+import io.netty.channel.ChannelPromise;
 import io.netty.util.CharsetUtil;
 import io.netty.util.ReferenceCountUtil;
 
@@ -16,8 +19,7 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TcpConsumerAgentMsgHandler extends ChannelInboundHandlerAdapter {
-
+public class DubboRpcEncoder3 extends ChannelOutboundHandlerAdapter {
     // header length.
     protected static final int HEADER_LENGTH = 16;
     // magic header.
@@ -96,30 +98,22 @@ public class TcpConsumerAgentMsgHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        TcpProviderAgent.setConsumerAgentChannel(ctx.channel());
-    }
-
-    @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-//        ByteBuf byteBuf = (ByteBuf) msg;
-//        ByteBuf idBuf=byteBuf.slice(0,8);
-//        ByteBuf dataBuf=byteBuf.slice(8,byteBuf.readableBytes()-8).retain();
-//        System.out.println(idBuf.getLong(0));
-//        System.out.println(dataBuf.toString(CharsetUtil.UTF_8));
-////        System.out.println(req.getId());
-////        System.out.println(req.getParameter().toString(CharsetUtil.UTF_8));
-//        int bodyLen=frontBody.readableBytes()+dataBuf.readableBytes()+tailBody.readableBytes();
-//        ByteBuf headerDup=headerBuf.duplicate().retain();
-//        int saveWriterIndex=headerDup.writerIndex();
-//        headerDup.writerIndex(4);
-//        headerDup.writeBytes(idBuf);
-//        headerDup.writeInt(bodyLen);
-//        headerDup.writerIndex(saveWriterIndex);
-//        CompositeByteBuf sendBuf=ctx.alloc().compositeDirectBuffer();
-//        sendBuf.addComponents(true,headerDup,frontBody.duplicate().retain(),dataBuf,tailBody.duplicate().retain());
-//        ReferenceCountUtil.release(byteBuf);
-//        TcpProviderChannelManager.getChannel().writeAndFlush(sendBuf);
-        TcpProviderChannelManager.getChannel().writeAndFlush(msg);
+    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+        ByteBuf byteBuf = (ByteBuf) msg;
+        ByteBuf idBuf=byteBuf.slice(0,8);
+        ByteBuf dataBuf=byteBuf.slice(8,byteBuf.readableBytes()-8).retain();
+//        System.out.println(req.getId());
+//        System.out.println(req.getParameter().toString(CharsetUtil.UTF_8));
+        int bodyLen=frontBody.readableBytes()+dataBuf.readableBytes()+tailBody.readableBytes();
+        ByteBuf headerDup=headerBuf.duplicate().retain();
+        int saveWriterIndex=headerDup.writerIndex();
+        headerDup.writerIndex(4);
+        headerDup.writeBytes(idBuf);
+        headerDup.writeInt(bodyLen);
+        headerDup.writerIndex(saveWriterIndex);
+        CompositeByteBuf sendBuf=ctx.alloc().compositeDirectBuffer();
+        sendBuf.addComponents(true,headerDup,frontBody.duplicate().retain(),dataBuf,tailBody.duplicate().retain());
+        ReferenceCountUtil.release(byteBuf);
+        ctx.writeAndFlush(sendBuf,promise);
     }
 }

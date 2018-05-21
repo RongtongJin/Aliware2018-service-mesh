@@ -28,6 +28,7 @@ public class TcpProviderChannelManager {
                     @Override
                     protected void initChannel(SocketChannel socketChannel) throws Exception {
                         ChannelPipeline pipeline = socketChannel.pipeline();
+                        pipeline.addLast(new DubboRpcEncoder3());
                         pipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE,12,4,0,0));
                         //pipeline.addLast(new DubboRpcDecoder());
                         pipeline.addLast(new TcpRpcMsgHandler());

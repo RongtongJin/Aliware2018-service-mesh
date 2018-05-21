@@ -67,9 +67,9 @@ public class TcpConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpR
 
 
         /*tcp发给provider agent*/
-        System.out.println("send start..");
+//        System.out.println("send start..");
         ch.getChannel().writeAndFlush(sendBuf);
-        System.out.println("send finish..");
+//        System.out.println("send finish..");
     }
 
     @Override
