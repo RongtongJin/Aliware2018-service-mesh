@@ -18,8 +18,8 @@ public enum EnumKey {
 
     public static EnumKey getNext(int id) {
         if(ConstUtil.IDEA_MODE)  return EnumKey.S;
-        id=((int) id & 7);
-        switch ((int) id) {
+        id=(id & 7);
+        switch (id) {
             case 0:
                 return EnumKey.S;
             case 1:
@@ -31,9 +31,9 @@ public enum EnumKey {
             case 4:
                 return EnumKey.L;
             case 5:
-                return EnumKey.M;
+                return EnumKey.S;
             case 6:
-                return EnumKey.L;
+                return EnumKey.M;
             default:
                 return EnumKey.L;
         }

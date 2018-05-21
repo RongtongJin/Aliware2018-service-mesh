@@ -2,6 +2,7 @@ package com.alibaba.dubbo.performance.demo.agent.provideragent.udp;
 
 import com.alibaba.dubbo.performance.demo.agent.registry.EtcdRegistry;
 import com.alibaba.dubbo.performance.demo.agent.registry.IRegistry;
+import com.alibaba.dubbo.performance.demo.agent.utils.ConstUtil;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
@@ -32,7 +33,9 @@ public class UdpProviderAgent {
 
         Class<? extends DatagramChannel> channelClass= epollAvail ? EpollDatagramChannel.class:NioDatagramChannel.class;
 
-        Thread.sleep(1000);
+        if(!ConstUtil.IDEA_MODE){
+            Thread.sleep(16000);
+        }
 
         UdpProviderChannelManager.initChannel(eventLoopGroup);
 

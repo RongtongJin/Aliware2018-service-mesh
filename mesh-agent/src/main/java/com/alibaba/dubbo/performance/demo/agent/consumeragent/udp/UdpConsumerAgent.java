@@ -5,6 +5,7 @@ import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
 import com.alibaba.dubbo.performance.demo.agent.registry.EtcdRegistry;
 import com.alibaba.dubbo.performance.demo.agent.registry.IRegistry;
 import com.alibaba.dubbo.performance.demo.agent.registry.IpHelper;
+import com.alibaba.dubbo.performance.demo.agent.utils.ConstUtil;
 import com.alibaba.dubbo.performance.demo.agent.utils.EnumKey;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -46,15 +47,16 @@ public class UdpConsumerAgent {
         }
         Class<? extends ServerChannel> channelClass = epollAvail ? EpollServerSocketChannel.class : NioServerSocketChannel.class;
 
-        Thread.sleep(1000);
+        if(!ConstUtil.IDEA_MODE){
+            Thread.sleep(15000);
+        }
+
 
         udpChannelMap=new EnumMap<>(EnumKey.class);
         for(Map.Entry<EnumKey,Endpoint> entry:endpoints.entrySet()){
             udpChannelMap.put(entry.getKey(),new InetSocketAddress(entry.getValue().getHost(),entry.getValue().getPort()));
         }
 
-        //IDEA TEST USE
-       // udpChannelMap.put("ideaTest",new InetSocketAddress(IpHelper.getHostIp(),30000));
 
         UdpChannelManager.initChannel(workerGroup);
 

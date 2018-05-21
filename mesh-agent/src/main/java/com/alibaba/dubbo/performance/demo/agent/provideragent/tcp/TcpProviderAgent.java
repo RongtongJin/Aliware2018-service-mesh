@@ -2,6 +2,7 @@ package com.alibaba.dubbo.performance.demo.agent.provideragent.tcp;
 
 import com.alibaba.dubbo.performance.demo.agent.registry.EtcdRegistry;
 import com.alibaba.dubbo.performance.demo.agent.registry.IRegistry;
+import com.alibaba.dubbo.performance.demo.agent.utils.ConstUtil;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
@@ -42,7 +43,9 @@ public class TcpProviderAgent {
         }
         Class<? extends ServerChannel> channelClass = epollAvail ? EpollServerSocketChannel.class : NioServerSocketChannel.class;
 
-        Thread.sleep(1000);
+        if(!ConstUtil.IDEA_MODE){
+            Thread.sleep(16000);
+        }
 
         TcpProviderChannelManager.initChannel(workerGroup);
 
