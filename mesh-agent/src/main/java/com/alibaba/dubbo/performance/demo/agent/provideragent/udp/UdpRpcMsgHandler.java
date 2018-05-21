@@ -22,7 +22,7 @@ public class UdpRpcMsgHandler extends SimpleChannelInboundHandler<ByteBuf> {
         byte byte2=byteBuf.getByte(2);
         byte status=byteBuf.getByte(3);
         if((byte2&FLAG_EVENT)==0&&status==20){
-            ByteBuf idBuf=byteBuf.slice(4,4).retain();
+            ByteBuf idBuf=byteBuf.slice(8,4).retain();
             ByteBuf hashCodeBuf = byteBuf.slice(17 + len, byteBuf.readableBytes() - 17 - 2 * len).retain();
             CompositeByteBuf sendBuf= ctx.alloc().compositeDirectBuffer();
             sendBuf.addComponents(true,idBuf,hashCodeBuf);
