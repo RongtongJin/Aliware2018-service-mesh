@@ -45,9 +45,9 @@ public class UdpConsumerAgent {
         }
         Class<? extends ServerChannel> channelClass = epollAvail ? EpollServerSocketChannel.class : NioServerSocketChannel.class;
 
-        if(!ConstUtil.IDEA_MODE){
-            Thread.sleep(15000);
-        }
+//        if(!ConstUtil.IDEA_MODE){
+//            Thread.sleep(15000);
+//        }
 
         endpoints = registry.find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
 
