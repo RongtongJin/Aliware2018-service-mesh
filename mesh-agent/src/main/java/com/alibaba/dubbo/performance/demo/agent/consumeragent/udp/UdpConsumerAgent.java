@@ -33,7 +33,7 @@ public class UdpConsumerAgent {
 
     public void start(int port) throws Exception {
 
-        endpoints = registry.find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
+
 
         boolean epollAvail= Epoll.isAvailable();
         EventLoopGroup bossGroup=null;
@@ -51,6 +51,7 @@ public class UdpConsumerAgent {
             Thread.sleep(15000);
         }
 
+        endpoints = registry.find("com.alibaba.dubbo.performance.demo.provider.IHelloService");
 
         udpChannelMap=new EnumMap<>(EnumKey.class);
         for(Map.Entry<EnumKey,Endpoint> entry:endpoints.entrySet()){
