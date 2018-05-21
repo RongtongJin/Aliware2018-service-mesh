@@ -36,10 +36,10 @@ public class TcpConsumerAgent {
         EventLoopGroup workerGroup=null;
         if(epollAvail){
             bossGroup = new EpollEventLoopGroup(1);
-            workerGroup = new EpollEventLoopGroup(6);
+            workerGroup = new EpollEventLoopGroup(4);
         }else{
             bossGroup = new NioEventLoopGroup(1);
-            workerGroup = new NioEventLoopGroup(6);
+            workerGroup = new NioEventLoopGroup(4);
         }
         Class<? extends ServerChannel> channelClass = epollAvail ? EpollServerSocketChannel.class : NioServerSocketChannel.class;
 
