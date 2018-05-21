@@ -51,7 +51,7 @@ public class UdpProviderAgent {
                     //.option(ChannelOption.SO_SNDBUF) // 设置UDP写缓冲区为1M
                     .handler(new UdpConsumerAgentMsgHandler());
             channel=bootstrap.bind(new InetSocketAddress(port)).sync().channel();
-            System.out.println("ProviderAgent start on "+port);
+            System.out.println("UdpProviderAgent start on "+port);
             channel.closeFuture().await();
         }catch (Exception e){
 
