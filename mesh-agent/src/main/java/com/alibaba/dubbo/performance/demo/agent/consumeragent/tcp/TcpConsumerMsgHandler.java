@@ -4,6 +4,7 @@ import com.alibaba.dubbo.performance.demo.agent.consumeragent.model.ChannelHolde
 import com.alibaba.dubbo.performance.demo.agent.registry.Endpoint;
 import com.alibaba.dubbo.performance.demo.agent.utils.EnumKey;
 import io.netty.buffer.*;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
@@ -25,11 +26,23 @@ public class TcpConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpR
 
     private static Random random = new Random();
 
-    private Map<EnumKey,TcpChannel> tcpChannelMap;
+//    private static Map<EnumKey,TcpChannel> tcpChannelMap;
 
+    private static Channel channelSmall;
 
-    public TcpConsumerMsgHandler(Map<EnumKey,TcpChannel> tcpChannelMap){
-        this.tcpChannelMap=tcpChannelMap;
+    private static Channel channelMedium;
+
+    private static Channel channelLarge;
+
+    public TcpConsumerMsgHandler (Map<EnumKey,TcpChannel> tcpChannelMap){
+//        this.tcpChannelMap=tcpChannelMap;
+        try {
+            channelSmall=tcpChannelMap.get(EnumKey.S).getChannel();
+            channelMedium=tcpChannelMap.get(EnumKey.M).getChannel();
+            channelLarge=tcpChannelMap.get(EnumKey.L).getChannel();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
 
@@ -49,16 +62,16 @@ public class TcpConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpR
         sendBuf.addComponents(true,idBuf,buf.slice(136,buf.readableBytes()-136).retain());
         //sendBuf.writeBytes(System.lineSeparator().getBytes());
 
-        TcpChannel ch=null;
+        Channel ch=null;
 
         //tcp按照性能简单负载均衡,fix me:利用id 可以不生成随机数
         int x=random.nextInt(6);
         if(x==0){
-            ch=tcpChannelMap.get(EnumKey.S);
+            ch=channelSmall;
         }else if(x<=2){
-            ch=tcpChannelMap.get(EnumKey.M);
+            ch=channelMedium;
         }else{
-            ch=tcpChannelMap.get(EnumKey.L);
+            ch=channelLarge;
         }
 //        ch=tcpChannelMap.get(EnumKey.getNext(id));
 
@@ -68,7 +81,7 @@ public class TcpConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpR
 
         /*tcp发给provider agent*/
 //        System.out.println("send start..");
-        ch.getChannel().writeAndFlush(sendBuf);
+        ch.writeAndFlush(sendBuf);
 //        System.out.println("send finish..");
     }
 
