@@ -15,10 +15,11 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class UdpConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
-    private static AtomicLong genId=new AtomicLong();
+    private static AtomicInteger genId=new AtomicInteger();
 
     private Map<EnumKey,InetSocketAddress> udpChannelMap;
 
@@ -34,7 +35,7 @@ public class UdpConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpR
     public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest msg) throws Exception{
         ByteBuf buf = msg.content();
 //        System.out.println(buf.toString(io.netty.util.CharsetUtil.UTF_8));
-        long id=genId.getAndIncrement();
+        int id=genId.getAndIncrement();
         ChannelHolder.put(id,ctx.channel());
 //        PooledByteBufAllocator.DEFAULT.
         CompositeByteBuf sendBuf=ctx.alloc().compositeDirectBuffer();
@@ -54,7 +55,7 @@ public class UdpConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpR
 //        }else{
 //            addr=udpChannelMap.get("large");
 //        }
-        addr=udpChannelMap.get(EnumKey.getNext((int)id));
+        addr=udpChannelMap.get(EnumKey.getNext(id));
         //idea下测试使用udp
         //addr=udpChannelMap.get("ideaTest");
 

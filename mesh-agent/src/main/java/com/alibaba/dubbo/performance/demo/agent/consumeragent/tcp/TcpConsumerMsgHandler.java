@@ -13,6 +13,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 
@@ -20,7 +21,7 @@ public class TcpConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpR
 
     private static Log log = LogFactory.getLog(TcpConsumerMsgHandler.class);
 
-    private static AtomicLong genId=new AtomicLong();
+    private static AtomicInteger genId=new AtomicInteger();
 
     private static Random random = new Random();
 
@@ -37,19 +38,18 @@ public class TcpConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpR
 
         ByteBuf buf = msg.content();
 //        System.out.println(buf.toString(io.netty.util.CharsetUtil.UTF_8));
-        long id=genId.getAndIncrement();
+        int id=genId.getAndIncrement();
 
         ChannelHolder.put(id,ctx.channel());
 
 //        PooledByteBufAllocator.DEFAULT.
         CompositeByteBuf sendBuf=ctx.alloc().compositeDirectBuffer();
         ByteBuf idBuf=ctx.alloc().ioBuffer();
-        idBuf.writeLong(id);
+        idBuf.writeInt(id);
         sendBuf.addComponents(true,idBuf,buf.slice(136,buf.readableBytes()-136).retain());
         //sendBuf.writeBytes(System.lineSeparator().getBytes());
 
         TcpChannel ch=null;
-
 
         //tcp按照性能简单负载均衡,fix me:利用id 可以不生成随机数
 //        int x=random.nextInt(6);
@@ -60,7 +60,7 @@ public class TcpConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpR
 //        }else{
 //            ch=tcpChannelMap.get("large");
 //        }
-        ch=tcpChannelMap.get(EnumKey.getNext((int)id));
+        ch=tcpChannelMap.get(EnumKey.getNext(id));
 
         //idea下测试使用tcp
       //  ch=tcpChannelMap.get("ideaTest");

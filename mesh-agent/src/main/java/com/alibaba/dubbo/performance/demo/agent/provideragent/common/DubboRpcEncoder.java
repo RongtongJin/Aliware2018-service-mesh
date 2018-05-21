@@ -98,13 +98,14 @@ public class DubboRpcEncoder extends ChannelOutboundHandlerAdapter {
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
         ByteBuf byteBuf = (ByteBuf) msg;
-        ByteBuf idBuf=byteBuf.slice(0,8);
-        ByteBuf dataBuf=byteBuf.slice(8,byteBuf.readableBytes()-8).retain();
+        //ByteBuf idBuf=byteBuf.slice(0,4);
+        int id=byteBuf.readInt();
+        ByteBuf dataBuf=byteBuf.slice(4,byteBuf.readableBytes()).retain();
         int bodyLen=frontBody.readableBytes()+dataBuf.readableBytes()+tailBody.readableBytes();
         ByteBuf headerDup=headerBuf.duplicate().retain();
         int saveWriterIndex=headerDup.writerIndex();
         headerDup.writerIndex(4);
-        headerDup.writeBytes(idBuf);
+        headerDup.writeLong(id);
         headerDup.writeInt(bodyLen);
         headerDup.writerIndex(saveWriterIndex);
         CompositeByteBuf sendBuf=ctx.alloc().compositeDirectBuffer();

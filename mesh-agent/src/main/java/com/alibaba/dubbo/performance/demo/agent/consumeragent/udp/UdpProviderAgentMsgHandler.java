@@ -22,11 +22,11 @@ public class UdpProviderAgentMsgHandler extends SimpleChannelInboundHandler<Data
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, DatagramPacket datagramPacket) throws Exception {
         ByteBuf buf=datagramPacket.content();
-        Long id=buf.readLong();
+        Integer id=buf.readInt();
         Channel sendChannel= ChannelHolder.get(id);
         //测试后发现每次remove id后性能更高
         ChannelHolder.remove(id);
-        ByteBuf hashCodeBuf = buf.slice(8,buf.readableBytes()).retain();
+        ByteBuf hashCodeBuf = buf.slice(4,buf.readableBytes()).retain();
        // System.out.println(hashCodeBuf.toString(io.netty.util.CharsetUtil.UTF_8));
         FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1,
                 OK, hashCodeBuf);

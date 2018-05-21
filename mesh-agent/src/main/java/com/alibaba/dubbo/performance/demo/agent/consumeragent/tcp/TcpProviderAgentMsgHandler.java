@@ -19,7 +19,7 @@ public class TcpProviderAgentMsgHandler extends SimpleChannelInboundHandler<Byte
 
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf) throws Exception {
-        Long id=byteBuf.readLong();
+        int id=byteBuf.readInt();
         Channel sendChannel= ChannelHolder.get(id);
         //测试后发现每次remove id后性能更高
         ChannelHolder.remove(id);
@@ -29,7 +29,7 @@ public class TcpProviderAgentMsgHandler extends SimpleChannelInboundHandler<Byte
 //        buf.readBytes(bytes);
 //        Integer res= JSON.parseObject(bytes, Integer.class);
         //System.out.println(id);
-        ByteBuf hashCodeBuf = byteBuf.slice(8,byteBuf.readableBytes()).retain();
+        ByteBuf hashCodeBuf = byteBuf.slice(4,byteBuf.readableBytes()).retain();
         //System.out.println(hashCodeBuf.toString(io.netty.util.CharsetUtil.UTF_8));
         FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1,
                 OK, hashCodeBuf);
