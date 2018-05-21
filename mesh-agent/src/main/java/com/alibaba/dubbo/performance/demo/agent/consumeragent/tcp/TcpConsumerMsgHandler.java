@@ -52,15 +52,15 @@ public class TcpConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpR
         TcpChannel ch=null;
 
         //tcp按照性能简单负载均衡,fix me:利用id 可以不生成随机数
-//        int x=random.nextInt(6);
-//        if(x==0){
-//            ch=tcpChannelMap.get("small");
-//        }else if(x<=2){
-//            ch=tcpChannelMap.get("medium");
-//        }else{
-//            ch=tcpChannelMap.get("large");
-//        }
-        ch=tcpChannelMap.get(EnumKey.getNext(id));
+        int x=random.nextInt(6);
+        if(x==0){
+            ch=tcpChannelMap.get(EnumKey.S);
+        }else if(x<=2){
+            ch=tcpChannelMap.get(EnumKey.M);
+        }else{
+            ch=tcpChannelMap.get(EnumKey.L);
+        }
+//        ch=tcpChannelMap.get(EnumKey.getNext(id));
 
         //idea下测试使用tcp
       //  ch=tcpChannelMap.get("ideaTest");
