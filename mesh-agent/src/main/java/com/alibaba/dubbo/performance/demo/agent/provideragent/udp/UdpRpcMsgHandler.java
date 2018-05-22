@@ -19,16 +19,16 @@ public class UdpRpcMsgHandler extends SimpleChannelInboundHandler<ByteBuf> {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, ByteBuf byteBuf) throws Exception {
 
-        byte byte2=byteBuf.getByte(2);
-        byte status=byteBuf.getByte(3);
-        if((byte2&FLAG_EVENT)==0&&status==20){
+//        byte byte2=byteBuf.getByte(2);
+//        byte status=byteBuf.getByte(3);
+//        if((byte2&FLAG_EVENT)==0&&status==20){
             ByteBuf idBuf=byteBuf.slice(8,4).retain();
             ByteBuf hashCodeBuf = byteBuf.slice(17 + len, byteBuf.readableBytes() - 17 - 2 * len).retain();
             CompositeByteBuf sendBuf= ctx.alloc().compositeDirectBuffer();
             sendBuf.addComponents(true,idBuf,hashCodeBuf);
             DatagramPacket dp=new DatagramPacket(sendBuf,UdpProviderAgent.getMsgReturner());
             UdpProviderAgent.getUdpChannel().writeAndFlush(dp);
-        }
+//        }
     }
 
     @Override
