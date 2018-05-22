@@ -25,7 +25,7 @@ public class UdpProviderAgentMsgHandler extends SimpleChannelInboundHandler<Data
         Integer id=buf.readInt();
         Channel sendChannel= ChannelHolder.get(id);
         //测试后发现每次remove id后性能更高
-        ChannelHolder.remove(id);
+//        ChannelHolder.remove(id);
         ByteBuf hashCodeBuf = buf.slice(4,buf.readableBytes()).retain();
        // System.out.println(hashCodeBuf.toString(io.netty.util.CharsetUtil.UTF_8));
         FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1,
