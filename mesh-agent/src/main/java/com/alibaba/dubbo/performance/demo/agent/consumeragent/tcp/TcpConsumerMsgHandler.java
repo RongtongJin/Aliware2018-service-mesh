@@ -22,7 +22,7 @@ public class TcpConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpR
 
     private static Log log = LogFactory.getLog(TcpConsumerMsgHandler.class);
 
-    private static AtomicInteger genId=new AtomicInteger();
+    private static int genId=0;
 
     private static Random random = new Random();
 
@@ -51,14 +51,14 @@ public class TcpConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpR
 
         ByteBuf buf = msg.content();
 //        System.out.println(buf.toString(io.netty.util.CharsetUtil.UTF_8));
-        int id=genId.getAndIncrement();
 
-        ChannelHolder.put(id,ctx.channel());
+
+        ChannelHolder.put(genId,ctx.channel());
 
 //        PooledByteBufAllocator.DEFAULT.
         CompositeByteBuf sendBuf=ctx.alloc().compositeDirectBuffer();
         ByteBuf idBuf=ctx.alloc().ioBuffer();
-        idBuf.writeInt(id);
+        idBuf.writeInt(genId);
         sendBuf.addComponents(true,idBuf,buf.slice(136,buf.readableBytes()-136).retain());
         //sendBuf.writeBytes(System.lineSeparator().getBytes());
 
@@ -78,7 +78,7 @@ public class TcpConsumerMsgHandler extends SimpleChannelInboundHandler<FullHttpR
         //idea下测试使用tcp
       //  ch=tcpChannelMap.get("ideaTest");
 
-
+        ++genId;
         /*tcp发给provider agent*/
 //        System.out.println("send start..");
         ch.writeAndFlush(sendBuf);

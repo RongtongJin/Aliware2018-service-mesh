@@ -22,7 +22,7 @@ public class TcpProviderAgentMsgHandler extends SimpleChannelInboundHandler<Byte
         int id=byteBuf.readInt();
         Channel sendChannel= ChannelHolder.get(id);
         //测试后发现每次remove id后性能更高
-        ChannelHolder.remove(id);
+//        ChannelHolder.remove(id);
         //threadsPool.submit(new Task(id));
         //是否要加这个连接判断
 //        byte[] bytes=new byte[buf.readableBytes()];
