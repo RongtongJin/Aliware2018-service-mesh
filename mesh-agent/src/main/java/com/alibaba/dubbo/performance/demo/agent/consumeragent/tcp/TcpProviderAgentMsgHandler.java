@@ -1,61 +1,51 @@
 package com.alibaba.dubbo.performance.demo.agent.consumeragent.tcp;
 
-import com.alibaba.dubbo.performance.demo.agent.consumeragent.model.ChannelHolder;
+import com.alibaba.dubbo.performance.demo.agent.holder.CtxHolder;
+import com.alibaba.dubbo.performance.demo.agent.holder.bytebuf.TwoCompositeByteBuf;
+import com.alibaba.dubbo.performance.demo.agent.utils.ConstUtil;
+
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 
-import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_LENGTH;
-import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
-import static io.netty.handler.codec.http.HttpResponseStatus.OK;
-import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
-public class TcpProviderAgentMsgHandler extends SimpleChannelInboundHandler<ByteBuf> {
+public class TcpProviderAgentMsgHandler extends ChannelInboundHandlerAdapter{
 
-    //private static ExecutorService threadsPool= Executors.newSingleThreadExecutor();
+    private ByteBuf headerBuf = null;
+    private TwoCompositeByteBuf sendBuf = null;
 
     @Override
-    protected void channelRead0(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf) throws Exception {
-        Long id=byteBuf.readLong();
-        Channel sendChannel= ChannelHolder.get(id);
-        //测试后发现每次remove id后性能更高
-        ChannelHolder.remove(id);
-        //threadsPool.submit(new Task(id));
-        //是否要加这个连接判断
-//        byte[] bytes=new byte[buf.readableBytes()];
-//        buf.readBytes(bytes);
-//        Integer res= JSON.parseObject(bytes, Integer.class);
-        //System.out.println(id);
-        ByteBuf hashCodeBuf = byteBuf.slice(8,byteBuf.readableBytes()).retain();
-        //System.out.println(hashCodeBuf.toString(io.netty.util.CharsetUtil.UTF_8));
-        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1,
-                OK, hashCodeBuf);
+    public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+        headerBuf = ctx.alloc().directBuffer(ConstUtil.HEADER_LENGTH);
+        headerBuf.writeBytes(ConstUtil.template);
 
-        //需要加这个吗？
-        response.headers().set(CONTENT_TYPE, "text/plain");
-        response.headers().set(CONTENT_LENGTH,
-                response.content().readableBytes());
-
-        //response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
-        sendChannel.writeAndFlush(response).addListener(cf->{
-            if(!cf.isSuccess()){
-                //log.error("send msg to Consumer failed.");
-                cf.cause().printStackTrace();
-            }
-        });
+        sendBuf = new TwoCompositeByteBuf(ctx.alloc(), headerBuf);
+        sendBuf.retain(Integer.MAX_VALUE - 1);
     }
 
-//    private static class Task implements Runnable{
-//        private long id;
-//        public Task(long id){
-//            this.id=id;
-//        }
-//        @Override
-//        public void run() {
-//            ChannelHolder.remove(id);
-//        }
-//    }
+    @Override
+    public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
+        headerBuf.release();
+    }
+
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        ByteBuf byteBuf=(ByteBuf)msg;
+        int channelId =byteBuf.readShort();
+        ChannelHandlerContext sendCtx= CtxHolder.get(channelId);
+        int len = byteBuf.readableBytes();
+        if (len >= 10) {
+            headerBuf.setByte(31, ConstUtil.ONE);
+            len -= 10;
+            headerBuf.setByte(32, ConstUtil.ZERO + len);
+        } else {
+            headerBuf.setByte(31, ConstUtil.EMP);
+            headerBuf.setByte(32, ConstUtil.ZERO + len);
+        }
+//        CompositeByteBuf sendBuf = ctx.alloc().compositeDirectBuffer();
+//        sendBuf.addComponents(true, headerBuf.retain(), byteBuf);
+        sendBuf.setHeadAndBody( headerBuf, byteBuf);
+        sendCtx.writeAndFlush(sendBuf,sendCtx.voidPromise());
+    }
+
 }

@@ -8,14 +8,17 @@ import com.coreos.jetcd.data.ByteSequence;
 import com.coreos.jetcd.kv.GetResponse;
 import com.coreos.jetcd.options.GetOption;
 import com.coreos.jetcd.options.PutOption;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class EtcdRegistry implements IRegistry{
+public final class EtcdRegistry implements IRegistry {
     private Logger logger = LoggerFactory.getLogger(EtcdRegistry.class);
     // 该EtcdRegistry没有使用etcd的Watch机制来监听etcd的事件
     // 添加watch，在本地内存缓存地址列表，可减少网络调用的次数
@@ -24,6 +27,7 @@ public class EtcdRegistry implements IRegistry{
     private Lease lease;
     private KV kv;
     private long leaseId;
+    private ExecutorService monitor=null;
 
     public EtcdRegistry(String registryAddress) {
         System.out.println(registryAddress);
@@ -35,12 +39,11 @@ public class EtcdRegistry implements IRegistry{
         } catch (Exception e) {
             e.printStackTrace();
         }
-        //这部分能不能优化，获取一次后不在需要连接
-        keepAlive();
 
-        String type = System.getProperty("type");   // 获取type参数
+        String type=System.getProperty("type");
         if ("provider".equals(type)){
             // 如果是provider，去etcd注册服务
+           // keepAlive();
             try {
                 int port = Integer.valueOf(System.getProperty("server.port"));
                 register("com.alibaba.dubbo.performance.demo.provider.IHelloService",port);
@@ -64,12 +67,22 @@ public class EtcdRegistry implements IRegistry{
 
     // 发送心跳到ETCD,表明该host是活着的
     public void keepAlive(){
-        Executors.newSingleThreadExecutor().submit(
+        monitor=Executors.newSingleThreadExecutor();
+        monitor.submit(
                 () -> {
+                    System.err.println("检测!");
                     try {
                         Lease.KeepAliveListener listener = lease.keepAlive(leaseId);
-                        listener.listen();
+
                         logger.info("KeepAlive lease:" + leaseId + "; Hex format:" + Long.toHexString(leaseId));
+                        if(findLsx()){
+                            listener.close();
+                            System.out.println("退出心跳!");
+                        }else{
+                            listener.listen();
+                            System.out.println("还没退出心跳!");
+                        }
+                        monitor.shutdown();
                     } catch (Exception e) { e.printStackTrace(); }
                 }
         );
@@ -85,6 +98,41 @@ public class EtcdRegistry implements IRegistry{
 
         Map<EnumKey,Endpoint> level2EndPoint=new EnumMap<EnumKey, Endpoint>(EnumKey.class);
 
+        for (com.coreos.jetcd.data.KeyValue kv : response.getKvs()){
+            String k = kv.getKey().toStringUtf8();
+            int index = k.lastIndexOf("/");
+            String levelStr = k.substring(index + 1,k.length());
+
+            String v= kv.getValue().toStringUtf8();
+            String host = v.split(":")[0];
+            int port = Integer.valueOf(v.split(":")[1]);
+            if("small".equals(levelStr)){
+                level2EndPoint.put(EnumKey.S,new Endpoint(host,port));
+            }else if("medium".equals(levelStr)){
+                level2EndPoint.put(EnumKey.M,new Endpoint(host,port));
+            }else {
+                level2EndPoint.put(EnumKey.L,new Endpoint(host,port));
+            }
+            System.out.println(levelStr+"->"+host+":"+port);
+        }
+        return level2EndPoint;
+    }
+    public boolean findLsx() throws Exception {
+        System.out.println("查找LSX");
+        String strKey = MessageFormat.format("/{0}","lsx");
+        ByteSequence key  = ByteSequence.fromString(strKey);
+        GetResponse response = kv.get(key, GetOption.newBuilder().withPrefix(key).build()).get();
+        if(response.getKvs().size()==0) return false;
+        return true;
+
+    }
+    public Map<EnumKey,Endpoint> find(String serviceName, Map<EnumKey,Endpoint> level2EndPoint) throws Exception {
+
+        String strKey = MessageFormat.format("/{0}",serviceName);
+        ByteSequence key  = ByteSequence.fromString(strKey);
+        GetResponse response = kv.get(key, GetOption.newBuilder().withPrefix(key).build()).get();
+
+        //List<Endpoint> endpoints = new ArrayList<>();
         for (com.coreos.jetcd.data.KeyValue kv : response.getKvs()){
             String k = kv.getKey().toStringUtf8();
             int index = k.lastIndexOf("/");

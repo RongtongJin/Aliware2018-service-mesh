@@ -11,48 +11,69 @@
 
     <artifactId>mesh-agent</artifactId>
     <version>1.0-SNAPSHOT</version>
-
-
     <dependencies>
+        <!--日志 -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.7</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>1.1.7</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-access</artifactId>
+            <version>1.1.7</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.1.7</version>
+        </dependency>
 
+        <!--netty 4.1.12.Final 4.1.25.Final -->
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
-            <version>4.1.12.Final</version>
+            <version>4.1.25.Final</version>
         </dependency>
+        <!-- JSON序列化 -->
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
+            <version>1.2.46</version>
+        </dependency>
+        <!-- HashMap -->
+        <!--
+        <dependency>
+            <groupId>com.koloboke</groupId>
+            <artifactId>koloboke-api-jdk8</artifactId>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.17</version>
+            <groupId>com.koloboke</groupId>
+            <artifactId>koloboke-impl-jdk8</artifactId>
+            <version>1.0.0</version>
+            <scope>runtime</scope>
         </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-            <version>1.2</version>
-        </dependency>
+        -->
         <dependency>
             <groupId>com.coreos</groupId>
             <artifactId>jetcd-core</artifactId>
-            <version>0.0.1</version>
-           <!-- <exclusions>
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty-codec-http2</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty-handler-proxy</artifactId>
-                </exclusion>
-            </exclusions> -->
+            <version>0.0.2</version>
+            <!-- <exclusions>
+                 <exclusion>
+                     <groupId>io.netty</groupId>
+                     <artifactId>netty-codec-http2</artifactId>
+                 </exclusion>
+                 <exclusion>
+                     <groupId>io.netty</groupId>
+                     <artifactId>netty-handler-proxy</artifactId>
+                 </exclusion>
+             </exclusions> -->
         </dependency>
     </dependencies>
 

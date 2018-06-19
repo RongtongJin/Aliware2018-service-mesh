@@ -12,40 +12,13 @@
         <module>mesh-agent</module>
     </modules>
 
-
     <properties>
-        <netty4.version>4.1.12.Final</netty4.version>
-        <springboot.version>1.5.7.RELEASE</springboot.version>
-        <junit.version>4.12</junit.version>
-
         <project.version>1.0-SNAPSHOT</project.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
     </properties>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>io.netty</groupId>
-                <artifactId>netty-all</artifactId>
-                <version>${netty4.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>${junit.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.alibaba</groupId>
-                <artifactId>fastjson</artifactId>
-                <version>1.2.46</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
 
 
 </project>

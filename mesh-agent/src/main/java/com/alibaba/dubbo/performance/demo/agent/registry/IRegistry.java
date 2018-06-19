@@ -2,7 +2,6 @@ package com.alibaba.dubbo.performance.demo.agent.registry;
 
 import com.alibaba.dubbo.performance.demo.agent.utils.EnumKey;
 
-import java.util.List;
 import java.util.Map;
 
 public interface IRegistry {
